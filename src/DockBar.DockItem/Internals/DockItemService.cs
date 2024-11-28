@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DockBar.DockItem.Structs;
-using Mapster;
 using MessagePack;
 
 namespace DockBar.DockItem.Internals
