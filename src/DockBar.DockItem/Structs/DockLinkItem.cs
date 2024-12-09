@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DockBar.DockItem.Helpers;
+using MessagePack;
+using MessagePack.Formatters;
 
 namespace DockBar.DockItem.Structs;
 
@@ -18,11 +20,12 @@ internal enum LinkType
     Folder,
 }
 
+[MessagePackFormatter(typeof(DockLinkItemFormatter))]
 internal sealed class DockLinkItem : IDockItem
 {
-    public required string Name { get; init; }
+    public required string Key { get; init; }
 
-    public required string IconPath { get; init; }
+    public required string? IconPath { get; init; }
 
     public required string LinkPath { get; init; }
 
@@ -64,6 +67,24 @@ internal sealed class DockLinkItem : IDockItem
         catch (Exception e)
         {
             Debug.WriteLine(e);
+        }
+    }
+
+    class DockLinkItemFormatter : IMessagePackFormatter<DockLinkItem>
+    {
+        public DockLinkItem Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
+        {
+            options.Security.DepthStep(ref reader);
+            var name = reader.ReadString();
+            var linkPath = reader.ReadString();
+            reader.Depth--;
+            return (DockLinkItem)IDockItem.CreateDockItem(name!, linkPath!);
+        }
+
+        public void Serialize(ref MessagePackWriter writer, DockLinkItem value, MessagePackSerializerOptions options)
+        {
+            writer.Write(value.Key);
+            writer.Write(value.LinkPath);
         }
     }
 }

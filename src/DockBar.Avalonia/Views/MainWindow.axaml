@@ -4,8 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:DockBar.Avalonia.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:dd="using:DockBar.DockItem"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vd="using:DockBar.Avalonia.ViewDatas"
     xmlns:vm="using:DockBar.Avalonia.ViewModels"
     Title="DockBar"
     x:CompileBindings="True"
@@ -38,7 +38,7 @@
             <MenuItem
                 Click="DeleteLinkMenuItem_Clicked"
                 Header="删除该链接"
-                IsEnabled="{Binding IsSelectedDockLink}" />
+                IsEnabled="{Binding IsSelectedDockItem}" />
             <MenuItem Click="MoveMenuItem_Clicked" Header="移动模式">
                 <MenuItem.Icon>
                     <TextBlock Classes="FontIcon" Text="&#xE7C2;" />
@@ -74,17 +74,17 @@
             VerticalAlignment="Bottom"
             Background="AliceBlue"
             DragDrop.AllowDrop="True"
-            ItemsSource="{Binding Links, Mode=OneWay}">
+            ItemsSource="{Binding DockItems, Mode=OneWay}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <StackPanel Orientation="Horizontal" Spacing="{Binding Global.DockItemSpacing}" />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="dd:IDockItem">
+                <DataTemplate DataType="vd:DockItemData">
                     <controls:DockItemControl
                         VerticalAlignment="Bottom"
-                        DockItem="{Binding .}"
+                        DockItemData="{Binding .}"
                         IsHitTestVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsDockItemPanelEnabled}"
                         PointerPressed="DockItem_PointerPressed"
                         Size="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).Global.DockItemSize}" />

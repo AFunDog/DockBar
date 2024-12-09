@@ -7,17 +7,18 @@ using System.Text;
 using System.Threading.Tasks;
 using DockBar.DockItem.Helpers;
 using DockBar.DockItem.Structs;
+using MessagePack.Formatters;
 
 namespace DockBar.DockItem
 {
     public interface IDockItem
     {
-        string Name { get; }
-        string IconPath { get; }
+        string Key { get; }
+        string? IconPath { get; }
 
         void Start();
 
-        internal static IDockItem CreateDockItem(string name, string linkPath)
+        internal static sealed IDockItem CreateDockItem(string key, string linkPath)
         {
             var iconPath = "";
 
@@ -54,7 +55,7 @@ namespace DockBar.DockItem
             }
             return new DockLinkItem
             {
-                Name = name,
+                Key = key,
                 LinkPath = linkPath,
                 LinkType = linkType,
                 IconPath = iconPath,

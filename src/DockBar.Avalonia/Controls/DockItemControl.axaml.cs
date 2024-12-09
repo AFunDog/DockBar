@@ -5,20 +5,21 @@ using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using DockBar.Avalonia.ViewDatas;
 using DockBar.Avalonia.ViewModels;
 using DockBar.DockItem;
 
 namespace DockBar.Avalonia.Controls;
 
-public class DockItemControl : TemplatedControl
+internal class DockItemControl : TemplatedControl
 {
     public static readonly DirectProperty<DockItemControl, IImage?> DockIconProperty = AvaloniaProperty.RegisterDirect<
         DockItemControl,
         IImage?
     >(nameof(DockIcon), o => o.DockIcon);
 
-    public static readonly StyledProperty<IDockItem> DockItemProperty = AvaloniaProperty.Register<DockItemControl, IDockItem>(
-        nameof(DockItem)
+    public static readonly StyledProperty<DockItemData> DockItemDataProperty = AvaloniaProperty.Register<DockItemControl, DockItemData>(
+        nameof(DockItemData)
     );
 
     public static readonly StyledProperty<double> SizeProperty = AvaloniaProperty.Register<DockItemControl, double>(nameof(Size));
@@ -31,17 +32,17 @@ public class DockItemControl : TemplatedControl
     public IImage? DockIcon
     {
         get =>
-            string.IsNullOrEmpty(DockItem.IconPath)
+            string.IsNullOrEmpty(DockItemData.IconPath)
                 ? new Bitmap(AssetLoader.Open(new Uri("avares://DockBar/Assets/icon.png")))
-                : new Bitmap(DockItem.IconPath);
+                : new Bitmap(DockItemData.IconPath);
     }
 
-    public IDockItem DockItem
+    public DockItemData DockItemData
     {
-        get => GetValue(DockItemProperty);
+        get => GetValue(DockItemDataProperty);
         set
         {
-            SetValue(DockItemProperty, value);
+            SetValue(DockItemDataProperty, value);
             RaisePropertyChanged(DockIconProperty, null, DockIcon);
         }
     }
@@ -64,7 +65,7 @@ public class DockItemControl : TemplatedControl
 
         if (e.Pointer.Type is PointerType.Mouse && e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
         {
-            DockItem.Start();
+            DockItemData.DockItem.Start();
         }
     }
 }

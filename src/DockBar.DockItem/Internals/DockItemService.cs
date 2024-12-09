@@ -11,77 +11,61 @@ namespace DockBar.DockItem.Internals
 {
     internal sealed class DockItemService : IDockItemService
     {
-        private readonly List<IDockItem> _dockItems = [];
+        private Dictionary<string, IDockItem> Items { get; } = [];
 
-        public IReadOnlyCollection<IDockItem> DockItems => _dockItems;
+        public IReadOnlyCollection<IDockItem> DockItems => Items.Values;
 
         public event EventHandler<DockItemChangedEventArgs>? DockItemChanged;
 
-        public void InsertDockLinkItem(string name, string linkPath, int index = -1)
+        public void AddDockLinkItem(string key, string linkPath)
         {
-            if (_dockItems.Any(item => item.Name == name) is false)
+            if (Items.ContainsKey(key) is false)
             {
-                var item = IDockItem.CreateDockItem(name, linkPath);
-                if (index == -1)
-                    _dockItems.Add(item);
-                else
-                    _dockItems.Insert(index, item);
+                var item = IDockItem.CreateDockItem(key, linkPath);
+                Items.Add(key, item);
                 DockItemChanged?.Invoke(this, new DockItemChangedEventArgs { DockItem = item, IsAdd = true });
             }
         }
 
-        public void RemoveDockLinkItem(string name)
+        public void AddDockItem(IDockItem dockItem)
         {
-            IDockItem dockitem = _dockItems.First(item => item.Name == name);
-            if (dockitem is not null && _dockItems.Remove(dockitem))
+            if (Items.ContainsKey(dockItem.Key) is false)
             {
-                DockItemChanged?.Invoke(this, new DockItemChangedEventArgs { DockItem = dockitem, IsAdd = false });
+                Items.Add(dockItem.Key, dockItem);
+                DockItemChanged?.Invoke(this, new DockItemChangedEventArgs { DockItem = dockItem, IsAdd = true });
             }
         }
 
-        public void MoveDockLinkItem(string name, int index)
+        public void RemoveDockItem(string key)
         {
-            var dockitem = _dockItems.First(item => item.Name == name);
-            if (dockitem is null)
-                return;
-            _dockItems.Remove(dockitem);
-            _dockItems.Insert(index, dockitem);
+            if (Items.TryGetValue(key, out IDockItem? item) && Items.Remove(key))
+            {
+                DockItemChanged?.Invoke(this, new DockItemChangedEventArgs { DockItem = item, IsAdd = false });
+            }
+        }
+
+        public IDockItem? GetDockItem(string key)
+        {
+            if (Items.TryGetValue(key, out IDockItem? item))
+            {
+                return item;
+            }
+            return null;
         }
 
         public void ReadData(string filePath)
         {
-            try
-            {
-                using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-                var items = MessagePackSerializer.Deserialize<IEnumerable<DockItemData>>(
-                    fs,
-                    MessagePack.Resolvers.ContractlessStandardResolverAllowPrivate.Options
-                );
-                if (items is not null)
-                    foreach (var item in items)
-                        InsertDockLinkItem(item.Name, item.LinkPath);
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine(e);
-            }
+            using FileStream? fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            var items = MessagePackSerializer.Typeless.Deserialize(fs) as IDockItem[];
+            if (items is not null)
+                foreach (var item in items)
+                    AddDockItem(item);
         }
 
         public void SaveData(string filePath)
         {
-            try
-            {
-                using var fs = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write);
-                MessagePackSerializer.Serialize(
-                    fs,
-                    _dockItems.Select(item => new DockItemData(item.Name, ((DockLinkItem)item).LinkPath)),
-                    MessagePack.Resolvers.ContractlessStandardResolverAllowPrivate.Options
-                );
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine(e);
-            }
+            using var fs = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write);
+            MessagePackSerializer.Typeless.Serialize(fs, Items.Values.ToArray());
         }
     }
 }

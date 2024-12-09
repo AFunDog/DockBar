@@ -365,3 +365,5 @@ FodyWeavers.xsd
 .csharpierrc
 
 test
+
+DockBar.TestConsole

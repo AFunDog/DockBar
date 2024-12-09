@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
+using DockBar.Avalonia.ViewDatas;
 using DockBar.DockItem;
 using MessagePack;
 using Serilog;
@@ -17,15 +19,15 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
     public IDockItemService DockItemService { get; }
     public ILogger Logger { get; }
 
-    public ObservableCollection<IDockItem> Links { get; } = [];
+    public ObservableCollection<DockItemData> DockItems { get; } = [];
 
     public GlobalViewModel Global { get; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsSelectedDockLink))]
-    private IDockItem? _selectedDockLink = null;
+    [NotifyPropertyChangedFor(nameof(IsSelectedDockItem))]
+    private DockItemData? _selectedDockItem = null;
 
-    public bool IsSelectedDockLink => SelectedDockLink != null;
+    public bool IsSelectedDockItem => SelectedDockItem != null;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsDockItemPanelEnabled))]
@@ -38,7 +40,7 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
     public bool IsDockItemPanelEnabled => !IsMoveMode && !IsDragMode;
 
     public double DockPanelWidth =>
-        (Global.DockItemSize + Global.DockItemSpacing) * Links.Count
+        (Global.DockItemSize + Global.DockItemSpacing) * DockItems.Count
         + Global.DockItemExtendRate * Global.DockItemSize
         + Global.DockItemSpacing;
 
@@ -49,24 +51,29 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
         Global = global;
         Logger = logger;
         DockItemService = dockItemService;
-        DockItemService.DockItemChanged += (s, e) =>
+        void AddHandler(object? s, DockItemChangedEventArgs e)
         {
             if (e.IsAdd)
             {
-                Links.Add(e.DockItem);
+                DockItems.Add(new DockItemData(e.DockItem));
             }
-            else
+        }
+
+        DockItemService.DockItemChanged += AddHandler;
+
+        DockItemService.ReadData(StorageFile);
+        DockItemService.DockItemChanged -= AddHandler;
+        DockItemService.DockItemChanged += (s, e) =>
+        {
+            if (e.IsAdd is false)
             {
-                Links.Remove(e.DockItem);
+                DockItems.Remove(DockItems.First(item => item.Key == e.DockItem.Key));
             }
         };
-        DockItemService.ReadData(StorageFile);
-
-        Global.PropertyChanged += (s, e) => NotifyPanelSize(this);
-        DockItemService.DockItemChanged += (s, e) => NotifyPanelSize(this);
+        Global.PropertyChanged += (s, e) => NotifyPanelSize();
     }
 
-    public void SaveDockLinkData()
+    public void SaveDockItemDatas()
     {
         DockItemService.SaveData(StorageFile);
     }
@@ -74,17 +81,21 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
     public void InsertDockLinkItem(int index, string fullPath)
     {
         Logger.Debug($"AddDockLinkItem {fullPath}");
-        DockItemService.InsertDockLinkItem(Path.GetFileNameWithoutExtension(fullPath), fullPath, index);
+        var key = Path.GetFileNameWithoutExtension(fullPath);
+        DockItemService.AddDockLinkItem(key, fullPath);
+        DockItems.Insert(index, new DockItemData(DockItemService.GetDockItem(key)!));
+        NotifyPanelSize();
     }
 
-    public void RemoveDockLinkItem(IDockItem item)
+    public void RemoveDockItem(string key)
     {
-        DockItemService.RemoveDockLinkItem(item.Name);
+        DockItemService.RemoveDockItem(key);
+        NotifyPanelSize();
     }
 
-    private static void NotifyPanelSize(MainWindowViewModel viewModel)
+    private void NotifyPanelSize()
     {
-        viewModel.OnPropertyChanged(nameof(DockPanelWidth));
-        viewModel.OnPropertyChanged(nameof(DockPanelHeight));
+        OnPropertyChanged(nameof(DockPanelWidth));
+        OnPropertyChanged(nameof(DockPanelHeight));
     }
 }

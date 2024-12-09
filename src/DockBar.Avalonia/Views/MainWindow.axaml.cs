@@ -15,7 +15,7 @@ namespace DockBar.Avalonia.Views;
 
 public partial class MainWindow : Window
 {
-    internal MainWindowViewModel ViewModel => (MainWindowViewModel)DataContext;
+    internal MainWindowViewModel ViewModel => (MainWindowViewModel)DataContext!;
 
     public MainWindow()
     {
@@ -26,6 +26,7 @@ public partial class MainWindow : Window
 
         Closed += (s, e) =>
         {
+            ViewModel.SaveDockItemDatas();
             ViewModel.Global.SaveSettings();
         };
     }
@@ -75,7 +76,7 @@ public partial class MainWindow : Window
             }
         }
 
-        ViewModel.SelectedDockLink = null;
+        ViewModel.SelectedDockItem = null;
         ViewModel.Logger.Debug("Window.OnPointerPressed");
     }
 
@@ -136,29 +137,29 @@ public partial class MainWindow : Window
         if (sender is not DockItemControl source)
             return;
 
-        ViewModel.SelectedDockLink = source.DockItem;
+        ViewModel.SelectedDockItem = source.DockItemData;
         ViewModel.Logger.Debug("DockItem.OnPointerPressed");
         e.Handled = true;
     }
 
     private void DeleteLinkMenuItem_Clicked(object? sender, RoutedEventArgs e)
     {
-        if (ViewModel.SelectedDockLink is null)
+        if (ViewModel.SelectedDockItem is null)
             return;
-        ViewModel.RemoveDockLinkItem(ViewModel.SelectedDockLink);
+        ViewModel.RemoveDockItem(ViewModel.SelectedDockItem.Key);
         e.Handled = true;
     }
 
     int PosXToIndex(double x)
     {
         var curRight = GlobalViewModel.Instance.DockItemSize / 2;
-        for (int i = 0; i < ViewModel.Links.Count; i++)
+        for (int i = 0; i < ViewModel.DockItems.Count; i++)
         {
             if (x <= curRight)
                 return i;
             curRight += GlobalViewModel.Instance.DockItemSize + GlobalViewModel.Instance.DockItemSpacing;
         }
-        return ViewModel.Links.Count;
+        return ViewModel.DockItems.Count;
     }
 
     protected override void OnSizeChanged(SizeChangedEventArgs e)

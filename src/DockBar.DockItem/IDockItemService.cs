@@ -13,11 +13,13 @@ public interface IDockItemService
 
     event EventHandler<DockItemChangedEventArgs>? DockItemChanged;
 
-    void InsertDockLinkItem(string name, string linkPath, int index);
+    void AddDockLinkItem(string key, string linkPath);
 
-    void RemoveDockLinkItem(string name);
+    void AddDockItem(IDockItem dockItem);
 
-    void MoveDockLinkItem(string name, int index);
+    void RemoveDockItem(string key);
+
+    IDockItem? GetDockItem(string key);
 
     void SaveData(string filePath);
     void ReadData(string filePath);
