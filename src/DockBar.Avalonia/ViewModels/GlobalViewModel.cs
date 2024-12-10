@@ -12,7 +12,7 @@ using CoreLibrary.Toolkit.Services.Setting.Structs;
 
 namespace DockBar.Avalonia.ViewModels;
 
-internal enum DockPanelPosition
+internal enum DockPanelPositionType
 {
     Left,
     Center,
@@ -51,11 +51,8 @@ internal sealed partial class GlobalViewModel : ViewModelBase
         true
     );
 
-    public static readonly SettingProperty<DockPanelPosition> DockPanelPositionSettingProperty = new SettingProperty<DockPanelPosition>(
-        typeof(GlobalViewModel),
-        nameof(DockPanelPosition),
-        DockPanelPosition.Center
-    );
+    public static readonly SettingProperty<DockPanelPositionType> DockPanelPositionSettingProperty =
+        new SettingProperty<DockPanelPositionType>(typeof(GlobalViewModel), nameof(DockPanelPosition), DockPanelPositionType.Center);
 
     public static readonly SettingProperty<double> AutoPositionBottomSettingProperty = new SettingProperty<double>(
         typeof(GlobalViewModel),
@@ -67,8 +64,10 @@ internal sealed partial class GlobalViewModel : ViewModelBase
     {
         SettingService = settingService;
         SettingService.RegisterModel(typeof(GlobalViewModel));
-        SettingService.LoadData(StorageFile);
-
+        if (File.Exists(StorageFile))
+            SettingService.LoadData(StorageFile);
+        else
+            File.Create(StorageFile).Close();
         Instance = this;
     }
 
@@ -82,7 +81,7 @@ internal sealed partial class GlobalViewModel : ViewModelBase
         }
     }
 
-    public DockPanelPosition DockPanelPosition
+    public DockPanelPositionType DockPanelPosition
     {
         get => DockPanelPositionSettingProperty.GetValue(SettingService);
         set

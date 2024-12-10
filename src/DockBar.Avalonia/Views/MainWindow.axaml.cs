@@ -206,13 +206,13 @@ public partial class MainWindow : Window
         base.OnSizeChanged(e);
         switch (GlobalViewModel.Instance.DockPanelPosition)
         {
-            case DockPanelPosition.Left:
+            case DockPanelPositionType.Left:
                 TryMoveWindowToLeft();
                 break;
-            case DockPanelPosition.Right:
+            case DockPanelPositionType.Right:
                 TryMoveWindowToRight();
                 break;
-            case DockPanelPosition.Center:
+            case DockPanelPositionType.Center:
                 TryMoveWindowToCenter();
                 break;
             default:
