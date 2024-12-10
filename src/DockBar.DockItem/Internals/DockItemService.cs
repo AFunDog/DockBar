@@ -55,7 +55,7 @@ namespace DockBar.DockItem.Internals
 
         public void ReadData(string filePath)
         {
-            using FileStream? fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            using FileStream? fs = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Read);
             var items = MessagePackSerializer.Typeless.Deserialize(fs) as IDockItem[];
             if (items is not null)
                 foreach (var item in items)

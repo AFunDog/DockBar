@@ -1,5 +1,7 @@
 using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Windows.Interop;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -23,12 +25,44 @@ public partial class MainWindow : Window
         DockItemList.AddHandler(DragDrop.DropEvent, OnDrop);
         DockItemList.AddHandler(DragDrop.DragEnterEvent, OnDragEnter);
         DockItemList.AddHandler(DragDrop.DragLeaveEvent, OnDragLeave);
-
-        Closed += (s, e) =>
+        this.Closing += (s, e) =>
         {
+            UnregisterHotKey();
             ViewModel.SaveDockItemDatas();
             ViewModel.Global.SaveSettings();
         };
+
+        Win32Properties.AddWndProcHookCallback(this, WndProcHook);
+        RegisterHotKey();
+    }
+
+    // 通过注册按键来实现全局按键响应
+    // 响应打开面板或关闭面板
+
+    private void RegisterHotKey()
+    {
+        var hWnd = this.TryGetPlatformHandle()!.Handle;
+        var res = User32.RegisterHotKey(hWnd, this.GetHashCode(), User32.HotKeyModifiers.MOD_WIN, (int)User32.VK.VK_OEM_3);
+        if (!res)
+        {
+            Log.Error("RegisterHotKey failed");
+        }
+    }
+
+    private void UnregisterHotKey()
+    {
+        var hWnd = this.TryGetPlatformHandle()!.Handle;
+        User32.UnregisterHotKey(hWnd, this.GetHashCode());
+    }
+
+    private nint WndProcHook(nint hWnd, uint msg, nint wParam, nint lParam, ref bool handled)
+    {
+        if (msg == (uint)User32.WindowMessage.WM_HOTKEY && wParam == this.GetHashCode())
+        {
+            OnHotKeyPressed();
+            handled = true;
+        }
+        return nint.Zero;
     }
 
     protected override void OnDataContextChanged(EventArgs e)
@@ -41,6 +75,11 @@ public partial class MainWindow : Window
                 TryMoveWindowToCenter();
             }
         };
+    }
+
+    private void OnHotKeyPressed()
+    {
+        ViewModel.IsMouseEntered = !ViewModel.IsMouseEntered;
     }
 
     private void OnDragLeave(object? sender, DragEventArgs e)
@@ -236,13 +275,13 @@ public partial class MainWindow : Window
     protected override void OnPointerEntered(PointerEventArgs e)
     {
         base.OnPointerEntered(e);
-        ViewModel.IsDockItemPanelShow = true;
+        ViewModel.IsMouseEntered = true;
     }
 
     protected override void OnPointerExited(PointerEventArgs e)
     {
         base.OnPointerExited(e);
-        ViewModel.IsDockItemPanelShow = false;
+        ViewModel.IsMouseEntered = false;
     }
 
     private void MainWindowContextMenuOpened(object? sender, RoutedEventArgs e)

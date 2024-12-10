@@ -40,7 +40,7 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
     public bool IsDockItemPanelEnabled => !IsMoveMode && !IsDragMode;
 
     public double DockPanelWidth =>
-        IsDockItemPanelShow || IsContextMenuShow
+        IsMouseEntered || IsContextMenuShow || IsDragMode
             ? (Global.DockItemSize + Global.DockItemSpacing) * DockItems.Count
                 + Global.DockItemExtendRate * Global.DockItemSize
                 + Global.DockItemSpacing
@@ -50,7 +50,7 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(DockPanelWidth))]
-    private bool _isDockItemPanelShow = false;
+    private bool _isMouseEntered = false;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(DockPanelWidth))]

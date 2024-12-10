@@ -15,17 +15,29 @@
         </Style>
 
         <!--  以下调试颜色  -->
-        <Style Selector="ItemsControl#DockItemList">
-            <Setter Property="Background" Value="LightGreen" />
+        <!--<Style Selector="ItemsControl#DockItemList">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Opacity="0.2" Color="LightGreen" />
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <Style Selector="controls|DockItemControl">
-            <Setter Property="Background" Value="Red" />
-        </Style>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Opacity="0.2" Color="Red" />
+                </Setter.Value>
+            </Setter>
+        </Style>-->
 
-        <Style Selector="Border.DockPanel">
-            <Setter Property="Background" Value="Gray" />
-        </Style>
+        <!--<Style Selector="Border.DockPanel">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Opacity="0.2" Color="Gray" />
+                </Setter.Value>
+            </Setter>
+        </Style>-->
     </Application.Styles>
 
     <Application.Resources>

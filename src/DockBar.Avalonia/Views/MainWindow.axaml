@@ -5,15 +5,17 @@
     xmlns:controls="using:DockBar.Avalonia.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:media="using:Avalonia.Media"
     xmlns:vd="using:DockBar.Avalonia.ViewDatas"
     xmlns:vm="using:DockBar.Avalonia.ViewModels"
     Title="DockBar"
+    MinWidth="0"
+    MinHeight="0"
     x:CompileBindings="True"
     x:DataType="vm:MainWindowViewModel"
+    CornerRadius="16"
     ShowInTaskbar="False"
     SizeToContent="WidthAndHeight"
-    TransparencyBackgroundFallback="Transparent"
-    TransparencyLevelHint="AcrylicBlur"
     mc:Ignorable="d">
 
     <!--<Design.DataContext>
@@ -22,10 +24,14 @@
     <Window.Styles>
         <!--  设置透明窗体  -->
         <Style Selector="Window">
-            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="TransparencyLevelHint" Value="AcrylicBlur" />
+            <Setter Property="Background" Value="{x:Null}" />
+            <!--<Setter Property="SystemDecorations" Value="" />-->
+            <Setter Property="ExtendClientAreaToDecorationsHint" Value="True" />
+            <Setter Property="ExtendClientAreaChromeHints" Value="NoChrome" />
             <Setter Property="SystemDecorations" Value="None" />
         </Style>
-        <Style Selector="Border.DockPanel">
+        <Style Selector="Grid.DockPanel">
             <Setter Property="Transitions">
                 <Setter.Value>
                     <Transitions>
@@ -80,35 +86,46 @@
 
 
     <!--  功能区  -->
-    <Border
-        Width="{Binding DockPanelWidth}"
-        Height="{Binding DockPanelHeight}"
-        Classes="DockPanel"
-        CornerRadius="8">
-        <ItemsControl
-            Name="DockItemList"
-            Margin="{Binding Global.DockItemListMargin}"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Bottom"
-            CornerRadius="8"
-            DragDrop.AllowDrop="True"
-            ItemsSource="{Binding DockItems, Mode=OneWay}">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <StackPanel Orientation="Horizontal" Spacing="{Binding Global.DockItemSpacing}" />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="vd:DockItemData">
-                    <controls:DockItemControl
-                        VerticalAlignment="Bottom"
-                        DockItemData="{Binding .}"
-                        IsHitTestVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsDockItemPanelEnabled}"
-                        PointerPressed="DockItem_PointerPressed"
-                        Size="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).Global.DockItemSize}" />
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-    </Border>
+    <Grid>
+        <ExperimentalAcrylicBorder CornerRadius="8">
+            <ExperimentalAcrylicBorder.Material>
+                <ExperimentalAcrylicMaterial
+                    BackgroundSource="Digger"
+                    MaterialOpacity="0.4"
+                    TintColor="Black"
+                    TintOpacity="1" />
+            </ExperimentalAcrylicBorder.Material>
+        </ExperimentalAcrylicBorder>
+        <Grid
+            Width="{Binding DockPanelWidth}"
+            Height="{Binding DockPanelHeight}"
+            Classes="DockPanel">
+
+            <ItemsControl
+                Name="DockItemList"
+                Margin="{Binding Global.DockItemListMargin}"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Bottom"
+                CornerRadius="8"
+                DragDrop.AllowDrop="True"
+                ItemsSource="{Binding DockItems, Mode=OneWay}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" Spacing="{Binding Global.DockItemSpacing}" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vd:DockItemData">
+                        <controls:DockItemControl
+                            VerticalAlignment="Bottom"
+                            DockItemData="{Binding .}"
+                            IsHitTestVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsDockItemPanelEnabled}"
+                            PointerPressed="DockItem_PointerPressed"
+                            Size="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).Global.DockItemSize}" />
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Grid>
+    </Grid>
 
 </Window>

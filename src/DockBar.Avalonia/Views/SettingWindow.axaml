@@ -14,11 +14,7 @@
 
     <Window.Styles>
         <Style Selector="Window">
-            <Setter Property="Background">
-                <Setter.Value>
-                    <SolidColorBrush Opacity="0.8" Color="#222222" />
-                </Setter.Value>
-            </Setter>
+            <Setter Property="Background" Value="{x:Null}" />
             <Setter Property="ExtendClientAreaToDecorationsHint" Value="True" />
             <Setter Property="ExtendClientAreaChromeHints" Value="NoChrome" />
             <Setter Property="TransparencyLevelHint" Value="AcrylicBlur" />
@@ -26,6 +22,15 @@
         </Style>
     </Window.Styles>
     <Grid>
+        <ExperimentalAcrylicBorder CornerRadius="8">
+            <ExperimentalAcrylicBorder.Material>
+                <ExperimentalAcrylicMaterial
+                    BackgroundSource="Digger"
+                    MaterialOpacity="0.2"
+                    TintColor="Black"
+                    TintOpacity="0.8" />
+            </ExperimentalAcrylicBorder.Material>
+        </ExperimentalAcrylicBorder>
         <Grid RowDefinitions="32,auto">
             <!--  标题栏区域  -->
             <Grid
