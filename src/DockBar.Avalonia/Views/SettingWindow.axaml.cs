@@ -15,7 +15,6 @@ public partial class SettingWindow : Window
 
     private void CloseButton_Clicked(object? sender, RoutedEventArgs e)
     {
-        Debug.WriteLine(DataContext);
         Close();
         e.Handled = true;
     }

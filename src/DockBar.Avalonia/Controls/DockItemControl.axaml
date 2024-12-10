@@ -22,10 +22,11 @@
     <ControlTheme x:Key="{x:Type controls:DockItemControl}" TargetType="controls:DockItemControl">
         <Setter Property="Template">
             <ControlTemplate>
-                <Grid Background="Aqua" Cursor="Hand">
+                <Grid Cursor="Hand">
                     <Border
                         Width="{TemplateBinding Size}"
                         Height="{TemplateBinding Size}"
+                        Background="{TemplateBinding Background}"
                         ClipToBounds="True"
                         CornerRadius="16">
                         <Image Source="{TemplateBinding DockIcon}" Stretch="UniformToFill" />

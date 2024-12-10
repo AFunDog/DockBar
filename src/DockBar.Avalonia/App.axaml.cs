@@ -41,7 +41,7 @@ public partial class App : Application
         services
             // 注册外部服务
             .UseDockItemService()
-            .AddSingleton<ILogger>(new LoggerConfiguration().WriteTo.Debug().CreateLogger())
+            .AddSingleton<ILogger>(new LoggerConfiguration().WriteTo.Debug().MinimumLevel.Debug().CreateLogger())
             .AddSingleton<ISettingService>(ISettingService.Implement)
             // 注册全局视图模型
             .AddSingleton<GlobalViewModel>()

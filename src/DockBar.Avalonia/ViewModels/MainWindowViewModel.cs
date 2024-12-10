@@ -40,11 +40,21 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
     public bool IsDockItemPanelEnabled => !IsMoveMode && !IsDragMode;
 
     public double DockPanelWidth =>
-        (Global.DockItemSize + Global.DockItemSpacing) * DockItems.Count
-        + Global.DockItemExtendRate * Global.DockItemSize
-        + Global.DockItemSpacing;
+        IsDockItemPanelShow || IsContextMenuShow
+            ? (Global.DockItemSize + Global.DockItemSpacing) * DockItems.Count
+                + Global.DockItemExtendRate * Global.DockItemSize
+                + Global.DockItemSpacing
+            : Global.DockItemListMargin.Left + Global.DockItemListMargin.Right;
 
     public double DockPanelHeight => Global.DockItemSize * (1 + Global.DockItemExtendRate) + 8;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DockPanelWidth))]
+    private bool _isDockItemPanelShow = false;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DockPanelWidth))]
+    private bool _isContextMenuShow = false;
 
     public MainWindowViewModel(GlobalViewModel global, ILogger logger, IDockItemService dockItemService)
     {
@@ -76,6 +86,7 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
     public void SaveDockItemDatas()
     {
         DockItemService.SaveData(StorageFile);
+        Logger.Debug($"保存数据到 {StorageFile}");
     }
 
     public void InsertDockLinkItem(int index, string fullPath)

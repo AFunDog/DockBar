@@ -12,6 +12,8 @@
     x:DataType="vm:MainWindowViewModel"
     ShowInTaskbar="False"
     SizeToContent="WidthAndHeight"
+    TransparencyBackgroundFallback="Transparent"
+    TransparencyLevelHint="AcrylicBlur"
     mc:Ignorable="d">
 
     <!--<Design.DataContext>
@@ -23,10 +25,25 @@
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="SystemDecorations" Value="None" />
         </Style>
-
+        <Style Selector="Border.DockPanel">
+            <Setter Property="Transitions">
+                <Setter.Value>
+                    <Transitions>
+                        <DoubleTransition
+                            Easing="SineEaseOut"
+                            Property="Width"
+                            Duration="0:0:0.2" />
+                        <DoubleTransition
+                            Easing="SineEaseOut"
+                            Property="Height"
+                            Duration="0:0:0.2" />
+                    </Transitions>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Styles>
     <Window.ContextMenu>
-        <ContextMenu>
+        <ContextMenu Closed="MainWindowContextMenuClosed" Opened="MainWindowContextMenuOpened">
             <ContextMenu.Background>
                 <SolidColorBrush Opacity="0.9" Color="#222222" />
             </ContextMenu.Background>
@@ -63,16 +80,17 @@
 
 
     <!--  功能区  -->
-    <Grid
+    <Border
         Width="{Binding DockPanelWidth}"
         Height="{Binding DockPanelHeight}"
-        Background="AntiqueWhite">
+        Classes="DockPanel"
+        CornerRadius="8">
         <ItemsControl
             Name="DockItemList"
             Margin="{Binding Global.DockItemListMargin}"
             HorizontalAlignment="Center"
             VerticalAlignment="Bottom"
-            Background="AliceBlue"
+            CornerRadius="8"
             DragDrop.AllowDrop="True"
             ItemsSource="{Binding DockItems, Mode=OneWay}">
             <ItemsControl.ItemsPanel>
@@ -91,6 +109,6 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
-    </Grid>
+    </Border>
 
 </Window>

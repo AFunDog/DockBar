@@ -165,12 +165,25 @@ public partial class MainWindow : Window
     protected override void OnSizeChanged(SizeChangedEventArgs e)
     {
         base.OnSizeChanged(e);
-        TryMoveWindowToCenter();
+        switch (GlobalViewModel.Instance.DockPanelPosition)
+        {
+            case DockPanelPosition.Left:
+                TryMoveWindowToLeft();
+                break;
+            case DockPanelPosition.Right:
+                TryMoveWindowToRight();
+                break;
+            case DockPanelPosition.Center:
+                TryMoveWindowToCenter();
+                break;
+            default:
+                break;
+        }
     }
 
     private void TryMoveWindowToCenter()
     {
-        if (ViewModel.Global.IsAutoPosition is true)
+        if (ViewModel.Global.IsAutoPosition)
         {
             if (Screens.ScreenFromWindow(this) is Screen screen)
             {
@@ -184,5 +197,61 @@ public partial class MainWindow : Window
                 Position = new PixelPoint((int)x, (int)y);
             }
         }
+    }
+
+    private void TryMoveWindowToLeft()
+    {
+        if (ViewModel.Global.IsAutoPosition)
+        {
+            if (Screens.ScreenFromWindow(this) is Screen screen)
+            {
+                var realWidth = Width * screen.Scaling;
+                var realHeight = Height * screen.Scaling;
+
+                var x = screen.Bounds.X;
+                var y = screen.Bounds.Y + screen.Bounds.Height - ViewModel.Global.AutoPositionBottom - realHeight;
+
+                Position = new PixelPoint((int)x, (int)y);
+            }
+        }
+    }
+
+    private void TryMoveWindowToRight()
+    {
+        if (ViewModel.Global.IsAutoPosition)
+        {
+            if (Screens.ScreenFromWindow(this) is Screen screen)
+            {
+                var realWidth = Width * screen.Scaling;
+                var realHeight = Height * screen.Scaling;
+
+                var x = screen.Bounds.X + screen.Bounds.Width - realWidth;
+                var y = screen.Bounds.Y + screen.Bounds.Height - ViewModel.Global.AutoPositionBottom - realHeight;
+
+                Position = new PixelPoint((int)x, (int)y);
+            }
+        }
+    }
+
+    protected override void OnPointerEntered(PointerEventArgs e)
+    {
+        base.OnPointerEntered(e);
+        ViewModel.IsDockItemPanelShow = true;
+    }
+
+    protected override void OnPointerExited(PointerEventArgs e)
+    {
+        base.OnPointerExited(e);
+        ViewModel.IsDockItemPanelShow = false;
+    }
+
+    private void MainWindowContextMenuOpened(object? sender, RoutedEventArgs e)
+    {
+        ViewModel.IsContextMenuShow = true;
+    }
+
+    private void MainWindowContextMenuClosed(object? sender, RoutedEventArgs e)
+    {
+        ViewModel.IsContextMenuShow = false;
     }
 }

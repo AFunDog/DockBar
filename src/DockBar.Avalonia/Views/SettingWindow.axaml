@@ -98,6 +98,13 @@
                                     <controls:SettingCard Header="启用自动定位">
                                         <CheckBox IsChecked="{Binding Global.IsAutoPosition, Mode=TwoWay}" />
                                     </controls:SettingCard>
+                                    <controls:SettingCard Header="自动定位位置">
+                                        <ComboBox SelectedIndex="{Binding Global.DockPanelPosition, Mode=TwoWay}">
+                                            <TextBlock Text="靠左" />
+                                            <TextBlock Text="中心" />
+                                            <TextBlock Text="靠右" />
+                                        </ComboBox>
+                                    </controls:SettingCard>
                                     <controls:SettingCard Header="自动定位底部距离" IsEnabled="{Binding Global.IsAutoPosition, Mode=OneWay}">
                                         <NumericUpDown
                                             Width="256"
