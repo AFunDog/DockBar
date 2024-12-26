@@ -14,8 +14,18 @@
             <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
         </Style>
 
+        <!--  设置透明窗体  -->
+        <Style Selector="Window">
+            <Setter Property="TransparencyLevelHint" Value="AcrylicBlur" />
+            <Setter Property="Background" Value="{x:Null}" />
+            <!--<Setter Property="SystemDecorations" Value="" />-->
+            <Setter Property="ExtendClientAreaToDecorationsHint" Value="True" />
+            <Setter Property="ExtendClientAreaChromeHints" Value="NoChrome" />
+            <Setter Property="SystemDecorations" Value="None" />
+        </Style>
+
         <!--  以下调试颜色  -->
-        <!--<Style Selector="ItemsControl#DockItemList">
+        <Style Selector="ItemsControl#DockItemList">
             <Setter Property="Background">
                 <Setter.Value>
                     <SolidColorBrush Opacity="0.2" Color="LightGreen" />
@@ -29,7 +39,7 @@
                     <SolidColorBrush Opacity="0.2" Color="Red" />
                 </Setter.Value>
             </Setter>
-        </Style>-->
+        </Style>
 
         <!--<Style Selector="Border.DockPanel">
             <Setter Property="Background">

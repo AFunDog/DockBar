@@ -5,9 +5,8 @@ using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using DockBar.Avalonia.ViewDatas;
 using DockBar.Avalonia.ViewModels;
-using DockBar.DockItem;
+using DockBar.Core;
 
 namespace DockBar.Avalonia.Controls;
 
@@ -18,8 +17,13 @@ internal class DockItemControl : TemplatedControl
         IImage?
     >(nameof(DockIcon), o => o.DockIcon);
 
-    public static readonly StyledProperty<DockItemData> DockItemDataProperty = AvaloniaProperty.Register<DockItemControl, DockItemData>(
-        nameof(DockItemData)
+    public static readonly DirectProperty<DockItemControl, string> ShowNameProperty = AvaloniaProperty.RegisterDirect<
+        DockItemControl,
+        string
+    >(nameof(ShowName), o => o.ShowName);
+
+    public static readonly StyledProperty<IDockItem> DockItemProperty = AvaloniaProperty.Register<DockItemControl, IDockItem>(
+        nameof(DockItem)
     );
 
     public static readonly StyledProperty<double> SizeProperty = AvaloniaProperty.Register<DockItemControl, double>(nameof(Size));
@@ -32,18 +36,24 @@ internal class DockItemControl : TemplatedControl
     public IImage? DockIcon
     {
         get =>
-            string.IsNullOrEmpty(DockItemData.IconPath)
+            string.IsNullOrEmpty(DockItem.IconPath)
                 ? new Bitmap(AssetLoader.Open(new Uri("avares://DockBar/Assets/icon.png")))
-                : new Bitmap(DockItemData.IconPath);
+                : new Bitmap(DockItem.IconPath);
     }
 
-    public DockItemData DockItemData
+    public string ShowName
     {
-        get => GetValue(DockItemDataProperty);
+        get => DockItem.ShowName;
+    }
+
+    public IDockItem DockItem
+    {
+        get => GetValue(DockItemProperty);
         set
         {
-            SetValue(DockItemDataProperty, value);
+            SetValue(DockItemProperty, value);
             RaisePropertyChanged(DockIconProperty, null, DockIcon);
+            RaisePropertyChanged(ShowNameProperty, "", ShowName);
         }
     }
 
@@ -65,7 +75,7 @@ internal class DockItemControl : TemplatedControl
 
         if (e.Pointer.Type is PointerType.Mouse && e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
         {
-            DockItemData.DockItem.Start();
+            DockItem.Start();
         }
     }
 }

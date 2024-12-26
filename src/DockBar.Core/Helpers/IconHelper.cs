@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace DockBar.DockItem.Helpers
+namespace DockBar.Core.Helpers
 {
     internal static class IconHelper
     {
@@ -21,26 +16,20 @@ namespace DockBar.DockItem.Helpers
             try
             {
                 Vanara.PInvoke.Shell32.SHFILEINFO info = default;
-                IntPtr iconHandle = Vanara.PInvoke.Shell32.SHGetFileInfo(
+                nint iconHandle = Vanara.PInvoke.Shell32.SHGetFileInfo(
                     path,
                     0,
                     ref info,
                     Marshal.SizeOf(info),
-                    Vanara.PInvoke.Shell32.SHGFI.SHGFI_OPENICON
-                        | Vanara.PInvoke.Shell32.SHGFI.SHGFI_SYSICONINDEX
+                    Vanara.PInvoke.Shell32.SHGFI.SHGFI_OPENICON | Vanara.PInvoke.Shell32.SHGFI.SHGFI_SYSICONINDEX
                 );
                 // IID_IImageList GUID
                 Guid guid = new("46EB5926-582E-4017-9FDF-E8998DAA0950");
-                var res = Vanara.PInvoke.Shell32.SHGetImageList(
-                    Vanara.PInvoke.Shell32.SHIL.SHIL_JUMBO,
-                    in guid,
-                    out var ls
-                );
+                var res = Vanara.PInvoke.Shell32.SHGetImageList(Vanara.PInvoke.Shell32.SHIL.SHIL_JUMBO, in guid, out var ls);
                 var list = (Vanara.PInvoke.ComCtl32.IImageList)ls;
                 using var ico = list.GetIcon(
                     info.iIcon,
-                    Vanara.PInvoke.ComCtl32.IMAGELISTDRAWFLAGS.ILD_TRANSPARENT
-                        | Vanara.PInvoke.ComCtl32.IMAGELISTDRAWFLAGS.ILD_IMAGE
+                    Vanara.PInvoke.ComCtl32.IMAGELISTDRAWFLAGS.ILD_TRANSPARENT | Vanara.PInvoke.ComCtl32.IMAGELISTDRAWFLAGS.ILD_IMAGE
                 );
                 return Icon.FromHandle(ico.DangerousGetHandle()).ToBitmap();
             }

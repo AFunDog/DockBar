@@ -1,16 +1,12 @@
 using System;
-using System.Runtime.CompilerServices;
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
-using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using CoreLibrary.Toolkit.Services.Setting;
 using DockBar.Avalonia.ViewModels;
 using DockBar.Avalonia.Views;
-using DockBar.DockItem;
+using DockBar.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
@@ -40,8 +36,7 @@ public partial class App : Application
 
     private static IServiceProvider BuildServices()
     {
-        ServiceCollection services = new();
-        services
+        var services = new ServiceCollection()
             // 注册外部服务
             .UseDockItemService()
             .AddSingleton<ILogger>(new LoggerConfiguration().WriteTo.Debug().MinimumLevel.Debug().CreateLogger())
@@ -51,6 +46,7 @@ public partial class App : Application
             // 注册视图模型
             .AddTransient<MainWindowViewModel>()
             .AddTransient<SettingWindowViewModel>()
+            .AddTransient<AddDockItemWindowViewModel>()
             // 注册窗口
             .AddSingleton<MainWindow>(static provider => new MainWindow
             {
@@ -60,6 +56,10 @@ public partial class App : Application
             .AddTransient<SettingWindow>(static provider => new SettingWindow
             {
                 DataContext = provider.GetRequiredService<SettingWindowViewModel>()
+            })
+            .AddTransient<AddDockItemWindow>(static provider => new AddDockItemWindow
+            {
+                DataContext = provider.GetRequiredService<AddDockItemWindowViewModel>()
             });
         return services.BuildServiceProvider();
     }

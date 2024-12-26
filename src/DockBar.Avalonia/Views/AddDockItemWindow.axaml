@@ -1,0 +1,68 @@
+<Window
+    x:Class="DockBar.Avalonia.AddDockItemWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:DockBar.Avalonia.ViewModels"
+    Title="添加停靠项目"
+    Width="800"
+    Height="450"
+    x:DataType="vm:AddDockItemWindowViewModel"
+    mc:Ignorable="d">
+    <Window.Styles>
+        <Style Selector="Window">
+            <Setter Property="Background" Value="{x:Null}" />
+            <Setter Property="ExtendClientAreaToDecorationsHint" Value="True" />
+            <Setter Property="ExtendClientAreaChromeHints" Value="NoChrome" />
+            <Setter Property="TransparencyLevelHint" Value="AcrylicBlur" />
+            <Setter Property="WindowStartupLocation" Value="CenterOwner" />
+            <Setter Property="SystemDecorations" Value="Full" />
+        </Style>
+    </Window.Styles>
+    <Grid>
+        <ExperimentalAcrylicBorder CornerRadius="8">
+            <ExperimentalAcrylicBorder.Material>
+                <ExperimentalAcrylicMaterial
+                    BackgroundSource="Digger"
+                    MaterialOpacity="0.65"
+                    TintColor="Black"
+                    TintOpacity="1" />
+            </ExperimentalAcrylicBorder.Material>
+        </ExperimentalAcrylicBorder>
+        <Grid RowDefinitions="32,*">
+            <!--  标题栏区域  -->
+            <Grid
+                Grid.Row="0"
+                Margin="8,0,8,0"
+                ColumnDefinitions="*,auto">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    IsHitTestVisible="False"
+                    Text="{Binding $parent[Window].Title}" />
+                <Button Grid.Column="1" Click="CloseButton_Clicked">
+                    <Button.Styles>
+                        <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                            <Setter Property="Background">
+                                <Setter.Value>
+                                    <SolidColorBrush Opacity="0.8" Color="Red" />
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Styles>
+                    <TextBlock Classes="FontIcon" Text="&#xE711;" />
+                </Button>
+            </Grid>
+
+            <Grid
+                Name="AddGrid"
+                Grid.Row="1"
+                Background="Transparent"
+                ColumnDefinitions="*,*"
+                DragDrop.AllowDrop="True"
+                RowDefinitions="*,*">
+                <Image Source="{Binding DockIcon, Mode=OneWay}" />
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

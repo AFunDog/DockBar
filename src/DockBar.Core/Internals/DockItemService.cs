@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DockBar.DockItem.Structs;
+﻿using DockBar.Core.Structs;
 using MessagePack;
 
-namespace DockBar.DockItem.Internals
+namespace DockBar.Core.Internals
 {
     internal sealed class DockItemService : IDockItemService
     {
@@ -21,7 +15,7 @@ namespace DockBar.DockItem.Internals
         {
             if (Items.ContainsKey(key) is false)
             {
-                var item = IDockItem.CreateDockItem(key, linkPath);
+                var item = new DockLinkItem(key, linkPath);
                 Items.Add(key, item);
                 DockItemChanged?.Invoke(this, new DockItemChangedEventArgs { DockItem = item, IsAdd = true });
             }
@@ -56,16 +50,24 @@ namespace DockBar.DockItem.Internals
         public void ReadData(string filePath)
         {
             using FileStream? fs = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Read);
-            var items = MessagePackSerializer.Typeless.Deserialize(fs) as IDockItem[];
-            if (items is not null)
-                foreach (var item in items)
-                    AddDockItem(item);
+            try
+            {
+                var items = MessagePackSerializer.Typeless.Deserialize(fs) as IDockItem[];
+                if (items is not null)
+                    foreach (var item in items)
+                        AddDockItem(item);
+            }
+            catch (Exception) { }
         }
 
         public void SaveData(string filePath)
         {
             using var fs = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write);
-            MessagePackSerializer.Typeless.Serialize(fs, Items.Values.ToArray());
+            try
+            {
+                MessagePackSerializer.Typeless.Serialize(fs, Items.Values.ToArray());
+            }
+            catch (Exception) { }
         }
     }
 }

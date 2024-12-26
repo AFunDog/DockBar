@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 using Avalonia;
-using CommunityToolkit.Mvvm.ComponentModel;
 using CoreLibrary.Toolkit.Services.Setting;
 using CoreLibrary.Toolkit.Services.Setting.Structs;
 

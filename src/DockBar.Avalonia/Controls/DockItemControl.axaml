@@ -12,17 +12,17 @@
     -->
 
     <!--<Design.PreviewWith>
-    <StackPanel Width="400" Spacing="10">
-        <StackPanel Background="{DynamicResource SystemRegionBrush}">
-          <controls:DockItemControl />
+        <StackPanel Width="400" Spacing="10">
+            <StackPanel Background="{DynamicResource SystemRegionBrush}">
+                <controls:DockItemControl  />
+            </StackPanel>
         </StackPanel>
-    </StackPanel>
-  </Design.PreviewWith>-->
+    </Design.PreviewWith>-->
 
     <ControlTheme x:Key="{x:Type controls:DockItemControl}" TargetType="controls:DockItemControl">
         <Setter Property="Template">
             <ControlTemplate>
-                <Grid Cursor="Hand">
+                <Grid Cursor="Hand" RowDefinitions="*,auto">
                     <Border
                         Width="{TemplateBinding Size}"
                         Height="{TemplateBinding Size}"
@@ -31,6 +31,7 @@
                         CornerRadius="16">
                         <Image Source="{TemplateBinding DockIcon}" Stretch="UniformToFill" />
                     </Border>
+                    <TextBlock Grid.Row="1" Text="{TemplateBinding ShowName}" />
                 </Grid>
 
 

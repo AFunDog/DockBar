@@ -1,7 +1,7 @@
-﻿using DockBar.DockItem.Internals;
+﻿using DockBar.Core.Internals;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DockBar.DockItem;
+namespace DockBar.Core;
 
 public static class DockItemServiceExtensions
 {

@@ -19,6 +19,7 @@
             <Setter Property="ExtendClientAreaChromeHints" Value="NoChrome" />
             <Setter Property="TransparencyLevelHint" Value="AcrylicBlur" />
             <Setter Property="WindowStartupLocation" Value="CenterOwner" />
+            <Setter Property="SystemDecorations" Value="Full" />
         </Style>
     </Window.Styles>
     <Grid>
@@ -26,12 +27,12 @@
             <ExperimentalAcrylicBorder.Material>
                 <ExperimentalAcrylicMaterial
                     BackgroundSource="Digger"
-                    MaterialOpacity="0.2"
+                    MaterialOpacity="0.65"
                     TintColor="Black"
-                    TintOpacity="0.8" />
+                    TintOpacity="1" />
             </ExperimentalAcrylicBorder.Material>
         </ExperimentalAcrylicBorder>
-        <Grid RowDefinitions="32,auto">
+        <Grid RowDefinitions="32,*">
             <!--  标题栏区域  -->
             <Grid
                 Grid.Row="0"
@@ -42,6 +43,15 @@
                     IsHitTestVisible="False"
                     Text="{Binding $parent[Window].Title}" />
                 <Button Grid.Column="1" Click="CloseButton_Clicked">
+                    <Button.Styles>
+                        <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                            <Setter Property="Background">
+                                <Setter.Value>
+                                    <SolidColorBrush Opacity="0.8" Color="Red" />
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Styles>
                     <TextBlock Classes="FontIcon" Text="&#xE711;" />
                 </Button>
             </Grid>
@@ -50,6 +60,9 @@
                     <Grid.Styles>
                         <Style Selector="Expander">
                             <Setter Property="HorizontalAlignment" Value="Stretch" />
+                            <Style Selector="^ /template/ ToggleButton">
+                                <!--<Setter Property="Background" Value="Red" />-->
+                            </Style>
                         </Style>
                     </Grid.Styles>
                     <ScrollViewer HorizontalScrollBarVisibility="Disabled">

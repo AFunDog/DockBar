@@ -1,7 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Windows.Interop;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -158,17 +156,18 @@ public partial class MainWindow : Window
         ViewModel.IsMoveMode = true;
     }
 
-    private void AddLinkMenuItem_Clicked(object? sender, RoutedEventArgs e)
+    private async void AddLinkMenuItem_Clicked(object? sender, RoutedEventArgs e)
     {
-        //if (_addDockItemDialog is not null)
-        //    return;
-        //_addDockItemDialog = new AddDockItemDialog();
-        //_addDockItemDialog.Closed += (s, e) =>
-        //{
-        //    _addDockItemDialog = null;
-        //};
-        //_addDockItemDialog.ShowDialog(this);
-        //e.Handled = true;
+        try
+        {
+            var addDockItemWindow = App.Instance.ServiceProvider.GetRequiredService<AddDockItemWindow>();
+            await addDockItemWindow.ShowDialog(this);
+            e.Handled = true;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+        }
     }
 
     private void DockItem_PointerPressed(object? sender, PointerPressedEventArgs e)
@@ -176,7 +175,7 @@ public partial class MainWindow : Window
         if (sender is not DockItemControl source)
             return;
 
-        ViewModel.SelectedDockItem = source.DockItemData;
+        ViewModel.SelectedDockItem = source.DockItem;
         ViewModel.Logger.Debug("DockItem.OnPointerPressed");
         e.Handled = true;
     }

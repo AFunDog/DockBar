@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
+﻿using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
-using DockBar.Avalonia.ViewDatas;
-using DockBar.DockItem;
-using MessagePack;
+using DockBar.Core;
 using Serilog;
 
 namespace DockBar.Avalonia.ViewModels;
@@ -19,15 +14,15 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
     public IDockItemService DockItemService { get; }
     public ILogger Logger { get; }
 
-    public ObservableCollection<DockItemData> DockItems { get; } = [];
+    public ObservableCollection<IDockItem> DockItems { get; } = [];
 
     public GlobalViewModel Global { get; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsSelectedDockItem))]
-    private DockItemData? _selectedDockItem = null;
+    private IDockItem? _selectedDockItem = null;
 
-    public bool IsSelectedDockItem => SelectedDockItem != null;
+    public bool IsSelectedDockItem => SelectedDockItem is not null;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsDockItemPanelEnabled))]
@@ -65,7 +60,7 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
         {
             if (e.IsAdd)
             {
-                DockItems.Add(new DockItemData(e.DockItem));
+                DockItems.Add(e.DockItem);
             }
         }
 
@@ -94,7 +89,10 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
         Logger.Debug($"AddDockLinkItem {fullPath}");
         var key = Path.GetFileNameWithoutExtension(fullPath);
         DockItemService.AddDockLinkItem(key, fullPath);
-        DockItems.Insert(index, new DockItemData(DockItemService.GetDockItem(key)!));
+        if (DockItemService.GetDockItem(key) is IDockItem dockItem)
+        {
+            DockItems.Insert(index, dockItem);
+        }
         NotifyPanelSize();
     }
 

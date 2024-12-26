@@ -2,11 +2,12 @@
     x:Class="DockBar.Avalonia.Views.MainWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:c="using:DockBar.Core"
     xmlns:controls="using:DockBar.Avalonia.Controls"
+    xmlns:cs="using:DockBar.Core.Structs"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:media="using:Avalonia.Media"
-    xmlns:vd="using:DockBar.Avalonia.ViewDatas"
     xmlns:vm="using:DockBar.Avalonia.ViewModels"
     Title="DockBar"
     MinWidth="0"
@@ -22,15 +23,6 @@
         <vm:MainWindowViewModel />
     </Design.DataContext>-->
     <Window.Styles>
-        <!--  设置透明窗体  -->
-        <Style Selector="Window">
-            <Setter Property="TransparencyLevelHint" Value="AcrylicBlur" />
-            <Setter Property="Background" Value="{x:Null}" />
-            <!--<Setter Property="SystemDecorations" Value="" />-->
-            <Setter Property="ExtendClientAreaToDecorationsHint" Value="True" />
-            <Setter Property="ExtendClientAreaChromeHints" Value="NoChrome" />
-            <Setter Property="SystemDecorations" Value="None" />
-        </Style>
         <Style Selector="Grid.DockPanel">
             <Setter Property="Transitions">
                 <Setter.Value>
@@ -53,7 +45,7 @@
             <ContextMenu.Background>
                 <SolidColorBrush Opacity="0.9" Color="#222222" />
             </ContextMenu.Background>
-            <MenuItem Click="AddLinkMenuItem_Clicked" Header="添加项目">
+            <MenuItem Click="AddLinkMenuItem_Clicked" Header="在此处添加项目">
                 <MenuItem.Icon>
                     <TextBlock Classes="FontIcon" Text="&#xE710;" />
                 </MenuItem.Icon>
@@ -91,21 +83,20 @@
             <ExperimentalAcrylicBorder.Material>
                 <ExperimentalAcrylicMaterial
                     BackgroundSource="Digger"
-                    MaterialOpacity="0.4"
+                    MaterialOpacity="0.5"
                     TintColor="Black"
-                    TintOpacity="1" />
+                    TintOpacity="0.8" />
             </ExperimentalAcrylicBorder.Material>
         </ExperimentalAcrylicBorder>
         <Grid
             Width="{Binding DockPanelWidth}"
             Height="{Binding DockPanelHeight}"
             Classes="DockPanel">
-
             <ItemsControl
                 Name="DockItemList"
                 Margin="{Binding Global.DockItemListMargin}"
                 HorizontalAlignment="Center"
-                VerticalAlignment="Bottom"
+                VerticalAlignment="Center"
                 CornerRadius="8"
                 DragDrop.AllowDrop="True"
                 ItemsSource="{Binding DockItems, Mode=OneWay}">
@@ -115,10 +106,10 @@
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="vd:DockItemData">
+                    <DataTemplate DataType="c:IDockItem">
                         <controls:DockItemControl
-                            VerticalAlignment="Bottom"
-                            DockItemData="{Binding .}"
+                            VerticalAlignment="Center"
+                            DockItem="{Binding .}"
                             IsHitTestVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsDockItemPanelEnabled}"
                             PointerPressed="DockItem_PointerPressed"
                             Size="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).Global.DockItemSize}" />
