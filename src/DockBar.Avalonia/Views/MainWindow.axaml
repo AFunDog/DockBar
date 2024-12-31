@@ -2,28 +2,54 @@
     x:Class="DockBar.Avalonia.Views.MainWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:a="using:DockBar.Avalonia"
+    xmlns:ac="using:DockBar.Avalonia.Converters"
     xmlns:c="using:DockBar.Core"
+    xmlns:cd="using:DockBar.Core.DockItems"
     xmlns:controls="using:DockBar.Avalonia.Controls"
     xmlns:cs="using:DockBar.Core.Structs"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:media="using:Avalonia.Media"
+    xmlns:sm="using:DockBar.SystemMonitor"
+    xmlns:sys="using:System"
     xmlns:vm="using:DockBar.Avalonia.ViewModels"
     Title="DockBar"
-    MinWidth="0"
-    MinHeight="0"
-    x:CompileBindings="True"
     x:DataType="vm:MainWindowViewModel"
     CornerRadius="16"
+    Design.Width="1000"
     ShowInTaskbar="False"
     SizeToContent="WidthAndHeight"
     mc:Ignorable="d">
 
-    <!--<Design.DataContext>
-        <vm:MainWindowViewModel />
-    </Design.DataContext>-->
+    <Design.DataContext>
+        <vm:MainWindowViewModel IsMouseEntered="True">
+            <vm:MainWindowViewModel.DockItems>
+                <cd:DockLinkItem LinkPath="" ShowName="停靠项目1" />
+                <cd:DockLinkItem LinkPath="" ShowName="停靠项目2" />
+                <cd:DockLinkItem LinkPath="" ShowName="停靠项目3" />
+            </vm:MainWindowViewModel.DockItems>
+            <vm:MainWindowViewModel.GlobalSetting>
+                <a:GlobalSetting />
+            </vm:MainWindowViewModel.GlobalSetting>
+            <vm:MainWindowViewModel.PerformanceMonitor>
+                <sm:PerformanceMonitor />
+            </vm:MainWindowViewModel.PerformanceMonitor>
+
+        </vm:MainWindowViewModel>
+    </Design.DataContext>
+    <Design.DesignStyle>
+        <Style Selector="Window">
+            <Setter Property="RequestedThemeVariant" Value="Dark" />
+        </Style>
+    </Design.DesignStyle>
     <Window.Styles>
-        <Style Selector="Grid.DockPanel">
+        <Style Selector="Window">
+            <!--<Setter Property="TransparencyLevelHint" Value="AcrylicBlur" />-->
+            <Setter Property="Background" Value="{x:Null}" />
+            <Setter Property="SystemDecorations" Value="None" />
+        </Style>
+        <Style Selector=":is(Control)#DockPanel">
             <Setter Property="Transitions">
                 <Setter.Value>
                     <Transitions>
@@ -38,7 +64,9 @@
                     </Transitions>
                 </Setter.Value>
             </Setter>
+
         </Style>
+
     </Window.Styles>
     <Window.ContextMenu>
         <ContextMenu Closed="MainWindowContextMenuClosed" Opened="MainWindowContextMenuOpened">
@@ -76,47 +104,96 @@
         </ContextMenu>
     </Window.ContextMenu>
 
+    <Grid ColumnDefinitions="128,*,128">
+        <Border
+            Grid.ColumnSpan="3"
+            Height="{Binding GlobalSetting.DockItemSize, Converter={StaticResource PercentageConverter}, ConverterParameter=0.8}"
+            VerticalAlignment="Bottom"
+            CornerRadius="8">
+            <Border.Background>
+                <SolidColorBrush Opacity="0.8" Color="#222222" />
+            </Border.Background>
+        </Border>
 
-    <!--  功能区  -->
-    <Grid>
-        <ExperimentalAcrylicBorder CornerRadius="8">
-            <ExperimentalAcrylicBorder.Material>
-                <ExperimentalAcrylicMaterial
-                    BackgroundSource="Digger"
-                    MaterialOpacity="0.5"
-                    TintColor="Black"
-                    TintOpacity="0.8" />
-            </ExperimentalAcrylicBorder.Material>
-        </ExperimentalAcrylicBorder>
+        <StackPanel
+            Grid.Column="0"
+            Margin="0,0,0,4"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Bottom"
+            Orientation="Vertical"
+            Spacing="8">
+            <TextBlock>
+                <Run Text="CPU :" />
+                <Run Text="{Binding PerformanceMonitor.CpuUsage, StringFormat={}{0:F0}}" />
+                <Run Text="%" />
+            </TextBlock>
+            <TextBlock>
+                <Run Text="内存 :" />
+                <Run Text="{Binding PerformanceMonitor.MemoryUsage, StringFormat={}{0:F0}}" />
+                <Run Text="%" />
+            </TextBlock>
+        </StackPanel>
         <Grid
+            Name="DockPanel"
+            Grid.Column="1"
             Width="{Binding DockPanelWidth}"
             Height="{Binding DockPanelHeight}"
-            Classes="DockPanel">
+            Margin="0,0,0,4"
+            IsHitTestVisible="{Binding !IsMoveMode}">
+
             <ItemsControl
                 Name="DockItemList"
-                Margin="{Binding Global.DockItemListMargin}"
                 HorizontalAlignment="Center"
-                VerticalAlignment="Center"
+                VerticalAlignment="Bottom"
+                Background="Transparent"
                 CornerRadius="8"
                 DragDrop.AllowDrop="True"
-                ItemsSource="{Binding DockItems, Mode=OneWay}">
+                ItemsSource="{Binding DockItems, Mode=OneWay}"
+                PointerPressed="DockItemList_PointerPressed">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal" Spacing="{Binding Global.DockItemSpacing}" />
+                        <StackPanel
+                            Width="{Binding DockPanelWidth, Mode=OneWayToSource}"
+                            Margin="{Binding DockItemListMargin}"
+                            Orientation="Horizontal"
+                            Spacing="{Binding GlobalSetting.DockItemSpacing}" />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="c:IDockItem">
+                    <DataTemplate DataType="cd:DockItemBase">
                         <controls:DockItemControl
-                            VerticalAlignment="Center"
-                            DockItem="{Binding .}"
-                            IsHitTestVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).IsDockItemPanelEnabled}"
+                            DockItem="{Binding}"
+                            ExtendRate="{Binding #DockItemList.((vm:MainWindowViewModel)DataContext).GlobalSetting.DockItemExtendRate}"
+                            FontSize="{Binding #DockItemList.((vm:MainWindowViewModel)DataContext).GlobalSetting.DockItemNameFontSize}"
+                            IsShowName="{Binding #DockItemList.((vm:MainWindowViewModel)DataContext).GlobalSetting.DockItemIsShowName}"
                             PointerPressed="DockItem_PointerPressed"
-                            Size="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).Global.DockItemSize}" />
+                            Size="{Binding #DockItemList.((vm:MainWindowViewModel)DataContext).GlobalSetting.DockItemSize}" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
+
         </Grid>
+
+        <StackPanel
+            Grid.Column="2"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Bottom"
+            Spacing="8">
+            <TextBlock>
+                <Run
+                    BaselineAlignment="Bottom"
+                    FontFamily="Segoe Fluent Icons"
+                    Text="&#xE70E; " />
+                <Run Text="{Binding PerformanceMonitor.NetworkSentBytesString}" />
+            </TextBlock>
+            <TextBlock>
+                <Run
+                    BaselineAlignment="Bottom"
+                    FontFamily="Segoe Fluent Icons"
+                    Text="&#xE70D; " />
+                <Run Text="{Binding PerformanceMonitor.NetworkReceivedBytesString}" />
+            </TextBlock>
+        </StackPanel>
     </Grid>
 
 </Window>

@@ -4,16 +4,18 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using DockBar.Avalonia.Structs;
 using DockBar.Avalonia.ViewModels;
+using DockBar.Core.DockItems;
 using DockBar.Core.Structs;
 
 namespace DockBar.Avalonia;
 
-public partial class AddDockItemWindow : Window
+public partial class EditDockItemWindow : Window
 {
-    internal AddDockItemWindowViewModel ViewModel => (AddDockItemWindowViewModel)DataContext!;
+    internal EditDockItemWindowViewModel ViewModel => (EditDockItemWindowViewModel)DataContext!;
 
-    public AddDockItemWindow()
+    public EditDockItemWindow()
     {
         InitializeComponent();
 
@@ -29,9 +31,14 @@ public partial class AddDockItemWindow : Window
     private void OnDrop(object? sender, DragEventArgs e)
     {
         var datas = e.Data.GetFiles();
+
         if (datas is not null && datas.FirstOrDefault() is IStorageItem data)
         {
-            ViewModel.CurrentDockItem = new DockLinkItem(Path.GetFileNameWithoutExtension(data.Path.LocalPath), data.Path.LocalPath);
+            ViewModel.CurrentDockItem = new WrappedDockItem
+            {
+                DockItem = new DockLinkItem { LinkPath = data.Path.LocalPath },
+                Index = ViewModel.Index
+            };
         }
     }
 

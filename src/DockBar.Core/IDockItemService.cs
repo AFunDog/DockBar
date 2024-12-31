@@ -1,25 +1,20 @@
-﻿namespace DockBar.Core;
+﻿using DockBar.Core.DockItems;
+using DockBar.Core.Internals;
+using DockBar.Core.Structs;
+using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+
+namespace DockBar.Core;
 
 public interface IDockItemService
 {
-    IReadOnlyCollection<IDockItem> DockItems { get; }
+    IEnumerable<DockItemBase> DockItems { get; }
 
-    event EventHandler<DockItemChangedEventArgs>? DockItemChanged;
+    event Action<IDockItemService, DockItemChangedEventArgs>? DockItemChanged;
 
-    void AddDockLinkItem(string key, string linkPath);
-
-    void AddDockItem(IDockItem dockItem);
-
-    void RemoveDockItem(string key);
-
-    IDockItem? GetDockItem(string key);
-
+    DockItemBase? GetDockItem(int key);
+    void RegisterDockItem(DockItemBase dockItem);
+    void UnregisterDockItem(int key);
+    void LoadData(string filePath);
     void SaveData(string filePath);
-    void ReadData(string filePath);
-}
-
-public class DockItemChangedEventArgs : EventArgs
-{
-    public required IDockItem DockItem { get; init; }
-    public required bool IsAdd { get; init; }
 }

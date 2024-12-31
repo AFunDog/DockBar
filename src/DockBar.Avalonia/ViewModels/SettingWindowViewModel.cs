@@ -2,10 +2,12 @@
 
 internal sealed class SettingWindowViewModel : ViewModelBase
 {
-    public GlobalViewModel Global { get; }
+    public GlobalSetting? GlobalSetting { get; set; }
 
-    public SettingWindowViewModel(GlobalViewModel global)
+    public SettingWindowViewModel() { }
+
+    public SettingWindowViewModel(GlobalSetting globalSetting)
     {
-        Global = global;
+        GlobalSetting = globalSetting;
     }
 }

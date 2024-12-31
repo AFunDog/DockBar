@@ -1,15 +1,36 @@
 <Window
-    x:Class="DockBar.Avalonia.AddDockItemWindow"
+    x:Class="DockBar.Avalonia.EditDockItemWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cd="using:DockBar.Core.DockItems"
+    xmlns:controls="using:DockBar.Avalonia.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:DockBar.Avalonia.ViewModels"
-    Title="添加停靠项目"
+    Title="{Binding WindowTitle, Mode=OneWay}"
     Width="800"
     Height="450"
-    x:DataType="vm:AddDockItemWindowViewModel"
+    x:DataType="vm:EditDockItemWindowViewModel"
     mc:Ignorable="d">
+    <Design.DataContext>
+        <vm:EditDockItemWindowViewModel>
+            <vm:EditDockItemWindowViewModel.CurrentDockItem>
+                <cd:WrappedDockItem />
+            </vm:EditDockItemWindowViewModel.CurrentDockItem>
+            <vm:EditDockItemWindowViewModel.CurrentDockItem>
+                <cd:WrappedDockItem ShowName="123">
+                    <cd:WrappedDockItem.DockItem>
+                        <cd:DockLinkItem LinkPath="" />
+                    </cd:WrappedDockItem.DockItem>
+                </cd:WrappedDockItem>
+            </vm:EditDockItemWindowViewModel.CurrentDockItem>
+        </vm:EditDockItemWindowViewModel>
+    </Design.DataContext>
+    <Design.DesignStyle>
+        <Style Selector="Window">
+            <Setter Property="RequestedThemeVariant" Value="Dark" />
+        </Style>
+    </Design.DesignStyle>
     <Window.Styles>
         <Style Selector="Window">
             <Setter Property="Background" Value="{x:Null}" />
@@ -57,11 +78,31 @@
             <Grid
                 Name="AddGrid"
                 Grid.Row="1"
+                Margin="16"
                 Background="Transparent"
                 ColumnDefinitions="*,*"
                 DragDrop.AllowDrop="True"
                 RowDefinitions="*,*">
-                <Image Source="{Binding DockIcon, Mode=OneWay}" />
+                <controls:DockItemControl DockItem="{Binding CurrentDockItem, Mode=OneWay}" Size="108" />
+                <StackPanel
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Margin="0,8,0,0"
+                    Orientation="Vertical"
+                    Spacing="8">
+                    <TextBox Text="{Binding CurrentDockItem.ShowName, Mode=TwoWay}" />
+                    <NumericUpDown
+                        Increment="1"
+                        Minimum="0"
+                        Value="{Binding CurrentDockItem.Index, Mode=TwoWay}" />
+                </StackPanel>
+                <Button
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    HorizontalAlignment="Center"
+                    Command="{Binding AddDockItemCommand}"
+                    Content="{Binding ConfirmButtonText}"
+                    IsDefault="True" />
             </Grid>
         </Grid>
     </Grid>

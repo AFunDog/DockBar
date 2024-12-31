@@ -1,5 +1,6 @@
 ﻿using DockBar.Core.Internals;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 namespace DockBar.Core;
 
@@ -10,4 +11,13 @@ public static class DockItemServiceExtensions
         collection.AddSingleton<IDockItemService, DockItemService>();
         return collection;
     }
+
+    //public static IServiceProvider GetServiceForDockItemService(this IServiceProvider provider)
+    //{
+    //    if (provider.GetService<ILogger>() is ILogger logger)
+    //    {
+    //        GlobalService.Logger = logger;
+    //    }
+    //    return provider;
+    //}
 }

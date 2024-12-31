@@ -1,110 +1,157 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Avalonia;
 using CommunityToolkit.Mvvm.ComponentModel;
+using DockBar.Avalonia.Structs;
 using DockBar.Core;
+using DockBar.Core.DockItems;
+using DockBar.Core.Structs;
+using DockBar.SystemMonitor;
 using Serilog;
 
 namespace DockBar.Avalonia.ViewModels;
 
 internal sealed partial class MainWindowViewModel : ViewModelBase
 {
-    const string StorageFile = ".dockItems";
+    const string StorageFile = "dockItems.bin";
 
-    public IDockItemService DockItemService { get; }
-    public ILogger Logger { get; }
+    public IDockItemService? DockItemService { get; set; }
+    public ILogger? Logger { get; set; }
+    public GlobalSetting GlobalSetting { get; set; } = new();
 
-    public ObservableCollection<IDockItem> DockItems { get; } = [];
+    [ObservableProperty]
+    public partial PerformanceMonitor? PerformanceMonitor { get; set; }
 
-    public GlobalViewModel Global { get; }
+    partial void OnPerformanceMonitorChanged(PerformanceMonitor? oldValue, PerformanceMonitor? newValue)
+    {
+        oldValue?.Dispose();
+        newValue?.StartMonitor();
+    }
+
+    public ObservableCollection<DockItemBase> DockItems { get; } = [];
+
+    [ObservableProperty]
+    public partial int SelectedIndex { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsSelectedDockItem))]
-    private IDockItem? _selectedDockItem = null;
+    public partial DockItemBase? SelectedDockItem { get; set; } = null;
+
+    //[ObservableProperty]
+    //private bool _isDockItemListPointerPressed;
 
     public bool IsSelectedDockItem => SelectedDockItem is not null;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsDockItemPanelEnabled))]
-    private bool _isMoveMode = false;
+    [NotifyPropertyChangedFor(nameof(DockPanelWidth))]
+    public partial bool IsMoveMode { get; set; } = false;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsDockItemPanelEnabled))]
-    private bool _isDragMode = false;
+    [NotifyPropertyChangedFor(nameof(DockPanelWidth))]
+    public partial bool IsDragMode { get; set; } = false;
 
-    public bool IsDockItemPanelEnabled => !IsMoveMode && !IsDragMode;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DockPanelWidth))]
+    public partial bool IsMouseEntered { get; set; } = false;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DockPanelWidth))]
+    public partial bool IsContextMenuShow { get; set; } = false;
 
     public double DockPanelWidth =>
-        IsMouseEntered || IsContextMenuShow || IsDragMode
-            ? (Global.DockItemSize + Global.DockItemSpacing) * DockItems.Count
-                + Global.DockItemExtendRate * Global.DockItemSize
-                + Global.DockItemSpacing
-            : Global.DockItemListMargin.Left + Global.DockItemListMargin.Right;
+        (IsMouseEntered || IsContextMenuShow || IsDragMode || IsMoveMode) && GlobalSetting is not null
+            ? (GlobalSetting.DockItemSize + GlobalSetting.DockItemSpacing) * DockItems.Count
+                + GlobalSetting.DockItemExtendRate * GlobalSetting.DockItemSize
+                + GlobalSetting.DockItemSpacing
+                + 8
+            : 0;
 
-    public double DockPanelHeight => Global.DockItemSize * (1 + Global.DockItemExtendRate) + 8;
+    //public double DockPanelWidth =>
+    //    IsMoveMode || IsDragMode || IsMouseEntered || IsContextMenuShow && GlobalSetting is not null
+    //        ? DockItemListPanelWidth + GlobalSetting.DockItemSpacing * 2
+    //        : 0;
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(DockPanelWidth))]
-    private bool _isMouseEntered = false;
+    public double DockPanelHeight =>
+        GlobalSetting is not null
+            ? GlobalSetting.DockItemSize * (1 + GlobalSetting.DockItemExtendRate)
+                + 8
+                + (GlobalSetting.DockItemIsShowName ? GlobalSetting.DockItemNameFontSize + 8 : 0)
+            : 108;
+    public Thickness DockItemListMargin => new(GlobalSetting?.DockItemSpacing ?? 0, 0, GlobalSetting?.DockItemSpacing ?? 0, 0);
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(DockPanelWidth))]
-    private bool _isContextMenuShow = false;
+    public MainWindowViewModel() { }
 
-    public MainWindowViewModel(GlobalViewModel global, ILogger logger, IDockItemService dockItemService)
+    public MainWindowViewModel(
+        ILogger logger,
+        IDockItemService dockItemService,
+        GlobalSetting globalSetting,
+        PerformanceMonitor performanceMonitor
+    )
     {
-        Global = global;
         Logger = logger;
         DockItemService = dockItemService;
-        void AddHandler(object? s, DockItemChangedEventArgs e)
+        GlobalSetting = globalSetting;
+        PerformanceMonitor = performanceMonitor;
+
+        void ChangeHandler(IDockItemService service, DockItemChangedEventArgs e)
         {
-            if (e.IsAdd)
+            switch (e.ChangeType)
             {
-                DockItems.Add(e.DockItem);
+                case DockItemChangeType.Add:
+                    switch (e.DockItem)
+                    {
+                        case WrappedDockItem { DockItem: not null } wrappedDockItem:
+                            DockItems.Insert(wrappedDockItem.Index, wrappedDockItem);
+                            break;
+                        default:
+                            DockItems.Add(e.DockItem);
+                            break;
+                    }
+                    break;
+                case DockItemChangeType.Remove:
+                    DockItems.Remove(e.DockItem);
+                    break;
+                default:
+                    break;
             }
+            DockItemService.SaveData(StorageFile);
         }
 
-        DockItemService.DockItemChanged += AddHandler;
-
-        DockItemService.ReadData(StorageFile);
-        DockItemService.DockItemChanged -= AddHandler;
-        DockItemService.DockItemChanged += (s, e) =>
+        DockItemService.LoadData(StorageFile);
+        foreach (var dockItem in DockItemService.DockItems)
         {
-            if (e.IsAdd is false)
-            {
-                DockItems.Remove(DockItems.First(item => item.Key == e.DockItem.Key));
-            }
-        };
-        Global.PropertyChanged += (s, e) => NotifyPanelSize();
-    }
-
-    public void SaveDockItemDatas()
-    {
-        DockItemService.SaveData(StorageFile);
-        Logger.Debug($"保存数据到 {StorageFile}");
+            DockItems.Add(dockItem);
+        }
+        DockItemService.DockItemChanged += ChangeHandler;
+        GlobalSetting.PropertyChanged += (s, e) => NotifyPanelSize();
     }
 
     public void InsertDockLinkItem(int index, string fullPath)
     {
-        Logger.Debug($"AddDockLinkItem {fullPath}");
-        var key = Path.GetFileNameWithoutExtension(fullPath);
-        DockItemService.AddDockLinkItem(key, fullPath);
-        if (DockItemService.GetDockItem(key) is IDockItem dockItem)
-        {
-            DockItems.Insert(index, dockItem);
-        }
+        DockItemService?.RegisterDockItem(
+            new WrappedDockItem
+            {
+                DockItem = new DockLinkItem { LinkPath = fullPath },
+                Index = index
+            }
+        );
+
         NotifyPanelSize();
     }
 
-    public void RemoveDockItem(string key)
+    public void RemoveDockItem(int key)
     {
-        DockItemService.RemoveDockItem(key);
+        DockItemService?.UnregisterDockItem(key);
         NotifyPanelSize();
     }
 
     private void NotifyPanelSize()
     {
         OnPropertyChanged(nameof(DockPanelWidth));
-        OnPropertyChanged(nameof(DockPanelHeight));
+        OnPropertyChanged(nameof(DockItemListMargin));
+        //OnPropertyChanged(nameof(DockPanelHeight));
     }
 }

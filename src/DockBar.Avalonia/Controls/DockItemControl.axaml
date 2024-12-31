@@ -1,29 +1,21 @@
 <ResourceDictionary
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:controls="using:DockBar.Avalonia.Controls">
-
-    <!--
-        Additional resources
-        Using Control Themes:
-        https://docs.avaloniaui.net/docs/basics/user-interface/styling/control-themes
-        Using Theme Variants:
-        https://docs.avaloniaui.net/docs/guides/styles-and-resources/how-to-use-theme-variants
-    -->
-
-    <!--<Design.PreviewWith>
-        <StackPanel Width="400" Spacing="10">
-            <StackPanel Background="{DynamicResource SystemRegionBrush}">
-                <controls:DockItemControl  />
-            </StackPanel>
-        </StackPanel>
-    </Design.PreviewWith>-->
+    xmlns:a="using:DockBar.Avalonia"
+    xmlns:as="using:DockBar.Avalonia.Structs"
+    xmlns:cd="using:DockBar.Core.DockItems"
+    xmlns:controls="using:DockBar.Avalonia.Controls"
+    xmlns:vm="using:DockBar.Avalonia.ViewModels">
 
     <ControlTheme x:Key="{x:Type controls:DockItemControl}" TargetType="controls:DockItemControl">
         <Setter Property="Template">
             <ControlTemplate>
-                <Grid Cursor="Hand" RowDefinitions="*,auto">
+                <Grid
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    RowDefinitions="*,auto">
                     <Border
+                        Name="IconContainer"
                         Width="{TemplateBinding Size}"
                         Height="{TemplateBinding Size}"
                         Background="{TemplateBinding Background}"
@@ -31,49 +23,62 @@
                         CornerRadius="16">
                         <Image Source="{TemplateBinding DockIcon}" Stretch="UniformToFill" />
                     </Border>
-                    <TextBlock Grid.Row="1" Text="{TemplateBinding ShowName}" />
+                    <TextBlock
+                        Grid.Row="1"
+                        Margin="0,4,0,0"
+                        HorizontalAlignment="Center"
+                        Background="Transparent"
+                        IsVisible="{TemplateBinding IsShowName}"
+                        Text="{TemplateBinding ShowName}" />
                 </Grid>
-
-
             </ControlTemplate>
         </Setter>
-        <Style Selector="^">
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Transitions">
+            <Setter.Value>
+                <Transitions>
+                    <DoubleTransition
+                        Easing="SineEaseOut"
+                        Property="Size"
+                        Duration="0:0:0.2" />
+                </Transitions>
+            </Setter.Value>
+        </Setter>
+        <Style Selector="^ /template/ Border#IconContainer">
             <Setter Property="Transitions">
                 <Setter.Value>
                     <Transitions>
-                        <TransformOperationsTransition
+                        <DoubleTransition
                             Easing="SineEaseOut"
-                            Property="RenderTransform"
+                            Property="Width"
+                            Duration="0:0:0.2" />
+                        <DoubleTransition
+                            Easing="SineEaseOut"
+                            Property="Height"
                             Duration="0:0:0.2" />
                     </Transitions>
                 </Setter.Value>
             </Setter>
-            <Style Selector="^ Border">
-                <Setter Property="Transitions">
-                    <Setter.Value>
-                        <Transitions>
-                            <TransformOperationsTransition
-                                Easing="SineEaseOut"
-                                Property="RenderTransform"
-                                Duration="0:0:0.2" />
-                            <DoubleTransition
-                                Easing="SineEaseOut"
-                                Property="Width"
-                                Duration="0:0:0.2" />
-                            <DoubleTransition
-                                Easing="SineEaseOut"
-                                Property="Height"
-                                Duration="0:0:0.2" />
-                        </Transitions>
-                    </Setter.Value>
-                </Setter>
-            </Style>
-            <Style Selector="^:pointerover">
-                <Style Selector="^ Border">
-                    <Setter Property="Width" Value="{Binding $parent[controls:DockItemControl].BigSize}" />
-                    <Setter Property="Height" Value="{Binding $parent[controls:DockItemControl].BigSize}" />
-                </Style>
-            </Style>
+        </Style>
+
+        <Style Selector="^:pointerover /template/ Border#IconContainer">
+            <Setter Property="Width" Value="{TemplateBinding ExtendSize}" />
+            <Setter Property="Height" Value="{TemplateBinding ExtendSize}" />
         </Style>
     </ControlTheme>
+
+
+    <Design.PreviewWith>
+        <Grid Width="200" Height="200">
+            <controls:DockItemControl
+                Background="Red"
+                ExtendRate="0.2"
+                FontSize="16"
+                Size="108">
+                <controls:DockItemControl.DockItem>
+                    <cd:DockLinkItem ShowName="测试名称" />
+                </controls:DockItemControl.DockItem>
+            </controls:DockItemControl>
+        </Grid>
+    </Design.PreviewWith>
 </ResourceDictionary>

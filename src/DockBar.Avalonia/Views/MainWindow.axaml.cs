@@ -4,8 +4,10 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using Avalonia.Platform;
 using DockBar.Avalonia.Controls;
+using DockBar.Avalonia.Structs;
 using DockBar.Avalonia.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -15,7 +17,7 @@ namespace DockBar.Avalonia.Views;
 
 public partial class MainWindow : Window
 {
-    internal MainWindowViewModel ViewModel => (MainWindowViewModel)DataContext!;
+    internal MainWindowViewModel? ViewModel => DataContext as MainWindowViewModel;
 
     public MainWindow()
     {
@@ -23,12 +25,6 @@ public partial class MainWindow : Window
         DockItemList.AddHandler(DragDrop.DropEvent, OnDrop);
         DockItemList.AddHandler(DragDrop.DragEnterEvent, OnDragEnter);
         DockItemList.AddHandler(DragDrop.DragLeaveEvent, OnDragLeave);
-        this.Closing += (s, e) =>
-        {
-            UnregisterHotKey();
-            ViewModel.SaveDockItemDatas();
-            ViewModel.Global.SaveSettings();
-        };
 
         Win32Properties.AddWndProcHookCallback(this, WndProcHook);
         RegisterHotKey();
@@ -39,12 +35,17 @@ public partial class MainWindow : Window
 
     private void RegisterHotKey()
     {
-        var hWnd = this.TryGetPlatformHandle()!.Handle;
-        var res = User32.RegisterHotKey(hWnd, this.GetHashCode(), User32.HotKeyModifiers.MOD_WIN, (int)User32.VK.VK_OEM_3);
-        if (!res)
+        if (this.TryGetPlatformHandle() is IPlatformHandle platformHandle)
         {
-            Log.Error("RegisterHotKey failed");
+            var hWnd = platformHandle.Handle;
+            var res = User32.RegisterHotKey(hWnd, this.GetHashCode(), User32.HotKeyModifiers.MOD_ALT, (int)User32.VK.VK_SPACE);
+            if (res)
+            {
+                App.Instance.Logger.Information("注册全局热键成功");
+                return;
+            }
         }
+        App.Instance.Logger.Error("注册全局热键失败");
     }
 
     private void UnregisterHotKey()
@@ -66,44 +67,63 @@ public partial class MainWindow : Window
     protected override void OnDataContextChanged(EventArgs e)
     {
         base.OnDataContextChanged(e);
-        ViewModel.Global.PropertyChanged += (s, e) =>
+        if (ViewModel is null)
+            return;
+        if (ViewModel.GlobalSetting is not null)
         {
-            if (e.PropertyName == nameof(GlobalViewModel.AutoPositionBottom))
+            ViewModel.GlobalSetting.LoadSetting(App.SettingFile);
+            ViewModel.GlobalSetting.PropertyChanged += (s, e) =>
             {
-                TryMoveWindowToCenter();
-            }
-        };
+                if (e.PropertyName == nameof(GlobalSetting.AutoPositionBottom))
+                {
+                    TryMoveWindowToCenter();
+                }
+            };
+        }
     }
 
     private void OnHotKeyPressed()
     {
-        ViewModel.IsMouseEntered = !ViewModel.IsMouseEntered;
+        if (ViewModel is not null)
+            ViewModel.IsMouseEntered = !ViewModel.IsMouseEntered;
     }
 
     private void OnDragLeave(object? sender, DragEventArgs e)
     {
-        ViewModel.IsDragMode = false;
+        if (ViewModel is not null)
+            ViewModel.IsDragMode = false;
     }
 
     private void OnDragEnter(object? sender, DragEventArgs e)
     {
-        ViewModel.IsDragMode = true;
+        if (ViewModel is not null)
+            ViewModel.IsDragMode = true;
     }
 
     private void OnDrop(object? sender, DragEventArgs e)
     {
-        var index = PosXToIndex(e.GetPosition(DockItemList).X);
+        if (ViewModel is null)
+            return;
         foreach (var data in e.Data.GetFiles() ?? [])
         {
-            ViewModel.InsertDockLinkItem(index, data.Path.LocalPath);
+            ViewModel.InsertDockLinkItem(ViewModel.SelectedIndex, data.Path.LocalPath);
         }
+
         ViewModel.IsDragMode = false;
-        ViewModel.Logger.Debug("OnDrop {Index}", index);
+        ViewModel.Logger?.Debug("OnDrop {Index}", ViewModel.SelectedIndex);
+    }
+
+    protected override void OnClosing(WindowClosingEventArgs e)
+    {
+        base.OnClosing(e);
+        UnregisterHotKey();
     }
 
     protected override void OnPointerPressed(PointerPressedEventArgs e)
     {
         base.OnPointerPressed(e);
+        if (ViewModel is null)
+            return;
         if (ViewModel.IsMoveMode)
         {
             if (e.Pointer.Type is PointerType.Mouse && e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
@@ -114,12 +134,18 @@ public partial class MainWindow : Window
         }
 
         ViewModel.SelectedDockItem = null;
-        ViewModel.Logger.Debug("Window.OnPointerPressed");
+        //ViewModel.IsDockItemListPointerPressed = false;
+        double x = e.GetPosition(DockItemList).X;
+        ViewModel.SelectedIndex = PosXToIndex(x);
+        ViewModel.Logger?.Debug("窗体被点击 点击X:{X} 选中索引:{Index}", x, ViewModel.SelectedIndex);
     }
 
     protected override void OnPointerReleased(PointerReleasedEventArgs e)
     {
         base.OnPointerReleased(e);
+        if (ViewModel is null)
+            return;
+
         if (ViewModel.IsMoveMode)
         {
             ViewModel.IsMoveMode = false;
@@ -139,28 +165,25 @@ public partial class MainWindow : Window
         var settingWindow = App.Instance.ServiceProvider.GetRequiredService<SettingWindow>();
         _ = settingWindow.ShowDialog(this);
         e.Handled = true;
-        //if (_settingDialog is not null)
-        //    return;
-        //_settingDialog = new SettingDialog();
-        //_settingDialog.Closed += (s, e) =>
-        //{
-        //    _settingDialog = null;
-        //};
-        //_settingDialog.ShowDialog(this);
-        //e.Handled = true;
     }
 
     private void MoveMenuItem_Clicked(object? sender, RoutedEventArgs e)
     {
         Cursor = new Cursor(StandardCursorType.SizeAll);
-        ViewModel.IsMoveMode = true;
+        if (ViewModel is not null)
+            ViewModel.IsMoveMode = true;
     }
 
     private async void AddLinkMenuItem_Clicked(object? sender, RoutedEventArgs e)
     {
+        if (ViewModel is null)
+            return;
+
         try
         {
-            var addDockItemWindow = App.Instance.ServiceProvider.GetRequiredService<AddDockItemWindow>();
+            var addDockItemWindow = App.Instance.ServiceProvider.GetRequiredService<EditDockItemWindow>();
+            addDockItemWindow.ViewModel.IsAddMode = true;
+            addDockItemWindow.ViewModel.Index = ViewModel.SelectedIndex;
             await addDockItemWindow.ShowDialog(this);
             e.Handled = true;
         }
@@ -174,15 +197,18 @@ public partial class MainWindow : Window
     {
         if (sender is not DockItemControl source)
             return;
-
+        if (ViewModel is null)
+            return;
         ViewModel.SelectedDockItem = source.DockItem;
-        ViewModel.Logger.Debug("DockItem.OnPointerPressed");
+        ViewModel.SelectedIndex = PosXToIndex(e.GetPosition(DockItemList).X);
+        //ViewModel.IsDockItemListPointerPressed = true;
+        ViewModel.Logger?.Debug("DockItem 被点击 {DockItem} {Index}", ViewModel.SelectedDockItem, ViewModel.SelectedIndex);
         e.Handled = true;
     }
 
     private void DeleteLinkMenuItem_Clicked(object? sender, RoutedEventArgs e)
     {
-        if (ViewModel.SelectedDockItem is null)
+        if (ViewModel is null || ViewModel.SelectedDockItem is null)
             return;
         ViewModel.RemoveDockItem(ViewModel.SelectedDockItem.Key);
         e.Handled = true;
@@ -190,12 +216,15 @@ public partial class MainWindow : Window
 
     int PosXToIndex(double x)
     {
-        var curRight = GlobalViewModel.Instance.DockItemSize / 2;
+        if (ViewModel is null || ViewModel.GlobalSetting is null)
+            return 0;
+
+        var curRight = ViewModel.GlobalSetting.DockItemSize / 2 + ViewModel.DockItemListMargin.Left;
         for (int i = 0; i < ViewModel.DockItems.Count; i++)
         {
             if (x <= curRight)
                 return i;
-            curRight += GlobalViewModel.Instance.DockItemSize + GlobalViewModel.Instance.DockItemSpacing;
+            curRight += ViewModel.GlobalSetting.DockItemSize + ViewModel.GlobalSetting.DockItemSpacing;
         }
         return ViewModel.DockItems.Count;
     }
@@ -203,7 +232,10 @@ public partial class MainWindow : Window
     protected override void OnSizeChanged(SizeChangedEventArgs e)
     {
         base.OnSizeChanged(e);
-        switch (GlobalViewModel.Instance.DockPanelPosition)
+        if (ViewModel is null || ViewModel.GlobalSetting is null)
+            return;
+
+        switch (ViewModel.GlobalSetting.DockPanelPosition)
         {
             case DockPanelPositionType.Left:
                 TryMoveWindowToLeft();
@@ -221,7 +253,7 @@ public partial class MainWindow : Window
 
     private void TryMoveWindowToCenter()
     {
-        if (ViewModel.Global.IsAutoPosition)
+        if (ViewModel?.GlobalSetting?.IsAutoPosition ?? false)
         {
             if (Screens.ScreenFromWindow(this) is Screen screen)
             {
@@ -230,7 +262,7 @@ public partial class MainWindow : Window
                 var realHeight = Height * screen.Scaling;
 
                 var x = screen.Bounds.X + (screen.Bounds.Width - realWidth) / 2;
-                var y = screen.Bounds.Y + screen.Bounds.Height - ViewModel.Global.AutoPositionBottom - realHeight;
+                var y = screen.Bounds.Y + screen.Bounds.Height - ViewModel.GlobalSetting.AutoPositionBottom - realHeight;
 
                 Position = new PixelPoint((int)x, (int)y);
             }
@@ -239,7 +271,7 @@ public partial class MainWindow : Window
 
     private void TryMoveWindowToLeft()
     {
-        if (ViewModel.Global.IsAutoPosition)
+        if (ViewModel?.GlobalSetting?.IsAutoPosition ?? false)
         {
             if (Screens.ScreenFromWindow(this) is Screen screen)
             {
@@ -247,7 +279,7 @@ public partial class MainWindow : Window
                 var realHeight = Height * screen.Scaling;
 
                 var x = screen.Bounds.X;
-                var y = screen.Bounds.Y + screen.Bounds.Height - ViewModel.Global.AutoPositionBottom - realHeight;
+                var y = screen.Bounds.Y + screen.Bounds.Height - ViewModel.GlobalSetting.AutoPositionBottom - realHeight;
 
                 Position = new PixelPoint((int)x, (int)y);
             }
@@ -256,7 +288,7 @@ public partial class MainWindow : Window
 
     private void TryMoveWindowToRight()
     {
-        if (ViewModel.Global.IsAutoPosition)
+        if (ViewModel?.GlobalSetting?.IsAutoPosition ?? false)
         {
             if (Screens.ScreenFromWindow(this) is Screen screen)
             {
@@ -264,7 +296,7 @@ public partial class MainWindow : Window
                 var realHeight = Height * screen.Scaling;
 
                 var x = screen.Bounds.X + screen.Bounds.Width - realWidth;
-                var y = screen.Bounds.Y + screen.Bounds.Height - ViewModel.Global.AutoPositionBottom - realHeight;
+                var y = screen.Bounds.Y + screen.Bounds.Height - ViewModel.GlobalSetting.AutoPositionBottom - realHeight;
 
                 Position = new PixelPoint((int)x, (int)y);
             }
@@ -274,22 +306,36 @@ public partial class MainWindow : Window
     protected override void OnPointerEntered(PointerEventArgs e)
     {
         base.OnPointerEntered(e);
-        ViewModel.IsMouseEntered = true;
+        if (ViewModel is not null)
+            ViewModel.IsMouseEntered = true;
     }
 
     protected override void OnPointerExited(PointerEventArgs e)
     {
         base.OnPointerExited(e);
-        ViewModel.IsMouseEntered = false;
+        if (ViewModel is not null)
+            ViewModel.IsMouseEntered = false;
     }
 
     private void MainWindowContextMenuOpened(object? sender, RoutedEventArgs e)
     {
-        ViewModel.IsContextMenuShow = true;
+        if (ViewModel is not null)
+            ViewModel.IsContextMenuShow = true;
     }
 
     private void MainWindowContextMenuClosed(object? sender, RoutedEventArgs e)
     {
-        ViewModel.IsContextMenuShow = false;
+        if (ViewModel is not null)
+            ViewModel.IsContextMenuShow = false;
+    }
+
+    private void DockItemList_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        //if (ViewModel is not null)
+        //{
+        //    //ViewModel.IsDockItemListPointerPressed = true;
+        //    ViewModel.SelectedDockItem = null;
+        //}
+        //e.Handled = true;
     }
 }

@@ -1,11 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<OutputType>WinExe</OutputType>
-		<TargetFramework>net8.0-windows</TargetFramework>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net9.0-windows</TargetFramework>
 		<Nullable>enable</Nullable>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+		<LangVersion>preview</LangVersion>
 	</PropertyGroup>
 	<PropertyGroup Label="Avalonia">
 		<AvaloniaXamlReportImportance>Normal</AvaloniaXamlReportImportance>
@@ -24,9 +25,11 @@
 		<!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
 		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.2.3" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-		<PackageReference Include="CoreLibrary.Toolkit" Version="1.0.3.3" />
+		<PackageReference Include="Dumpify" Version="0.6.6" />
+		<PackageReference Include="Mapster" Version="7.4.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
 		<PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
+		<PackageReference Include="System.Reactive" Version="6.0.1" />
 		<PackageReference Include="Vanara.Core" Version="4.0.4" />
 		<PackageReference Include="Vanara.PInvoke.Shared" Version="4.0.4" />
 		<PackageReference Include="Vanara.PInvoke.User32" Version="4.0.4" />
@@ -34,5 +37,12 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\DockBar.Core\DockBar.Core.csproj" />
+		<ProjectReference Include="..\DockBar.SystemMonitor\DockBar.SystemMonitor.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Views\EditDockItemWindow.axaml.cs">
+	    <DependentUpon>EditDockItemWindow.axaml</DependentUpon>
+	  </Compile>
 	</ItemGroup>
 </Project>

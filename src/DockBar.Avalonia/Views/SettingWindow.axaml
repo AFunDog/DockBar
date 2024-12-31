@@ -2,6 +2,7 @@
     x:Class="DockBar.Avalonia.SettingWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:a="using:DockBar.Avalonia"
     xmlns:controls="using:DockBar.Avalonia.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -11,7 +12,18 @@
     Height="450"
     x:DataType="vm:SettingWindowViewModel"
     mc:Ignorable="d">
-
+    <Design.DataContext>
+        <vm:SettingWindowViewModel>
+            <vm:SettingWindowViewModel.GlobalSetting>
+                <a:GlobalSetting />
+            </vm:SettingWindowViewModel.GlobalSetting>
+        </vm:SettingWindowViewModel>
+    </Design.DataContext>
+    <Design.DesignStyle>
+        <Style Selector="Window">
+            <Setter Property="RequestedThemeVariant" Value="Dark" />
+        </Style>
+    </Design.DesignStyle>
     <Window.Styles>
         <Style Selector="Window">
             <Setter Property="Background" Value="{x:Null}" />
@@ -63,6 +75,9 @@
                             <Style Selector="^ /template/ ToggleButton">
                                 <!--<Setter Property="Background" Value="Red" />-->
                             </Style>
+                            <Style Selector="^ NumericUpDown">
+                                <Setter Property="Width" Value="256" />
+                            </Style>
                         </Style>
                     </Grid.Styles>
                     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
@@ -80,28 +95,39 @@
                                 <StackPanel Orientation="Vertical">
                                     <controls:SettingCard Header="停靠项目尺寸">
                                         <NumericUpDown
-                                            Width="256"
                                             FormatString="0"
                                             Maximum="256"
                                             Minimum="24"
-                                            Value="{Binding Global.DockItemSize, Mode=TwoWay}" />
+                                            Value="{Binding GlobalSetting.DockItemSize, Mode=TwoWay}" />
                                     </controls:SettingCard>
                                     <controls:SettingCard Header="停靠项目间距">
                                         <NumericUpDown
-                                            Width="256"
                                             FormatString="0"
                                             Maximum="256"
                                             Minimum="0"
-                                            Value="{Binding Global.DockItemSpacing, Mode=TwoWay}" />
+                                            Value="{Binding GlobalSetting.DockItemSpacing, Mode=TwoWay}" />
                                     </controls:SettingCard>
                                     <controls:SettingCard Header="停靠项目聚焦放大比例">
                                         <NumericUpDown
-                                            Width="256"
                                             FormatString="0.00"
                                             Increment="0.01"
                                             Maximum="4"
                                             Minimum="0"
-                                            Value="{Binding Global.DockItemExtendRate, Mode=TwoWay}" />
+                                            Value="{Binding GlobalSetting.DockItemExtendRate, Mode=TwoWay}" />
+                                    </controls:SettingCard>
+                                    <controls:SettingCard Header="停靠项目名称">
+                                        <ToggleSwitch
+                                            IsChecked="{Binding GlobalSetting.DockItemIsShowName, Mode=TwoWay}"
+                                            OffContent="不显示"
+                                            OnContent="显示" />
+                                    </controls:SettingCard>
+                                    <controls:SettingCard Header="停靠项目名称字体大小">
+                                        <NumericUpDown
+                                            FormatString="0"
+                                            Increment="1"
+                                            Maximum="48"
+                                            Minimum="4"
+                                            Value="{Binding GlobalSetting.DockItemNameFontSize, Mode=TwoWay}" />
                                     </controls:SettingCard>
                                 </StackPanel>
                             </Expander>
@@ -114,22 +140,21 @@
                                 </Expander.Header>
                                 <StackPanel Orientation="Vertical">
                                     <controls:SettingCard Header="启用自动定位">
-                                        <CheckBox IsChecked="{Binding Global.IsAutoPosition, Mode=TwoWay}" />
+                                        <CheckBox IsChecked="{Binding GlobalSetting.IsAutoPosition, Mode=TwoWay}" />
                                     </controls:SettingCard>
-                                    <controls:SettingCard Header="自动定位位置">
-                                        <ComboBox SelectedIndex="{Binding Global.DockPanelPosition, Mode=TwoWay}">
+                                    <controls:SettingCard Header="自动定位位置" IsEnabled="{Binding GlobalSetting.IsAutoPosition}">
+                                        <ComboBox SelectedIndex="{Binding GlobalSetting.DockPanelPosition, Mode=TwoWay}">
                                             <TextBlock Text="靠左" />
                                             <TextBlock Text="中心" />
                                             <TextBlock Text="靠右" />
                                         </ComboBox>
                                     </controls:SettingCard>
-                                    <controls:SettingCard Header="自动定位底部距离" IsEnabled="{Binding Global.IsAutoPosition, Mode=OneWay}">
+                                    <controls:SettingCard Header="自动定位底部距离" IsEnabled="{Binding GlobalSetting.IsAutoPosition}">
                                         <NumericUpDown
-                                            Width="256"
                                             FormatString="0"
-                                            Maximum="1024"
+                                            Maximum="2560"
                                             Minimum="0"
-                                            Value="{Binding Global.AutoPositionBottom, Mode=TwoWay}" />
+                                            Value="{Binding GlobalSetting.AutoPositionBottom, Mode=TwoWay}" />
                                     </controls:SettingCard>
                                 </StackPanel>
                             </Expander>

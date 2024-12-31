@@ -2,6 +2,7 @@
     x:Class="DockBar.Avalonia.App"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ac="using:DockBar.Avalonia.Converters"
     xmlns:controls="using:DockBar.Avalonia.Controls"
     xmlns:vs="using:DockBar.Avalonia.Views"
     RequestedThemeVariant="Default">
@@ -14,18 +15,27 @@
             <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
         </Style>
 
-        <!--  设置透明窗体  -->
-        <Style Selector="Window">
-            <Setter Property="TransparencyLevelHint" Value="AcrylicBlur" />
-            <Setter Property="Background" Value="{x:Null}" />
-            <!--<Setter Property="SystemDecorations" Value="" />-->
-            <Setter Property="ExtendClientAreaToDecorationsHint" Value="True" />
-            <Setter Property="ExtendClientAreaChromeHints" Value="NoChrome" />
-            <Setter Property="SystemDecorations" Value="None" />
+        <Style Selector="Run.FontIcon">
+            <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
         </Style>
 
+        <!--  设置透明窗体  -->
+        <!--<Style Selector="Window">
+        -->
+        <!--<Setter Property="TransparencyLevelHint" Value="AcrylicBlur" />-->
+        <!--
+            <Setter Property="Background" Value="{x:Null}" />
+        -->
+        <!--<Setter Property="ExtendClientAreaToDecorationsHint" Value="True" />-->
+        <!--
+        -->
+        <!--<Setter Property="ExtendClientAreaChromeHints" Value="NoChrome" />-->
+        <!--
+            <Setter Property="SystemDecorations" Value="None" />
+        </Style>-->
+
         <!--  以下调试颜色  -->
-        <Style Selector="ItemsControl#DockItemList">
+        <!--<Style Selector="ItemsControl#DockItemList">
             <Setter Property="Background">
                 <Setter.Value>
                     <SolidColorBrush Opacity="0.2" Color="LightGreen" />
@@ -39,7 +49,7 @@
                     <SolidColorBrush Opacity="0.2" Color="Red" />
                 </Setter.Value>
             </Setter>
-        </Style>
+        </Style>-->
 
         <!--<Style Selector="Border.DockPanel">
             <Setter Property="Background">
@@ -52,9 +62,14 @@
 
     <Application.Resources>
         <ResourceDictionary>
+            <ac:PercentageConverter x:Key="PercentageConverter" />
+
+
+
+
             <ResourceDictionary.MergedDictionaries>
-                <ResourceInclude Source="/Controls/DockItemControl.axaml" />
-                <ResourceInclude Source="/Controls/SettingCard.axaml" />
+                <ResourceInclude Source="avares://DockBar.Avalonia/Controls/DockItemControl.axaml" />
+                <ResourceInclude Source="avares://DockBar.Avalonia/Controls/SettingCard.axaml" />
             </ResourceDictionary.MergedDictionaries>
 
 

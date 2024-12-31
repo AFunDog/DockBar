@@ -1,12 +1,14 @@
 using System;
+using System.IO;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
-using CoreLibrary.Toolkit.Services.Setting;
+using Avalonia.Platform;
 using DockBar.Avalonia.ViewModels;
 using DockBar.Avalonia.Views;
 using DockBar.Core;
+using DockBar.SystemMonitor;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
@@ -14,9 +16,13 @@ namespace DockBar.Avalonia;
 
 public partial class App : Application
 {
-    public IServiceProvider ServiceProvider { get; } = BuildServices();
-
     public static App Instance => (App)Current!;
+    public IServiceProvider ServiceProvider { get; } = BuildServices();
+    public ILogger Logger => ServiceProvider.GetRequiredService<ILogger>();
+
+    public Stream DefaultIconStream { get; } = AssetLoader.Open(new Uri("avares://DockBar.Avalonia/Assets/icon.png"));
+
+    public const string SettingFile = "settings.bin";
 
     public override void Initialize()
     {
@@ -39,14 +45,13 @@ public partial class App : Application
         var services = new ServiceCollection()
             // 注册外部服务
             .UseDockItemService()
-            .AddSingleton<ILogger>(new LoggerConfiguration().WriteTo.Debug().MinimumLevel.Debug().CreateLogger())
-            .AddSingleton<ISettingService>(ISettingService.Implement)
-            // 注册全局视图模型
-            .AddSingleton<GlobalViewModel>()
+            .AddSingleton<ILogger>(new LoggerConfiguration().WriteTo.Console().MinimumLevel.Debug().CreateLogger())
+            .AddSingleton<GlobalSetting>()
+            .AddSingleton<PerformanceMonitor>()
             // 注册视图模型
             .AddTransient<MainWindowViewModel>()
             .AddTransient<SettingWindowViewModel>()
-            .AddTransient<AddDockItemWindowViewModel>()
+            .AddTransient<EditDockItemWindowViewModel>()
             // 注册窗口
             .AddSingleton<MainWindow>(static provider => new MainWindow
             {
@@ -57,9 +62,9 @@ public partial class App : Application
             {
                 DataContext = provider.GetRequiredService<SettingWindowViewModel>()
             })
-            .AddTransient<AddDockItemWindow>(static provider => new AddDockItemWindow
+            .AddTransient<EditDockItemWindow>(static provider => new EditDockItemWindow
             {
-                DataContext = provider.GetRequiredService<AddDockItemWindowViewModel>()
+                DataContext = provider.GetRequiredService<EditDockItemWindowViewModel>()
             });
         return services.BuildServiceProvider();
     }
