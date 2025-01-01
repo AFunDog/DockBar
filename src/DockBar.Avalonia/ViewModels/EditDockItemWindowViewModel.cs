@@ -1,4 +1,5 @@
-﻿using Avalonia.Media;
+﻿using System;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -7,12 +8,18 @@ using DockBar.Avalonia.Structs;
 using DockBar.Core;
 using DockBar.Core.DockItems;
 using Dumpify;
+using Mapster;
 
 namespace DockBar.Avalonia.ViewModels;
 
 internal sealed partial class EditDockItemWindowViewModel : ViewModelBase
 {
     internal IDockItemService? DockItemService { get; }
+
+    public event Action? Confirmed;
+
+    [ObservableProperty]
+    public partial AppSetting LocalSetting { get; set; } = new();
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(WindowTitle), nameof(ConfirmButtonText))]
@@ -25,34 +32,31 @@ internal sealed partial class EditDockItemWindowViewModel : ViewModelBase
     public partial int Index { get; set; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(DockIcon))]
-    [NotifyCanExecuteChangedFor(nameof(AddDockItemCommand))]
-    public partial WrappedDockItem? CurrentDockItem { get; set; }
-    public IImage? DockIcon
-    {
-        get => CurrentDockItem?.IconDataStream.ToIImage();
-    }
-
-    //partial void OnCurrentDockItemChanged(WrappedDockItem? oldValue, WrappedDockItem? newValue)
-    //{
-    //    oldValue?.Dump("oldValue");
-    //    newValue?.Dump("newValue");
-    //}
+    [NotifyCanExecuteChangedFor(nameof(ConfirmDockItemCommand))]
+    public partial DockItemBase? CurrentDockItem { get; set; }
 
     // 设计时使用
     public EditDockItemWindowViewModel() { }
 
-    public EditDockItemWindowViewModel(IDockItemService dockItemService)
+    public EditDockItemWindowViewModel(IDockItemService dockItemService, AppSetting globalSetting)
     {
         DockItemService = dockItemService;
+        globalSetting.Adapt(LocalSetting);
     }
 
-    public bool CanAddDockItem => CurrentDockItem is not null;
+    public bool CanConfirmDockItem => CurrentDockItem is not null;
 
-    [RelayCommand(CanExecute = nameof(CanAddDockItem))]
-    private void AddDockItem()
+    [RelayCommand(CanExecute = nameof(CanConfirmDockItem))]
+    private void ConfirmDockItem()
     {
-        if (CurrentDockItem is not null)
+        if (CurrentDockItem is null)
+            return;
+
+        if (IsAddMode)
+        {
             DockItemService?.RegisterDockItem(CurrentDockItem);
+        }
+        // 如果是修改模式，实际上什么都不用做，因为 CurrentDockItem 已经是引用类型
+        Confirmed?.Invoke();
     }
 }

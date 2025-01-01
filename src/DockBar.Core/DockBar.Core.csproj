@@ -1,10 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net9.0-windows7.0</TargetFramework>
+		<TargetFramework>net9.0-windows</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<LangVersion>preview</LangVersion>
+		<PublishAot>true</PublishAot>
+		<PublishTrimmed>true</PublishTrimmed>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -18,6 +20,10 @@
 		<PackageReference Include="System.Drawing.Common" Version="9.0.0" />
 		<PackageReference Include="Vanara.Core" Version="4.0.4" />
 		<PackageReference Include="Vanara.PInvoke.Shell32" Version="4.0.4" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\DockBar.Shared\DockBar.Shared.csproj" />
 	</ItemGroup>
 
 </Project>

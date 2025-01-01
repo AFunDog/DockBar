@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using DockBar.Core.DockItems;
 using DockBar.Core.Structs;
+using DockBar.Shared.Helpers;
 using MessagePack;
 using Serilog;
 
@@ -8,12 +9,13 @@ namespace DockBar.Core.Internals;
 
 internal sealed class DockItemService : IDockItemService
 {
-    private ILogger Logger { get; set; } = Log.Logger;
+    internal ILogger Logger { get; set; } = Log.Logger;
     private Dictionary<int, DockItemBase> DockItemTable { get; } = [];
 
     public IEnumerable<DockItemBase> DockItems => DockItemTable.Values;
 
     public event Action<IDockItemService, DockItemChangedEventArgs>? DockItemChanged;
+    public event Action<IDockItemService, DockItemBase>? DockItemStarted;
 
     public DockItemService() { }
 
@@ -21,6 +23,13 @@ internal sealed class DockItemService : IDockItemService
     public DockItemService(ILogger logger)
     {
         Logger = logger;
+    }
+
+    internal void RaiseDockItemStarted(DockItemBase dockItem)
+    {
+        using var _ = LogHelper.Trace();
+        Logger.Debug("DockItem 启动 {Type} {Key} {ShowName}", dockItem.GetType(), dockItem.Key, dockItem.ShowName);
+        DockItemStarted?.Invoke(this, dockItem);
     }
 
     public DockItemBase? GetDockItem(int key)
@@ -34,18 +43,36 @@ internal sealed class DockItemService : IDockItemService
 
     public void RegisterDockItem(DockItemBase dockItem)
     {
+        //using var _ = LogHelper.Trace();
         dockItem.Key = AllocNewKey();
-        DockItemTable[dockItem.Key] = dockItem;
+        RegisterDockItemCore(dockItem);
+        //Logger.Debug("注册 DockItem 成功 {Key} {DockItem}", dockItem.Key, dockItem);
+    }
+
+    private bool RegisterDockItemCore(DockItemBase dockItem)
+    {
+        using var _ = LogHelper.Trace();
+        dockItem.OwnerService = this;
+        var res = DockItemTable.TryAdd(dockItem.Key, dockItem);
         DockItemChanged?.Invoke(this, new DockItemChangedEventArgs { DockItem = dockItem, ChangeType = DockItemChangeType.Add });
-        Logger.Debug("注册 DockItem 成功 {Key} {DockItem}", dockItem.Key, dockItem);
+        if (res)
+        {
+            Logger.Verbose("注册 DockItem 成功 {DockItem} {Key}", dockItem, dockItem.Key);
+        }
+        else
+        {
+            Logger.Warning("{DockItem} {Key} 已经被注册 跳过注册", dockItem, dockItem.Key);
+        }
+        return res;
     }
 
     public void UnregisterDockItem(int key)
     {
+        using var _ = LogHelper.Trace();
         if (DockItemTable.TryGetValue(key, out var dockItem) && DockItemTable.Remove(key))
         {
             DockItemChanged?.Invoke(this, new DockItemChangedEventArgs { DockItem = dockItem, ChangeType = DockItemChangeType.Remove });
-            dockItem.Dispose();
+            dockItem.OwnerService = null;
             Logger.Debug("删除 DockItem 成功 {Key} {DockItem}", key, dockItem);
         }
         else
@@ -56,6 +83,7 @@ internal sealed class DockItemService : IDockItemService
 
     public void ClearDockItems()
     {
+        using var _ = LogHelper.Trace();
         var keys = DockItemTable.Keys.ToArray();
         foreach (var key in keys)
         {
@@ -66,7 +94,7 @@ internal sealed class DockItemService : IDockItemService
 
     public void LoadData(string filePath)
     {
-        Logger.Information("开始从 {FilePath} 加载 DockItem 数据", filePath);
+        using var _ = LogHelper.Trace();
         if (!File.Exists(filePath))
         {
             Logger.Warning("本地文件 {FilePath} 不存在 跳过加载", filePath);
@@ -74,21 +102,20 @@ internal sealed class DockItemService : IDockItemService
         }
         try
         {
-            var data = MessagePackSerializer.Typeless.Deserialize(File.ReadAllBytes(filePath));
-            if (data is not IEnumerable<DockItemBase> dockItems)
-                return;
+            var dockItems = MessagePackSerializer.Deserialize<DockItemBase[]>(File.ReadAllBytes(filePath));
+            //if (data is not IEnumerable<DockItemBase> dockItems)
+            //    return;
             foreach (var dockItem in dockItems)
             {
-                var res = DockItemTable.TryAdd(dockItem.Key, dockItem);
-                if (res is false)
-                    Logger.Warning("{Key} 已经被注册 跳过", dockItem.Key);
-                else
+                var res = RegisterDockItemCore(dockItem);
+                if (res)
                     DockItemChanged?.Invoke(
                         this,
                         new DockItemChangedEventArgs { DockItem = dockItem, ChangeType = DockItemChangeType.Add }
                     );
             }
             Logger.Information("从 {FilePath} 加载 DockItem 数据成功", filePath);
+            Logger.Information("加载 {Count} 条数据：{DockItems}", DockItemTable.Count, DockItemTable.Values);
         }
         catch (Exception e)
         {
@@ -98,13 +125,18 @@ internal sealed class DockItemService : IDockItemService
 
     public void SaveData(string filePath)
     {
-        Logger.Information("开始保存 DockItem 数据到 {filePath}", filePath);
+        using var _ = LogHelper.Trace();
         try
         {
+            var file = new FileInfo(filePath);
+            if (file.Directory is not null && file.Directory.Exists is false)
+            {
+                file.Directory.Create();
+            }
             using var fs = File.OpenWrite(filePath);
             // 不转为 Array 会报错
-            MessagePackSerializer.Typeless.Serialize(fs, DockItemTable.Values.ToArray());
-            Logger.Information("保存 DockItem 数据到 {FilePath} 成功", filePath);
+            MessagePackSerializer.Serialize(fs, DockItemTable.Values.ToArray());
+            Logger.Information("保存 DockItem 数据到 {FilePath} 成功 共保存 {Count} 条数据", filePath, DockItemTable.Count);
         }
         catch (Exception e)
         {

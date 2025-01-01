@@ -9,6 +9,8 @@ using Avalonia.Platform;
 using DockBar.Avalonia.Controls;
 using DockBar.Avalonia.Structs;
 using DockBar.Avalonia.ViewModels;
+using DockBar.Core.DockItems;
+using DockBar.Shared.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Vanara.PInvoke;
@@ -28,6 +30,7 @@ public partial class MainWindow : Window
 
         Win32Properties.AddWndProcHookCallback(this, WndProcHook);
         RegisterHotKey();
+        RegisterKeyAction();
     }
 
     // 通过注册按键来实现全局按键响应
@@ -35,6 +38,7 @@ public partial class MainWindow : Window
 
     private void RegisterHotKey()
     {
+        using var _ = LogHelper.Trace();
         if (this.TryGetPlatformHandle() is IPlatformHandle platformHandle)
         {
             var hWnd = platformHandle.Handle;
@@ -52,6 +56,11 @@ public partial class MainWindow : Window
     {
         var hWnd = this.TryGetPlatformHandle()!.Handle;
         User32.UnregisterHotKey(hWnd, this.GetHashCode());
+    }
+
+    private void RegisterKeyAction()
+    {
+        KeyActionDockItems.KeyActions["Setting"] = OpenSettingWindow;
     }
 
     private nint WndProcHook(nint hWnd, uint msg, nint wParam, nint lParam, ref bool handled)
@@ -74,18 +83,29 @@ public partial class MainWindow : Window
             ViewModel.GlobalSetting.LoadSetting(App.SettingFile);
             ViewModel.GlobalSetting.PropertyChanged += (s, e) =>
             {
-                if (e.PropertyName == nameof(GlobalSetting.AutoPositionBottom))
+                if (e.PropertyName == nameof(AppSetting.AutoPositionBottom))
                 {
                     TryMoveWindowToCenter();
                 }
             };
+            //ViewModel.DockItemService?.RegisterDockItem(new WrappedDockItem() { DockItem = new SettingDockItem(), Index = 0 });
         }
     }
 
     private void OnHotKeyPressed()
     {
-        if (ViewModel is not null)
-            ViewModel.IsMouseEntered = !ViewModel.IsMouseEntered;
+        if (this.IsActive)
+        {
+            if (ViewModel is null)
+                return;
+            ViewModel.IsHotKeyPressed = !ViewModel.IsHotKeyPressed;
+        }
+        else
+        {
+            if (ViewModel is not null)
+                ViewModel.IsHotKeyPressed = true;
+            this.Activate();
+        }
     }
 
     private void OnDragLeave(object? sender, DragEventArgs e)
@@ -102,8 +122,11 @@ public partial class MainWindow : Window
 
     private void OnDrop(object? sender, DragEventArgs e)
     {
+        using var _ = LogHelper.Trace();
         if (ViewModel is null)
             return;
+
+        ViewModel.SelectedIndex = PosXToIndex(e.GetPosition(DockItemList).X);
         foreach (var data in e.Data.GetFiles() ?? [])
         {
             ViewModel.InsertDockLinkItem(ViewModel.SelectedIndex, data.Path.LocalPath);
@@ -124,6 +147,7 @@ public partial class MainWindow : Window
         base.OnPointerPressed(e);
         if (ViewModel is null)
             return;
+        using var _ = LogHelper.Trace();
         if (ViewModel.IsMoveMode)
         {
             if (e.Pointer.Type is PointerType.Mouse && e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
@@ -162,9 +186,14 @@ public partial class MainWindow : Window
 
     private void SettingMenuItem_Clicked(object? sender, RoutedEventArgs e)
     {
+        OpenSettingWindow();
+        e.Handled = true;
+    }
+
+    private void OpenSettingWindow()
+    {
         var settingWindow = App.Instance.ServiceProvider.GetRequiredService<SettingWindow>();
         _ = settingWindow.ShowDialog(this);
-        e.Handled = true;
     }
 
     private void MoveMenuItem_Clicked(object? sender, RoutedEventArgs e)
@@ -174,31 +203,13 @@ public partial class MainWindow : Window
             ViewModel.IsMoveMode = true;
     }
 
-    private async void AddLinkMenuItem_Clicked(object? sender, RoutedEventArgs e)
-    {
-        if (ViewModel is null)
-            return;
-
-        try
-        {
-            var addDockItemWindow = App.Instance.ServiceProvider.GetRequiredService<EditDockItemWindow>();
-            addDockItemWindow.ViewModel.IsAddMode = true;
-            addDockItemWindow.ViewModel.Index = ViewModel.SelectedIndex;
-            await addDockItemWindow.ShowDialog(this);
-            e.Handled = true;
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine(ex);
-        }
-    }
-
     private void DockItem_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
         if (sender is not DockItemControl source)
             return;
         if (ViewModel is null)
             return;
+        using var _ = LogHelper.Trace();
         ViewModel.SelectedDockItem = source.DockItem;
         ViewModel.SelectedIndex = PosXToIndex(e.GetPosition(DockItemList).X);
         //ViewModel.IsDockItemListPointerPressed = true;
@@ -206,7 +217,7 @@ public partial class MainWindow : Window
         e.Handled = true;
     }
 
-    private void DeleteLinkMenuItem_Clicked(object? sender, RoutedEventArgs e)
+    private void DeleteDockItemMenuItem_Clicked(object? sender, RoutedEventArgs e)
     {
         if (ViewModel is null || ViewModel.SelectedDockItem is null)
             return;
@@ -337,5 +348,43 @@ public partial class MainWindow : Window
         //    ViewModel.SelectedDockItem = null;
         //}
         //e.Handled = true;
+    }
+
+    private async void AddDockItemMenuItem_Clicked(object? sender, RoutedEventArgs e)
+    {
+        if (ViewModel is null)
+            return;
+
+        try
+        {
+            var addDockItemWindow = App.Instance.ServiceProvider.GetRequiredService<EditDockItemWindow>();
+            addDockItemWindow.ViewModel.IsAddMode = true;
+            addDockItemWindow.ViewModel.Index = ViewModel.SelectedIndex;
+            await addDockItemWindow.ShowDialog(this);
+            e.Handled = true;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+        }
+    }
+
+    private void EditDockItemMenuItem_Click(object? sender, RoutedEventArgs e)
+    {
+        if (ViewModel is null || ViewModel.SelectedDockItem is null)
+            return;
+        var editDockItemWindow = App.Instance.ServiceProvider.GetRequiredService<EditDockItemWindow>();
+        editDockItemWindow.ViewModel.IsAddMode = false;
+        editDockItemWindow.ViewModel.Index = ViewModel.SelectedIndex;
+        editDockItemWindow.ViewModel.CurrentDockItem = ViewModel.SelectedDockItem;
+        editDockItemWindow.ShowDialog(this);
+        e.Handled = true;
+    }
+
+    private void AddSettingDockItemMenuItem_Click(object? sender, RoutedEventArgs e)
+    {
+        ViewModel?.DockItemService?.RegisterDockItem(
+            new WrappedDockItem() { DockItem = KeyActionDockItems.SettingDockItem, Index = ViewModel.SelectedIndex }
+        );
     }
 }

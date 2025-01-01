@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using Avalonia.Controls;
@@ -46,5 +47,20 @@ public partial class EditDockItemWindow : Window
     {
         Close();
         e.Handled = true;
+    }
+
+    protected override void OnDataContextChanged(EventArgs e)
+    {
+        base.OnDataContextChanged(e);
+        if (ViewModel is not null)
+        {
+            ViewModel.Confirmed += Close;
+        }
+    }
+
+    protected override void OnClosing(WindowClosingEventArgs e)
+    {
+        base.OnClosing(e);
+        ViewModel.DockItemService?.SaveData(App.StorageFile);
     }
 }

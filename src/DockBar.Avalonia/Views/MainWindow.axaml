@@ -18,19 +18,20 @@
     x:DataType="vm:MainWindowViewModel"
     CornerRadius="16"
     Design.Width="1000"
+    Icon="avares://DockBar.Avalonia/Assets/icon.ico"
     ShowInTaskbar="False"
     SizeToContent="WidthAndHeight"
     mc:Ignorable="d">
 
     <Design.DataContext>
-        <vm:MainWindowViewModel IsMouseEntered="True">
+        <vm:MainWindowViewModel>
             <vm:MainWindowViewModel.DockItems>
                 <cd:DockLinkItem LinkPath="" ShowName="停靠项目1" />
                 <cd:DockLinkItem LinkPath="" ShowName="停靠项目2" />
                 <cd:DockLinkItem LinkPath="" ShowName="停靠项目3" />
             </vm:MainWindowViewModel.DockItems>
             <vm:MainWindowViewModel.GlobalSetting>
-                <a:GlobalSetting />
+                <a:AppSetting />
             </vm:MainWindowViewModel.GlobalSetting>
             <vm:MainWindowViewModel.PerformanceMonitor>
                 <sm:PerformanceMonitor />
@@ -40,6 +41,7 @@
     </Design.DataContext>
     <Design.DesignStyle>
         <Style Selector="Window">
+            <Setter Property="Background" Value="Gray" />
             <Setter Property="RequestedThemeVariant" Value="Dark" />
         </Style>
     </Design.DesignStyle>
@@ -73,15 +75,51 @@
             <ContextMenu.Background>
                 <SolidColorBrush Opacity="0.9" Color="#222222" />
             </ContextMenu.Background>
-            <MenuItem Click="AddLinkMenuItem_Clicked" Header="在此处添加项目">
+            <MenuItem Click="AddDockItemMenuItem_Clicked" Header="在此处添加项目">
                 <MenuItem.Icon>
-                    <TextBlock Classes="FontIcon" Text="&#xE710;" />
+                    <TextBlock
+                        Classes="FontIcon"
+                        Foreground="Green"
+                        Text="&#xE710;" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="添加内置项目">
+                <MenuItem.Icon>
+                    <TextBlock
+                        Classes="FontIcon"
+                        Foreground="Azure"
+                        Text="&#xE710;" />
+                </MenuItem.Icon>
+                <MenuItem Click="AddSettingDockItemMenuItem_Click" Header="设置">
+                    <MenuItem.Icon>
+                        <TextBlock Classes="FontIcon" Text="&#xE713;" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem />
+                <MenuItem />
+            </MenuItem>
+            <MenuItem
+                Click="EditDockItemMenuItem_Click"
+                Header="修改项目"
+                IsEnabled="{Binding IsSelectedDockItem}">
+                <MenuItem.Icon>
+                    <TextBlock
+                        Classes="FontIcon"
+                        Foreground="Orange"
+                        Text="&#xE70F;" />
                 </MenuItem.Icon>
             </MenuItem>
             <MenuItem
-                Click="DeleteLinkMenuItem_Clicked"
+                Click="DeleteDockItemMenuItem_Clicked"
                 Header="删除该链接"
-                IsEnabled="{Binding IsSelectedDockItem}" />
+                IsEnabled="{Binding IsSelectedDockItem}">
+                <MenuItem.Icon>
+                    <TextBlock
+                        Classes="FontIcon"
+                        Foreground="Red"
+                        Text="&#xE74D;" />
+                </MenuItem.Icon>
+            </MenuItem>
             <MenuItem Click="MoveMenuItem_Clicked" Header="移动模式">
                 <MenuItem.Icon>
                     <TextBlock Classes="FontIcon" Text="&#xE7C2;" />
@@ -109,11 +147,8 @@
             Grid.ColumnSpan="3"
             Height="{Binding GlobalSetting.DockItemSize, Converter={StaticResource PercentageConverter}, ConverterParameter=0.8}"
             VerticalAlignment="Bottom"
-            CornerRadius="8">
-            <Border.Background>
-                <SolidColorBrush Opacity="0.8" Color="#222222" />
-            </Border.Background>
-        </Border>
+            Background="{DynamicResource SystemControlBackgroundAltMediumBrush}"
+            CornerRadius="8" />
 
         <StackPanel
             Grid.Column="0"
@@ -138,7 +173,7 @@
             Grid.Column="1"
             Width="{Binding DockPanelWidth}"
             Height="{Binding DockPanelHeight}"
-            Margin="0,0,0,4"
+            Margin="0,0,0,8"
             IsHitTestVisible="{Binding !IsMoveMode}">
 
             <ItemsControl
@@ -176,6 +211,7 @@
 
         <StackPanel
             Grid.Column="2"
+            Margin="0,0,0,4"
             HorizontalAlignment="Center"
             VerticalAlignment="Bottom"
             Spacing="8">

@@ -14,4 +14,8 @@
 		<PackageReference Include="System.Management" Version="9.0.0" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\DockBar.Shared\DockBar.Shared.csproj" />
+	</ItemGroup>
+
 </Project>

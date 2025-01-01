@@ -19,10 +19,12 @@ public enum LinkType
     Folder,
 }
 
+[MessagePackObject(AllowPrivate = true)]
 public partial class DockLinkItem : DockItemBase
 {
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(LinkType))]
+    [Key(3)]
     public partial string? LinkPath { get; set; }
 
     [IgnoreMember]
@@ -36,7 +38,7 @@ public partial class DockLinkItem : DockItemBase
             _ => LinkType.File,
         };
 
-    public override void Start()
+    protected override void StartCore()
     {
         if (LinkPath is null)
             return;

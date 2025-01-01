@@ -11,6 +11,7 @@ public interface IDockItemService
     IEnumerable<DockItemBase> DockItems { get; }
 
     event Action<IDockItemService, DockItemChangedEventArgs>? DockItemChanged;
+    event Action<IDockItemService, DockItemBase>? DockItemStarted;
 
     DockItemBase? GetDockItem(int key);
     void RegisterDockItem(DockItemBase dockItem);

@@ -11,11 +11,12 @@
     Width="800"
     Height="450"
     x:DataType="vm:SettingWindowViewModel"
+    WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
     <Design.DataContext>
         <vm:SettingWindowViewModel>
             <vm:SettingWindowViewModel.GlobalSetting>
-                <a:GlobalSetting />
+                <a:AppSetting />
             </vm:SettingWindowViewModel.GlobalSetting>
         </vm:SettingWindowViewModel>
     </Design.DataContext>

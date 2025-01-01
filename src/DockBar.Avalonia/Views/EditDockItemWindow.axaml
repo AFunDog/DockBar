@@ -2,6 +2,7 @@
     x:Class="DockBar.Avalonia.EditDockItemWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:a="using:DockBar.Avalonia"
     xmlns:cd="using:DockBar.Core.DockItems"
     xmlns:controls="using:DockBar.Avalonia.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -13,17 +14,18 @@
     x:DataType="vm:EditDockItemWindowViewModel"
     mc:Ignorable="d">
     <Design.DataContext>
-        <vm:EditDockItemWindowViewModel>
-            <vm:EditDockItemWindowViewModel.CurrentDockItem>
-                <cd:WrappedDockItem />
-            </vm:EditDockItemWindowViewModel.CurrentDockItem>
+        <vm:EditDockItemWindowViewModel IsAddMode="True">
             <vm:EditDockItemWindowViewModel.CurrentDockItem>
                 <cd:WrappedDockItem ShowName="123">
                     <cd:WrappedDockItem.DockItem>
                         <cd:DockLinkItem LinkPath="" />
                     </cd:WrappedDockItem.DockItem>
                 </cd:WrappedDockItem>
+                <!--<cd:DockLinkItem/>-->
             </vm:EditDockItemWindowViewModel.CurrentDockItem>
+            <vm:EditDockItemWindowViewModel.LocalSetting>
+                <a:AppSetting />
+            </vm:EditDockItemWindowViewModel.LocalSetting>
         </vm:EditDockItemWindowViewModel>
     </Design.DataContext>
     <Design.DesignStyle>
@@ -75,34 +77,62 @@
                 </Button>
             </Grid>
 
+
+
             <Grid
                 Name="AddGrid"
                 Grid.Row="1"
                 Margin="16"
                 Background="Transparent"
                 ColumnDefinitions="*,*"
-                DragDrop.AllowDrop="True"
-                RowDefinitions="*,*">
-                <controls:DockItemControl DockItem="{Binding CurrentDockItem, Mode=OneWay}" Size="108" />
-                <StackPanel
-                    Grid.Row="1"
-                    Grid.Column="0"
-                    Margin="0,8,0,0"
-                    Orientation="Vertical"
-                    Spacing="8">
-                    <TextBox Text="{Binding CurrentDockItem.ShowName, Mode=TwoWay}" />
-                    <NumericUpDown
-                        Increment="1"
-                        Minimum="0"
-                        Value="{Binding CurrentDockItem.Index, Mode=TwoWay}" />
+                DragDrop.AllowDrop="True">
+                <Grid Grid.Column="0" RowDefinitions="*,*">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock HorizontalAlignment="Center" Text="预览" />
+                        <Border
+                            Margin="16"
+                            Padding="16"
+                            BorderBrush="{DynamicResource SystemBaseMediumColor}"
+                            BorderThickness="4"
+                            CornerRadius="16">
+                            <!--  将 IsEnabled 设置为 False 以免触发点击操作  -->
+                            <controls:DockItemControl
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                DockItem="{Binding CurrentDockItem, Mode=OneWay}"
+                                IsEnabled="False"
+                                Size="108" />
+
+                        </Border>
+                    </StackPanel>
+
+                    <Button
+                        Grid.Row="1"
+                        HorizontalAlignment="Center"
+                        Command="{Binding ConfirmDockItemCommand}"
+                        Content="{Binding ConfirmButtonText}"
+                        IsDefault="True" />
+
+
+                </Grid>
+                <StackPanel Grid.Column="1" Orientation="Vertical">
+                    <TextBlock Text="属性列表" />
+                    <ContentControl Margin="0,16,0,0" Content="{Binding CurrentDockItem}">
+                        <ContentControl.DataTemplates>
+                            <DataTemplate DataType="cd:WrappedDockItem">
+                                <StackPanel Orientation="Vertical" Spacing="8">
+                                    <TextBox Text="{Binding ShowName, Mode=TwoWay}" />
+                                    <NumericUpDown
+                                        Increment="1"
+                                        Minimum="0"
+                                        Value="{Binding Index, Mode=TwoWay}" />
+                                </StackPanel>
+                            </DataTemplate>
+                            <!--<DataTemplate DataType="cd:DockLinkItem" />-->
+                        </ContentControl.DataTemplates>
+                    </ContentControl>
                 </StackPanel>
-                <Button
-                    Grid.Row="1"
-                    Grid.Column="1"
-                    HorizontalAlignment="Center"
-                    Command="{Binding AddDockItemCommand}"
-                    Content="{Binding ConfirmButtonText}"
-                    IsDefault="True" />
+
             </Grid>
         </Grid>
     </Grid>

@@ -7,13 +7,14 @@ using System.Threading.Tasks;
 using Avalonia;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DockBar.Avalonia.Structs;
+using DockBar.Shared.Helpers;
 using Mapster;
 using MessagePack;
 using Serilog;
 
 namespace DockBar.Avalonia;
 
-internal sealed partial class GlobalSetting : ObservableObject
+internal sealed partial class AppSetting : ObservableObject
 {
     private ILogger Logger { get; } = Log.Logger;
 
@@ -44,16 +45,16 @@ internal sealed partial class GlobalSetting : ObservableObject
     [ObservableProperty]
     public partial double AutoPositionBottom { get; set; } = 108;
 
-    public GlobalSetting() { }
+    public AppSetting() { }
 
-    public GlobalSetting(ILogger logger)
+    public AppSetting(ILogger logger)
     {
         Logger = logger;
     }
 
     public void LoadSetting(string filePath)
     {
-        Logger.Information("开始从 {FilePath} 加载全局设置", filePath);
+        using var _ = LogHelper.Trace();
         if (File.Exists(filePath) is false)
         {
             Logger.Warning("全局设置文件 {FilePath} 不存在 加载跳过", filePath);
@@ -67,13 +68,13 @@ internal sealed partial class GlobalSetting : ObservableObject
         }
         catch (Exception e)
         {
-            Logger.Error(e, "从 {FilePath} 加载全局设置失败", filePath);
+            Logger.Error(e, "从 {FilePath} 加载全局" + "设置失败", filePath);
         }
     }
 
     public void SaveSetting(string filePath)
     {
-        Logger.Information("开始保存全局设置到 {FilePath}", filePath);
+        using var _ = LogHelper.Trace();
         try
         {
             using var fs = File.OpenWrite(filePath);

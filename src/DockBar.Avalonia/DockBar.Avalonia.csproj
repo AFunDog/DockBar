@@ -7,14 +7,21 @@
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
 		<LangVersion>preview</LangVersion>
+		<!--<PublishAot>true</PublishAot>-->
+		<!--<PublishTrimmed>true</PublishTrimmed>-->
 	</PropertyGroup>
 	<PropertyGroup Label="Avalonia">
 		<AvaloniaXamlReportImportance>Normal</AvaloniaXamlReportImportance>
+		<ApplicationIcon>Assets\icon.ico</ApplicationIcon>
 		<!--<SupportedOSPlatformVersion>10.0.20348.0</SupportedOSPlatformVersion>-->
 	</PropertyGroup>
 
 	<ItemGroup>
 		<AvaloniaResource Include="Assets\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="Assets\icon.ico" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -29,6 +36,7 @@
 		<PackageReference Include="Mapster" Version="7.4.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
 		<PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
+		<PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
 		<PackageReference Include="System.Reactive" Version="6.0.1" />
 		<PackageReference Include="Vanara.Core" Version="4.0.4" />
 		<PackageReference Include="Vanara.PInvoke.Shared" Version="4.0.4" />
@@ -37,6 +45,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\DockBar.Core\DockBar.Core.csproj" />
+		<ProjectReference Include="..\DockBar.Shared\DockBar.Shared.csproj" />
 		<ProjectReference Include="..\DockBar.SystemMonitor\DockBar.SystemMonitor.csproj" />
 	</ItemGroup>
 

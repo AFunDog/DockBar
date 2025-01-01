@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Management;
 using CommunityToolkit.Mvvm.ComponentModel;
+using DockBar.Shared.Helpers;
 using DockBar.SystemMonitor.Internals;
 using Serilog;
 
@@ -62,12 +63,13 @@ public sealed partial class PerformanceMonitor : ObservableObject, IDisposable
 
     public void StartMonitor()
     {
+        using var _ = LogHelper.Trace();
         // 先清空上一次的数据
         Dispose();
 
         CpuUsageCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
         MemoryUsageCounter = new PerformanceCounter("Memory", "Available MBytes");
-        NetworkMonitor = new PerformanceNetworkMonitor();
+        NetworkMonitor = new PerformanceNetworkMonitor(Logger);
         TotalPhysicalMemoryMB = GetTotalMemory() / (1024 * 1024);
         MonitorTask = Task.Run(Monitor);
         Logger.Information("启动性能监视器");
@@ -75,20 +77,38 @@ public sealed partial class PerformanceMonitor : ObservableObject, IDisposable
 
     private async Task Monitor()
     {
+        const int TraceTimeMs = 1000;
+
+        const int LogTimeMs = 10000;
+        var logCount = 0;
+
         while (true)
         {
-            CpuUsage = CpuUsageCounter?.NextValue() ?? CpuUsage;
-            MemoryUsage = (1 - MemoryUsageCounter?.NextValue() / TotalPhysicalMemoryMB) * 100 ?? MemoryUsage;
-            NetworkSentBytes = NetworkMonitor?.TotalNetworkSent ?? NetworkSentBytes;
-            NetworkReceivedBytes = NetworkMonitor?.TotalNetworkReceived ?? NetworkReceivedBytes;
-            Logger.Verbose(
-                "获取一次性能数据 CPU:{CpuUsage} MEM:{MemoryUsage} UPLOAD:{NetworkSentBytes} DOWNLOAD:{NetworkReceivedBytes}",
-                CpuUsage,
-                MemoryUsage,
-                NetworkSentBytes,
-                NetworkReceivedBytes
-            );
-            await Task.Delay(1000);
+            try
+            {
+                CpuUsage = CpuUsageCounter?.NextValue() ?? CpuUsage;
+                MemoryUsage = (1 - MemoryUsageCounter?.NextValue() / TotalPhysicalMemoryMB) * 100 ?? MemoryUsage;
+                NetworkSentBytes = NetworkMonitor?.TotalNetworkSent ?? NetworkSentBytes;
+                NetworkReceivedBytes = NetworkMonitor?.TotalNetworkReceived ?? NetworkReceivedBytes;
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e, "监视器出错");
+                break;
+            }
+            if (logCount == LogTimeMs / TraceTimeMs)
+            {
+                Logger.Verbose(
+                    "记录一次性能数据 CPU:{CpuUsage} MEM:{MemoryUsage} UPLOAD:{NetworkSentBytes} DOWNLOAD:{NetworkReceivedBytes}",
+                    CpuUsage,
+                    MemoryUsage,
+                    NetworkSentBytes,
+                    NetworkReceivedBytes
+                );
+                logCount = 0;
+            }
+            logCount++;
+            await Task.Delay(TraceTimeMs);
         }
     }
 
@@ -105,6 +125,7 @@ public sealed partial class PerformanceMonitor : ObservableObject, IDisposable
 
     public void Dispose()
     {
+        using var _ = LogHelper.Trace();
         MonitorTask?.Wait(0);
         MonitorTask?.Dispose();
         MonitorTask = null;

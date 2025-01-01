@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
@@ -8,9 +9,14 @@ using Avalonia.Platform;
 using DockBar.Avalonia.ViewModels;
 using DockBar.Avalonia.Views;
 using DockBar.Core;
+using DockBar.Shared.Helpers;
 using DockBar.SystemMonitor;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using Serilog.Context;
+using Serilog.Core;
+using Serilog.Events;
+using Serilog.Sinks.SystemConsole.Themes;
 
 namespace DockBar.Avalonia;
 
@@ -20,9 +26,8 @@ public partial class App : Application
     public IServiceProvider ServiceProvider { get; } = BuildServices();
     public ILogger Logger => ServiceProvider.GetRequiredService<ILogger>();
 
-    public Stream DefaultIconStream { get; } = AssetLoader.Open(new Uri("avares://DockBar.Avalonia/Assets/icon.png"));
-
     public const string SettingFile = "settings.bin";
+    public const string StorageFile = "dockItems.bin";
 
     public override void Initialize()
     {
@@ -45,8 +50,8 @@ public partial class App : Application
         var services = new ServiceCollection()
             // 注册外部服务
             .UseDockItemService()
-            .AddSingleton<ILogger>(new LoggerConfiguration().WriteTo.Console().MinimumLevel.Debug().CreateLogger())
-            .AddSingleton<GlobalSetting>()
+            .AddSingleton<ILogger>(BuildLogger())
+            .AddSingleton<AppSetting>()
             .AddSingleton<PerformanceMonitor>()
             // 注册视图模型
             .AddTransient<MainWindowViewModel>()
@@ -67,5 +72,27 @@ public partial class App : Application
                 DataContext = provider.GetRequiredService<EditDockItemWindowViewModel>()
             });
         return services.BuildServiceProvider();
+    }
+
+    private static Logger BuildLogger()
+    {
+        //AnsiConsoleTheme.Code.
+        return new LoggerConfiguration()
+            .Enrich.FromLogContext()
+            .MinimumLevel.Verbose()
+#if DEBUG
+            .WriteTo.Console(
+                outputTemplate: "{Timestamp:HH:mm:ss} [{Level:u3}] {Caller} {Message:lj}{NewLine}{Exception}",
+                restrictedToMinimumLevel: LogEventLevel.Debug
+            )
+#endif
+            .WriteTo.File(
+                "Log/log.txt",
+                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Caller} {Message:lj}{NewLine}{Exception}",
+                restrictedToMinimumLevel: LogEventLevel.Verbose,
+                rollingInterval: RollingInterval.Day,
+                rollOnFileSizeLimit: true
+            )
+            .CreateLogger();
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.IO;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -18,6 +19,8 @@ namespace DockBar.Avalonia.Controls;
 
 internal class DockItemControl : TemplatedControl
 {
+    #region DockItem
+
     public static readonly StyledProperty<DockItemBase?> DockItemProperty = AvaloniaProperty.Register<DockItemControl, DockItemBase?>(
         nameof(DockItem)
     );
@@ -26,6 +29,10 @@ internal class DockItemControl : TemplatedControl
         get => GetValue(DockItemProperty);
         set => SetValue(DockItemProperty, value);
     }
+    #endregion
+
+    #region DockIcon
+
 
     public static readonly DirectProperty<DockItemControl, IImage?> DockIconProperty = AvaloniaProperty.RegisterDirect<
         DockItemControl,
@@ -34,8 +41,16 @@ internal class DockItemControl : TemplatedControl
 
     public IImage? DockIcon
     {
-        get => DockItem?.IconDataStream?.ToIImage();
+        get
+        {
+            if (DockItem is null || DockItem.IconData is null)
+                return null;
+            return new MemoryStream(DockItem.IconData).ToIImage();
+        }
     }
+    #endregion
+
+    #region Size
 
     public static readonly StyledProperty<double> SizeProperty = AvaloniaProperty.Register<DockItemControl, double>(nameof(Size));
     public double Size
@@ -43,6 +58,9 @@ internal class DockItemControl : TemplatedControl
         get => GetValue(SizeProperty);
         set => SetValue(SizeProperty, value);
     }
+    #endregion
+
+    #region ExtendRate
 
     public static readonly StyledProperty<double> ExtendRateProperty = AvaloniaProperty.Register<DockItemControl, double>(
         nameof(ExtendRate)
@@ -53,6 +71,10 @@ internal class DockItemControl : TemplatedControl
         get => GetValue(ExtendRateProperty);
         set => SetValue(ExtendRateProperty, value);
     }
+    #endregion
+
+    #region ExtendSize
+
     public static readonly DirectProperty<DockItemControl, double> ExtendSizeProperty = AvaloniaProperty.RegisterDirect<
         DockItemControl,
         double
@@ -63,6 +85,10 @@ internal class DockItemControl : TemplatedControl
         get => Size * (1 + ExtendRate);
     }
 
+    #endregion
+
+    #region IsShowName
+
     public static readonly StyledProperty<bool> IsShowNameProperty = AvaloniaProperty.Register<DockItemControl, bool>(nameof(IsShowName));
 
     public bool IsShowName
@@ -70,6 +96,9 @@ internal class DockItemControl : TemplatedControl
         get => GetValue(IsShowNameProperty);
         set => SetValue(IsShowNameProperty, value);
     }
+    #endregion
+
+    #region ShowName
 
     public static readonly DirectProperty<DockItemControl, string?> ShowNameProperty = AvaloniaProperty.RegisterDirect<
         DockItemControl,
@@ -80,20 +109,46 @@ internal class DockItemControl : TemplatedControl
     {
         get => DockItem?.ShowName;
     }
+    #endregion
 
-    public DockItemControl()
+
+
+    public DockItemControl() { }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
-        DockItemProperty.Changed.Subscribe(e =>
+        base.OnPropertyChanged(change);
+        if (change.Property == DockItemProperty)
         {
+            if (change.GetOldValue<DockItemBase?>() is DockItemBase oldDockItem)
+            {
+                oldDockItem.PropertyChanged -= OnDockItemPropertyChanged;
+            }
+            if (change.GetNewValue<DockItemBase?>() is DockItemBase dockItem)
+            {
+                dockItem.PropertyChanged += OnDockItemPropertyChanged;
+            }
             RaisePropertyChanged(DockIconProperty, null, DockIcon);
             RaisePropertyChanged(ShowNameProperty, null, ShowName);
-        });
+        }
     }
 
-    protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+    private void OnDockItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        base.OnApplyTemplate(e);
+        if (e.PropertyName == nameof(DockItemBase.IconData))
+        {
+            RaisePropertyChanged(DockIconProperty, null, DockIcon);
+        }
+        else if (e.PropertyName == nameof(DockItemBase.ShowName))
+        {
+            RaisePropertyChanged(ShowNameProperty, null, ShowName);
+        }
     }
+
+    //protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+    //{
+    //    base.OnApplyTemplate(e);
+    //}
 
     protected override void OnPointerPressed(PointerPressedEventArgs e)
     {
