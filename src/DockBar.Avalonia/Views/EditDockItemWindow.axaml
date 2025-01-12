@@ -16,12 +16,8 @@
     <Design.DataContext>
         <vm:EditDockItemWindowViewModel IsAddMode="True">
             <vm:EditDockItemWindowViewModel.CurrentDockItem>
-                <cd:WrappedDockItem ShowName="123">
-                    <cd:WrappedDockItem.DockItem>
-                        <cd:DockLinkItem LinkPath="" />
-                    </cd:WrappedDockItem.DockItem>
-                </cd:WrappedDockItem>
-                <!--<cd:DockLinkItem/>-->
+                <!--<cd:KeyActionDockItem ActionKey="Setting" ShowName="123" />-->
+                <cd:DockLinkItem LinkPath="C:" />
             </vm:EditDockItemWindowViewModel.CurrentDockItem>
             <vm:EditDockItemWindowViewModel.LocalSetting>
                 <a:AppSetting />
@@ -115,23 +111,97 @@
 
 
                 </Grid>
-                <StackPanel Grid.Column="1" Orientation="Vertical">
-                    <TextBlock Text="属性列表" />
-                    <ContentControl Margin="0,16,0,0" Content="{Binding CurrentDockItem}">
+                <Grid
+                    Grid.Column="1"
+                    ColumnDefinitions="84,*"
+                    RowDefinitions="auto,auto,auto,auto,*">
+                    <Grid.Styles>
+                        <Style Selector="Label">
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                        </Style>
+                        <Style Selector="TextBlock">
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                        </Style>
+                        <Style Selector="TextBox">
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                        </Style>
+                    </Grid.Styles>
+                    <TextBlock
+                        Margin="0,0,0,16"
+                        FontSize="18"
+                        Text="属性列表" />
+                    <Label
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Content="唯一标识符"
+                        Target="{Binding #KeyTextBlock}" />
+                    <SelectableTextBlock
+                        Name="KeyTextBlock"
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Margin="0,4"
+                        Text="{Binding CurrentDockItem.Key}" />
+                    <Label
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Content="索引位置"
+                        Target="{Binding #IndexNumberTextBlock}" />
+                    <SelectableTextBlock
+                        Name="IndexNumberTextBlock"
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Margin="0,4"
+                        Text="{Binding Index}" />
+                    <Label
+                        Grid.Row="3"
+                        Grid.Column="0"
+                        Content="展示名称"
+                        Target="{Binding #ShowNameTextBox, Mode=TwoWay}" />
+                    <TextBox
+                        Name="ShowNameTextBox"
+                        Grid.Row="3"
+                        Grid.Column="1"
+                        Margin="0,4"
+                        Text="{Binding CurrentDockItem.ShowName, Mode=TwoWay}" />
+
+                    <ContentControl
+                        Grid.Row="4"
+                        Grid.ColumnSpan="2"
+                        VerticalAlignment="Top"
+                        Content="{Binding CurrentDockItem}">
                         <ContentControl.DataTemplates>
-                            <DataTemplate DataType="cd:WrappedDockItem">
-                                <StackPanel Orientation="Vertical" Spacing="8">
-                                    <TextBox Text="{Binding ShowName, Mode=TwoWay}" />
-                                    <NumericUpDown
-                                        Increment="1"
-                                        Minimum="0"
-                                        Value="{Binding Index, Mode=TwoWay}" />
-                                </StackPanel>
+                            <DataTemplate DataType="cd:DockLinkItem">
+                                <Grid ColumnDefinitions="84,*" RowDefinitions="*">
+                                    <Label
+                                        Grid.Row="0"
+                                        Grid.Column="0"
+                                        Content="目标路径"
+                                        Target="{Binding #LinkPathTextBox}" />
+                                    <TextBox
+                                        Name="LinkPathTextBox"
+                                        Grid.Row="0"
+                                        Grid.Column="1"
+                                        Margin="0,4"
+                                        Text="{Binding LinkPath, Mode=TwoWay}" />
+                                </Grid>
+                            </DataTemplate>
+                            <DataTemplate DataType="cd:KeyActionDockItem">
+                                <Grid ColumnDefinitions="84,*" RowDefinitions="*">
+                                    <Label
+                                        Grid.Row="0"
+                                        Grid.Column="0"
+                                        Content="行为标识符" />
+                                    <TextBox
+                                        Grid.Row="0"
+                                        Grid.Column="1"
+                                        Margin="0,4"
+                                        Text="{Binding ActionKey}" />
+                                </Grid>
                             </DataTemplate>
                             <!--<DataTemplate DataType="cd:DockLinkItem" />-->
                         </ContentControl.DataTemplates>
                     </ContentControl>
-                </StackPanel>
+                </Grid>
 
             </Grid>
         </Grid>

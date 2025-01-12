@@ -19,12 +19,11 @@ public enum LinkType
     Folder,
 }
 
-[MessagePackObject(AllowPrivate = true)]
+[MessagePackObject(keyAsPropertyName: true)]
 public partial class DockLinkItem : DockItemBase
 {
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(LinkType))]
-    [Key(3)]
     public partial string? LinkPath { get; set; }
 
     [IgnoreMember]
@@ -102,7 +101,7 @@ public partial class DockLinkItem : DockItemBase
     {
         try
         {
-            var processStartInfo = new ProcessStartInfo() { FileName = pathOrUrl, UseShellExecute = true, };
+            var processStartInfo = new ProcessStartInfo() { FileName = pathOrUrl, UseShellExecute = true };
             if (workingDir is not null)
                 processStartInfo.WorkingDirectory = workingDir;
             Process.Start(processStartInfo);

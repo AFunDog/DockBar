@@ -14,22 +14,23 @@ internal sealed class PerformanceNetworkMonitor : IDisposable
     private static string[] InstanceNames => new PerformanceCounterCategory("Network Interface").GetInstanceNames();
     private ILogger Logger { get; set; } = Log.Logger;
 
-    private PerformanceCounter[]? NetworkSentCounter { get; set; }
-    private PerformanceCounter[]? NetworkReceivedCounter { get; set; }
+    private List<PerformanceCounter> NetworkSentCounter { get; set; } = [];
+    private List<PerformanceCounter> NetworkReceivedCounter { get; set; } = [];
 
     public float TotalNetworkSent
     {
         get
         {
             using var _ = LogHelper.Trace();
-            if (
-                NetworkSentCounter is null
-                || NetworkSentCounter.Select(counter => counter.InstanceName).SequenceEqual(InstanceNames) is false
-            )
-            {
-                ResetCounter();
-                return 0;
-            }
+            //if (
+            //    NetworkSentCounter is null
+            //    || NetworkSentCounter.Select(counter => counter.InstanceName).SequenceEqual(InstanceNames) is false
+            //)
+            //{
+            //    ResetCounter();
+            //    return 0;
+            //}
+            ResetCounter();
             try
             {
                 return NetworkSentCounter.Sum(counter => counter.NextValue());
@@ -46,14 +47,15 @@ internal sealed class PerformanceNetworkMonitor : IDisposable
         get
         {
             using var _ = LogHelper.Trace();
-            if (
-                NetworkReceivedCounter is null
-                || NetworkReceivedCounter.Select(counter => counter.InstanceName).SequenceEqual(InstanceNames) is false
-            )
-            {
-                ResetCounter();
-                return 0;
-            }
+            //if (
+            //    NetworkReceivedCounter is null
+            //    || NetworkReceivedCounter.Select(counter => counter.InstanceName).SequenceEqual(InstanceNames) is false
+            //)
+            //{
+            //    ResetCounter();
+            //    return 0;
+            //}
+            ResetCounter();
             try
             {
                 return NetworkReceivedCounter.Sum(counter => counter.NextValue());
@@ -79,21 +81,33 @@ internal sealed class PerformanceNetworkMonitor : IDisposable
 
     public void ResetCounter()
     {
-        foreach (var counter in NetworkSentCounter ?? [])
-            counter.Dispose();
-        foreach (var counter in NetworkReceivedCounter ?? [])
-            counter.Dispose();
-        NetworkSentCounter = null;
-        NetworkReceivedCounter = null;
+        //foreach (var counter in NetworkSentCounter ?? [])
+        //    counter.Dispose();
+        //foreach (var counter in NetworkReceivedCounter ?? [])
+        //    counter.Dispose();
 
+        var instanceNames = InstanceNames;
+        var newInstances = instanceNames.Except(NetworkSentCounter.Select(counter => counter.InstanceName)).ToArray();
+        var removeInstances = NetworkSentCounter.Select(counter => counter.InstanceName).Except(instanceNames).ToArray();
         try
         {
-            var instanceNames = InstanceNames;
+            if (removeInstances.Length != 0)
+            {
+                NetworkSentCounter.RemoveAll(counter => removeInstances.Contains(counter.InstanceName));
+                NetworkReceivedCounter.RemoveAll(counter => removeInstances.Contains(counter.InstanceName));
+            }
+            if (newInstances.Length != 0)
+            {
+                NetworkSentCounter.AddRange(newInstances.Select(ins => new PerformanceCounter("Network Interface", "Bytes Sent/sec", ins)));
+                NetworkReceivedCounter.AddRange(
+                    newInstances.Select(ins => new PerformanceCounter("Network Interface", "Bytes Received/sec", ins))
+                );
+            }
 
-            NetworkSentCounter = instanceNames.Select(ins => new PerformanceCounter("Network Interface", "Bytes Sent/sec", ins)).ToArray();
-            NetworkReceivedCounter = instanceNames
-                .Select(ins => new PerformanceCounter("Network Interface", "Bytes Received/sec", ins))
-                .ToArray();
+            //NetworkSentCounter = instanceNames.Select(ins => new PerformanceCounter("Network Interface", "Bytes Sent/sec", ins)).ToList();
+            //NetworkReceivedCounter = instanceNames
+            //    .Select(ins => new PerformanceCounter("Network Interface", "Bytes Received/sec", ins))
+            //    .ToList();
         }
         catch (Exception e)
         {
@@ -107,13 +121,13 @@ internal sealed class PerformanceNetworkMonitor : IDisposable
         {
             foreach (var counter in NetworkSentCounter)
                 counter.Dispose();
-            NetworkSentCounter = null;
+            NetworkSentCounter.Clear();
         }
         if (NetworkReceivedCounter is not null)
         {
             foreach (var counter in NetworkReceivedCounter)
                 counter.Dispose();
-            NetworkReceivedCounter = null;
+            NetworkReceivedCounter.Clear();
         }
     }
 }

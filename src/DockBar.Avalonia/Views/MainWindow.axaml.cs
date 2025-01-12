@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -24,9 +25,9 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        DockItemList.AddHandler(DragDrop.DropEvent, OnDrop);
-        DockItemList.AddHandler(DragDrop.DragEnterEvent, OnDragEnter);
-        DockItemList.AddHandler(DragDrop.DragLeaveEvent, OnDragLeave);
+        DockItemPanel.AddHandler(DragDrop.DropEvent, OnDrop);
+        DockItemPanel.AddHandler(DragDrop.DragEnterEvent, OnDragEnter);
+        DockItemPanel.AddHandler(DragDrop.DragLeaveEvent, OnDragLeave);
 
         Win32Properties.AddWndProcHookCallback(this, WndProcHook);
         RegisterHotKey();
@@ -383,8 +384,6 @@ public partial class MainWindow : Window
 
     private void AddSettingDockItemMenuItem_Click(object? sender, RoutedEventArgs e)
     {
-        ViewModel?.DockItemService?.RegisterDockItem(
-            new WrappedDockItem() { DockItem = KeyActionDockItems.SettingDockItem, Index = ViewModel.SelectedIndex }
-        );
+        ViewModel?.DockItemService?.RegisterDockItem(ViewModel.SelectedIndex, KeyActionDockItems.SettingDockItem);
     }
 }

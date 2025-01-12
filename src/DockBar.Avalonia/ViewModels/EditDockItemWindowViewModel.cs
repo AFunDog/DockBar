@@ -7,8 +7,6 @@ using DockBar.Avalonia.Extensions;
 using DockBar.Avalonia.Structs;
 using DockBar.Core;
 using DockBar.Core.DockItems;
-using Dumpify;
-using Mapster;
 
 namespace DockBar.Avalonia.ViewModels;
 
@@ -33,7 +31,7 @@ internal sealed partial class EditDockItemWindowViewModel : ViewModelBase
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ConfirmDockItemCommand))]
-    public partial DockItemBase? CurrentDockItem { get; set; }
+    public partial DockItemBase CurrentDockItem { get; set; } = new DockLinkItem();
 
     // 设计时使用
     public EditDockItemWindowViewModel() { }
@@ -41,7 +39,7 @@ internal sealed partial class EditDockItemWindowViewModel : ViewModelBase
     public EditDockItemWindowViewModel(IDockItemService dockItemService, AppSetting globalSetting)
     {
         DockItemService = dockItemService;
-        globalSetting.Adapt(LocalSetting);
+        LocalSetting = globalSetting;
     }
 
     public bool CanConfirmDockItem => CurrentDockItem is not null;
@@ -54,7 +52,7 @@ internal sealed partial class EditDockItemWindowViewModel : ViewModelBase
 
         if (IsAddMode)
         {
-            DockItemService?.RegisterDockItem(CurrentDockItem);
+            DockItemService?.RegisterDockItem(Index, CurrentDockItem);
         }
         // 如果是修改模式，实际上什么都不用做，因为 CurrentDockItem 已经是引用类型
         Confirmed?.Invoke();

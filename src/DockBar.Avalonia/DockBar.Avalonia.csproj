@@ -7,15 +7,14 @@
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
 		<LangVersion>preview</LangVersion>
-		<!--<PublishAot>true</PublishAot>-->
-		<!--<PublishTrimmed>true</PublishTrimmed>-->
+		<Version>0.0.5.2</Version>
 	</PropertyGroup>
 	<PropertyGroup Label="Avalonia">
 		<AvaloniaXamlReportImportance>Normal</AvaloniaXamlReportImportance>
 		<ApplicationIcon>Assets\icon.ico</ApplicationIcon>
 		<!--<SupportedOSPlatformVersion>10.0.20348.0</SupportedOSPlatformVersion>-->
 	</PropertyGroup>
-
+	
 	<ItemGroup>
 		<AvaloniaResource Include="Assets\**" />
 	</ItemGroup>
@@ -26,14 +25,14 @@
 
 	<ItemGroup>
 		<PackageReference Include="Avalonia" Version="11.2.3" />
+		<PackageReference Include="Avalonia.Controls.ColorPicker" Version="11.2.3" />
 		<PackageReference Include="Avalonia.Desktop" Version="11.2.3" />
 		<PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.3" />
 		<PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.3" />
 		<!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
 		<PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.2.3" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-		<PackageReference Include="Dumpify" Version="0.6.6" />
-		<PackageReference Include="Mapster" Version="7.4.0" />
+		<!--<PackageReference Include="FluentAvaloniaUI" Version="2.2.0" />-->
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
 		<PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
 		<PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />

@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Management;
+using System.Runtime.InteropServices;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DockBar.Shared.Helpers;
 using DockBar.SystemMonitor.Internals;
@@ -14,7 +15,6 @@ public sealed partial class PerformanceMonitor : ObservableObject, IDisposable
 
     private PerformanceCounter? CpuUsageCounter { get; set; }
     private PerformanceCounter? MemoryUsageCounter { get; set; }
-
     private PerformanceNetworkMonitor? NetworkMonitor { get; set; }
 
     [ObservableProperty]
@@ -24,7 +24,7 @@ public sealed partial class PerformanceMonitor : ObservableObject, IDisposable
     public partial float MemoryUsage { get; set; }
 
     [ObservableProperty]
-    public partial float TotalPhysicalMemoryMB { get; set; }
+    public partial float TotalPhysicalMemoryMB { get; set; } = 1;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(NetworkSentBytesString))]
@@ -66,11 +66,10 @@ public sealed partial class PerformanceMonitor : ObservableObject, IDisposable
         using var _ = LogHelper.Trace();
         // 先清空上一次的数据
         Dispose();
-
         CpuUsageCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
         MemoryUsageCounter = new PerformanceCounter("Memory", "Available MBytes");
         NetworkMonitor = new PerformanceNetworkMonitor(Logger);
-        TotalPhysicalMemoryMB = GetTotalMemory() / (1024 * 1024);
+
         MonitorTask = Task.Run(Monitor);
         Logger.Information("启动性能监视器");
     }
@@ -86,6 +85,9 @@ public sealed partial class PerformanceMonitor : ObservableObject, IDisposable
         {
             try
             {
+                //TotalPhysicalMemoryMB = Vanara.PInvoke.Kernel32.GlobalMemoryStatusEx().TotalPhysicalMB;
+                TotalPhysicalMemoryMB = GetTotalPhysicalMemoryBytes() / (1024f * 1024);
+
                 CpuUsage = CpuUsageCounter?.NextValue() ?? CpuUsage;
                 MemoryUsage = (1 - MemoryUsageCounter?.NextValue() / TotalPhysicalMemoryMB) * 100 ?? MemoryUsage;
                 NetworkSentBytes = NetworkMonitor?.TotalNetworkSent ?? NetworkSentBytes;
@@ -112,15 +114,15 @@ public sealed partial class PerformanceMonitor : ObservableObject, IDisposable
         }
     }
 
-    private static ulong GetTotalMemory()
+    private static ulong GetTotalPhysicalMemoryBytes()
     {
-        // 不能放在异步中使用会卡死，不知道为什么！！！
-        using var searcher = new ManagementObjectSearcher("SELECT TotalPhysicalMemory FROM Win32_ComputerSystem");
-        foreach (var obj in searcher.Get())
+        Vanara.PInvoke.Kernel32.MEMORYSTATUSEX memStatus = new();
+        memStatus.dwLength = (uint)Marshal.SizeOf(memStatus);
+        if (Vanara.PInvoke.Kernel32.GlobalMemoryStatusEx(ref memStatus))
         {
-            return (ulong)obj["TotalPhysicalMemory"];
+            return memStatus.ullTotalPhys;
         }
-        return 0;
+        return 1;
     }
 
     public void Dispose()

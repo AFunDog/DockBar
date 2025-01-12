@@ -11,6 +11,8 @@
     <Application.Styles>
         <FluentTheme />
 
+        <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
+
         <Style Selector="TextBlock.FontIcon">
             <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
         </Style>

@@ -8,7 +8,6 @@ using Avalonia.Platform.Storage;
 using DockBar.Avalonia.Structs;
 using DockBar.Avalonia.ViewModels;
 using DockBar.Core.DockItems;
-using DockBar.Core.Structs;
 
 namespace DockBar.Avalonia;
 
@@ -35,11 +34,7 @@ public partial class EditDockItemWindow : Window
 
         if (datas is not null && datas.FirstOrDefault() is IStorageItem data)
         {
-            ViewModel.CurrentDockItem = new WrappedDockItem
-            {
-                DockItem = new DockLinkItem { LinkPath = data.Path.LocalPath },
-                Index = ViewModel.Index
-            };
+            ViewModel.CurrentDockItem = new DockLinkItem { LinkPath = data.Path.LocalPath };
         }
     }
 
@@ -61,6 +56,7 @@ public partial class EditDockItemWindow : Window
     protected override void OnClosing(WindowClosingEventArgs e)
     {
         base.OnClosing(e);
-        ViewModel.DockItemService?.SaveData(App.StorageFile);
+        if (ViewModel?.IsAddMode ?? false)
+            ViewModel.DockItemService?.SaveData(App.StorageFile);
     }
 }

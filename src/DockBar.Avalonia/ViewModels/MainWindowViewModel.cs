@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -8,7 +9,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using DockBar.Avalonia.Structs;
 using DockBar.Core;
 using DockBar.Core.DockItems;
-using DockBar.Core.Structs;
 using DockBar.Shared.Helpers;
 using DockBar.SystemMonitor;
 using Serilog;
@@ -19,7 +19,7 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
 {
     public IDockItemService? DockItemService { get; }
     public ILogger? Logger { get; }
-    public AppSetting GlobalSetting { get; } = new();
+    public AppSetting GlobalSetting { get; set; } = new();
 
     [ObservableProperty]
     public partial PerformanceMonitor? PerformanceMonitor { get; set; }
@@ -101,6 +101,9 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
                 + 8
                 + (GlobalSetting.DockItemIsShowName ? GlobalSetting.DockItemNameFontSize + 8 : 0)
             : 108;
+
+    //public double DockBarBackgroundWidth => Math.Min(192, 192);
+
     public Thickness DockItemListMargin => new(GlobalSetting?.DockItemSpacing ?? 0, 0, GlobalSetting?.DockItemSpacing ?? 0, 0);
 
     public MainWindowViewModel() { }
@@ -124,35 +127,24 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
 
     private void InitDockItemService(IDockItemService dockItemService)
     {
-        void OnDockItemChanged(IDockItemService service, DockItemChangedEventArgs e)
+        void OnDockItemAdded(IDockItemService service, DockItemBase dockItem)
         {
-            switch (e.ChangeType)
-            {
-                case DockItemChangeType.Add:
-                    switch (e.DockItem)
-                    {
-                        case WrappedDockItem { DockItem: not null } wrappedDockItem:
-                            DockItems.Insert(wrappedDockItem.Index, wrappedDockItem);
-                            for (int i = 0; i < DockItems.Count; i++)
-                            {
-                                if (DockItems[i] is WrappedDockItem w)
-                                {
-                                    w.Index = i;
-                                }
-                            }
-                            break;
-                        default:
-                            DockItems.Add(e.DockItem);
-                            break;
-                    }
-                    break;
-                case DockItemChangeType.Remove:
-                    DockItems.Remove(e.DockItem);
-                    break;
-                default:
-                    break;
-            }
-            service.SaveData(App.StorageFile);
+            DockItems.Insert(dockItem.Index, dockItem);
+            dockItemService.SaveData(App.StorageFile);
+            NotifyPanelSize();
+        }
+
+        void OnDockItemRemoved(IDockItemService service, DockItemBase dockItem)
+        {
+            DockItems.Remove(dockItem);
+            dockItemService.SaveData(App.StorageFile);
+            NotifyPanelSize();
+        }
+
+        void OnDockItemMoved(IDockItemService service, (int oldIndex, int newIndex) args)
+        {
+            DockItems.Move(args.oldIndex, args.newIndex);
+            dockItemService.SaveData(App.StorageFile);
         }
         void OnDockItemStarted(IDockItemService service, DockItemBase dockItem)
         {
@@ -165,7 +157,7 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
                     {
                         action();
                     }
-                    catch (System.Exception e)
+                    catch (Exception e)
                     {
                         Logger?.Error(e, "执行 KeyActionDockItem 的任务时发生错误");
                     }
@@ -179,33 +171,32 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
 
         dockItemService.LoadData(App.StorageFile);
         DockItems.Clear();
-
-        foreach (
-            var wrappedItem in dockItemService
-                .DockItems.Where(item => item is WrappedDockItem)
-                .Select(item => (WrappedDockItem)item)
-                .OrderBy(item => item.Index)
-        )
-        {
-            DockItems.Add(wrappedItem);
-        }
-        foreach (var dockItem in dockItemService.DockItems.Where(item => item is not WrappedDockItem))
+        foreach (var dockItem in dockItemService.DockItems)
         {
             DockItems.Add(dockItem);
         }
-        dockItemService.DockItemChanged += OnDockItemChanged;
+        //foreach (
+        //    var wrappedItem in dockItemService
+        //        .DockItems.Where(item => item is WrappedDockItem)
+        //        .Select(item => (WrappedDockItem)item)
+        //        .OrderBy(item => item.Index)
+        //)
+        //{
+        //    DockItems.Add(wrappedItem);
+        //}
+        //foreach (var dockItem in dockItemService.DockItems.Where(item => item is not WrappedDockItem))
+        //{
+        //    DockItems.Add(dockItem);
+        //}
+        dockItemService.DockItemAdded += OnDockItemAdded;
+        dockItemService.DockItemRemoved += OnDockItemRemoved;
+        dockItemService.DockItemMoved += OnDockItemMoved;
         dockItemService.DockItemStarted += OnDockItemStarted;
     }
 
     public void InsertDockLinkItem(int index, string fullPath)
     {
-        DockItemService?.RegisterDockItem(
-            new WrappedDockItem
-            {
-                DockItem = new DockLinkItem { LinkPath = fullPath },
-                Index = index
-            }
-        );
+        DockItemService?.RegisterDockItem(index, new DockLinkItem { LinkPath = fullPath });
 
         NotifyPanelSize();
     }
@@ -220,6 +211,6 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
     {
         OnPropertyChanged(nameof(DockPanelWidth));
         OnPropertyChanged(nameof(DockItemListMargin));
-        //OnPropertyChanged(nameof(DockPanelHeight));
+        OnPropertyChanged(nameof(DockPanelHeight));
     }
 }

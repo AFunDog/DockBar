@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using DockBar.Core.DockItems;
-using DockBar.Core.Structs;
 using DockBar.Shared.Helpers;
 using MessagePack;
 using Serilog;
@@ -11,11 +10,14 @@ internal sealed class DockItemService : IDockItemService
 {
     internal ILogger Logger { get; set; } = Log.Logger;
     private Dictionary<int, DockItemBase> DockItemTable { get; } = [];
+    private List<DockItemBase> DockItemList { get; } = [];
 
-    public IEnumerable<DockItemBase> DockItems => DockItemTable.Values;
+    public IReadOnlyList<DockItemBase> DockItems => DockItemList;
 
-    public event Action<IDockItemService, DockItemChangedEventArgs>? DockItemChanged;
+    public event Action<IDockItemService, DockItemBase>? DockItemAdded;
     public event Action<IDockItemService, DockItemBase>? DockItemStarted;
+    public event Action<IDockItemService, DockItemBase>? DockItemRemoved;
+    public event Action<IDockItemService, (int oldIndex, int newIndex)>? DockItemMoved;
 
     public DockItemService() { }
 
@@ -41,20 +43,23 @@ internal sealed class DockItemService : IDockItemService
         return null;
     }
 
-    public void RegisterDockItem(DockItemBase dockItem)
+    public int RegisterDockItem(int index, DockItemBase dockItem)
     {
         //using var _ = LogHelper.Trace();
         dockItem.Key = AllocNewKey();
-        RegisterDockItemCore(dockItem);
+        RegisterDockItemCore(index, dockItem);
+        return dockItem.Key;
         //Logger.Debug("注册 DockItem 成功 {Key} {DockItem}", dockItem.Key, dockItem);
     }
 
-    private bool RegisterDockItemCore(DockItemBase dockItem)
+    private bool RegisterDockItemCore(int index, DockItemBase dockItem)
     {
         using var _ = LogHelper.Trace();
         dockItem.OwnerService = this;
         var res = DockItemTable.TryAdd(dockItem.Key, dockItem);
-        DockItemChanged?.Invoke(this, new DockItemChangedEventArgs { DockItem = dockItem, ChangeType = DockItemChangeType.Add });
+        DockItemList.Insert(Math.Max(0, Math.Min(index, DockItemList.Count)), dockItem);
+        AllReIndexed();
+        DockItemAdded?.Invoke(this, dockItem);
         if (res)
         {
             Logger.Verbose("注册 DockItem 成功 {DockItem} {Key}", dockItem, dockItem.Key);
@@ -66,18 +71,40 @@ internal sealed class DockItemService : IDockItemService
         return res;
     }
 
-    public void UnregisterDockItem(int key)
+    public bool UnregisterDockItem(int key)
     {
         using var _ = LogHelper.Trace();
         if (DockItemTable.TryGetValue(key, out var dockItem) && DockItemTable.Remove(key))
         {
-            DockItemChanged?.Invoke(this, new DockItemChangedEventArgs { DockItem = dockItem, ChangeType = DockItemChangeType.Remove });
+            DockItemList.RemoveAt(dockItem.Index);
+            DockItemRemoved?.Invoke(this, dockItem);
             dockItem.OwnerService = null;
+            AllReIndexed();
             Logger.Debug("删除 DockItem 成功 {Key} {DockItem}", key, dockItem);
+            return true;
         }
         else
         {
             Logger.Warning("{key} 对应的 DockItem 不存在 跳过删除", key);
+        }
+        return false;
+    }
+
+    public void MoveDockItemTo(int key, int index)
+    {
+        using var _ = LogHelper.Trace();
+        index = Math.Max(0, Math.Min(index, DockItemTable.Count));
+        if (DockItemTable.TryGetValue(key, out var dockItem))
+        {
+            var oldIndex = dockItem.Index;
+            DockItemList.RemoveAt(dockItem.Index);
+            DockItemList.Insert(index, dockItem);
+            AllReIndexed();
+            DockItemMoved?.Invoke(this, (oldIndex, dockItem.Index));
+        }
+        else
+        {
+            Logger.Warning("尝试移动 {key} 对应的 DockItem 不存在 跳过移动", key);
         }
     }
 
@@ -107,12 +134,9 @@ internal sealed class DockItemService : IDockItemService
             //    return;
             foreach (var dockItem in dockItems)
             {
-                var res = RegisterDockItemCore(dockItem);
+                var res = RegisterDockItemCore(dockItem.Index, dockItem);
                 if (res)
-                    DockItemChanged?.Invoke(
-                        this,
-                        new DockItemChangedEventArgs { DockItem = dockItem, ChangeType = DockItemChangeType.Add }
-                    );
+                    DockItemRemoved?.Invoke(this, dockItem);
             }
             Logger.Information("从 {FilePath} 加载 DockItem 数据成功", filePath);
             Logger.Information("加载 {Count} 条数据：{DockItems}", DockItemTable.Count, DockItemTable.Values);
@@ -141,6 +165,17 @@ internal sealed class DockItemService : IDockItemService
         catch (Exception e)
         {
             Logger.Error(e, "保存 DockItem 数据到 {FilePath} 失败", filePath);
+        }
+    }
+
+    /// <summary>
+    /// 将列表中的所有元素的 <see cref="DockItemBase.Index"/> 重新编号
+    /// </summary>
+    private void AllReIndexed()
+    {
+        for (int i = 0; i < DockItemList.Count; i++)
+        {
+            DockItemList[i].Index = i;
         }
     }
 

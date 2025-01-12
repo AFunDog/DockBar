@@ -25,14 +25,14 @@
 
     <Design.DataContext>
         <vm:MainWindowViewModel>
+            <vm:MainWindowViewModel.GlobalSetting>
+                <a:AppSetting DockItemIsShowName="True" />
+            </vm:MainWindowViewModel.GlobalSetting>
             <vm:MainWindowViewModel.DockItems>
                 <cd:DockLinkItem LinkPath="" ShowName="停靠项目1" />
                 <cd:DockLinkItem LinkPath="" ShowName="停靠项目2" />
                 <cd:DockLinkItem LinkPath="" ShowName="停靠项目3" />
             </vm:MainWindowViewModel.DockItems>
-            <vm:MainWindowViewModel.GlobalSetting>
-                <a:AppSetting />
-            </vm:MainWindowViewModel.GlobalSetting>
             <vm:MainWindowViewModel.PerformanceMonitor>
                 <sm:PerformanceMonitor />
             </vm:MainWindowViewModel.PerformanceMonitor>
@@ -43,6 +43,9 @@
         <Style Selector="Window">
             <Setter Property="Background" Value="Gray" />
             <Setter Property="RequestedThemeVariant" Value="Dark" />
+            <Style Selector="^ Grid#DockPanelGrid">
+                <Setter Property="ShowGridLines" Value="True" />
+            </Style>
         </Style>
     </Design.DesignStyle>
     <Window.Styles>
@@ -51,7 +54,7 @@
             <Setter Property="Background" Value="{x:Null}" />
             <Setter Property="SystemDecorations" Value="None" />
         </Style>
-        <Style Selector=":is(Control)#DockPanel">
+        <Style Selector=":is(Control)#DockItemPanel">
             <Setter Property="Transitions">
                 <Setter.Value>
                     <Transitions>
@@ -142,47 +145,114 @@
         </ContextMenu>
     </Window.ContextMenu>
 
-    <Grid ColumnDefinitions="128,*,128">
-        <Border
+    <Grid Name="DockPanelGrid" ColumnDefinitions="128,*,128">
+        <!--<Border
+            Name="DockBarBackgroundBorder"
             Grid.ColumnSpan="3"
-            Height="{Binding GlobalSetting.DockItemSize, Converter={StaticResource PercentageConverter}, ConverterParameter=0.8}"
+            Height="64"
             VerticalAlignment="Bottom"
             Background="{DynamicResource SystemControlBackgroundAltMediumBrush}"
-            CornerRadius="8" />
+            CornerRadius="8" />-->
+        <Border
+            Name="DockBarBackgroundBorder"
+            Grid.ColumnSpan="3"
+            Height="64"
+            VerticalAlignment="Bottom"
+            ClipToBounds="True"
+            CornerRadius="8"
+            Opacity="0.8">
+            <Border.Background>
+                <SolidColorBrush Opacity="{Binding GlobalSetting.DockPanelBackgroundOpacity}" Color="{Binding GlobalSetting.DockPanelBackgroundColor}" />
+            </Border.Background>
+            <!--<ExperimentalAcrylicBorder CornerRadius="8">
+                <ExperimentalAcrylicBorder.Material>
+                    <ExperimentalAcrylicMaterial
+                        MaterialOpacity="0.3"
+                        PlatformTransparencyCompensationLevel=""
+                        TintColor="Black"
+                        TintOpacity="0.1" />
+                </ExperimentalAcrylicBorder.Material>
+            </ExperimentalAcrylicBorder>-->
 
-        <StackPanel
+        </Border>
+
+        <Grid
             Grid.Column="0"
-            Margin="0,0,0,4"
+            Height="{Binding #DockBarBackgroundBorder.Height}"
             HorizontalAlignment="Center"
             VerticalAlignment="Bottom"
-            Orientation="Vertical"
-            Spacing="8">
-            <TextBlock>
-                <Run Text="CPU :" />
-                <Run Text="{Binding PerformanceMonitor.CpuUsage, StringFormat={}{0:F0}}" />
-                <Run Text="%" />
-            </TextBlock>
-            <TextBlock>
-                <Run Text="内存 :" />
-                <Run Text="{Binding PerformanceMonitor.MemoryUsage, StringFormat={}{0:F0}}" />
-                <Run Text="%" />
-            </TextBlock>
-        </StackPanel>
+            RowDefinitions="*,*">
+            <Grid
+                Grid.Row="0"
+                VerticalAlignment="Center"
+                ColumnDefinitions="auto,*"
+                RowDefinitions="*,*">
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.RowSpan="2"
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    FontFamily="Segoe Fluent Icons"
+                    FontSize="22"
+                    Text="&#xE950; " />
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Bottom"
+                    Text="{Binding PerformanceMonitor.CpuUsage, StringFormat={}{0:F0}%}" />
+                <ProgressBar
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    MinWidth="72"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Value="{Binding PerformanceMonitor.CpuUsage}" />
+            </Grid>
+
+            <Grid
+                Grid.Row="1"
+                VerticalAlignment="Center"
+                ColumnDefinitions="auto,*"
+                RowDefinitions="*,*">
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.RowSpan="2"
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    FontFamily="Segoe Fluent Icons"
+                    FontSize="22"
+                    Text="&#xE9A6; " />
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    Text="{Binding PerformanceMonitor.MemoryUsage, StringFormat={}{0:F0}%}" />
+                <ProgressBar
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    MinWidth="72"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Value="{Binding PerformanceMonitor.MemoryUsage}" />
+            </Grid>
+
+        </Grid>
         <Grid
-            Name="DockPanel"
+            Name="DockItemPanel"
             Grid.Column="1"
             Width="{Binding DockPanelWidth}"
             Height="{Binding DockPanelHeight}"
-            Margin="0,0,0,8"
+            Margin="0,0,0,0"
+            Background="Transparent"
+            DragDrop.AllowDrop="True"
             IsHitTestVisible="{Binding !IsMoveMode}">
 
             <ItemsControl
                 Name="DockItemList"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Bottom"
-                Background="Transparent"
                 CornerRadius="8"
-                DragDrop.AllowDrop="True"
                 ItemsSource="{Binding DockItems, Mode=OneWay}"
                 PointerPressed="DockItemList_PointerPressed">
                 <ItemsControl.ItemsPanel>
@@ -209,27 +279,40 @@
 
         </Grid>
 
-        <StackPanel
+        <Grid
             Grid.Column="2"
-            Margin="0,0,0,4"
-            HorizontalAlignment="Center"
+            Height="{Binding #DockBarBackgroundBorder.Height}"
+            HorizontalAlignment="Stretch"
             VerticalAlignment="Bottom"
-            Spacing="8">
-            <TextBlock>
-                <Run
-                    BaselineAlignment="Bottom"
-                    FontFamily="Segoe Fluent Icons"
-                    Text="&#xE70E; " />
-                <Run Text="{Binding PerformanceMonitor.NetworkSentBytesString}" />
-            </TextBlock>
-            <TextBlock>
-                <Run
-                    BaselineAlignment="Bottom"
-                    FontFamily="Segoe Fluent Icons"
-                    Text="&#xE70D; " />
-                <Run Text="{Binding PerformanceMonitor.NetworkReceivedBytesString}" />
-            </TextBlock>
-        </StackPanel>
+            ColumnDefinitions="44,*"
+            RowDefinitions="*,*">
+            <TextBlock
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                FontFamily="Segoe Fluent Icons"
+                FontSize="20"
+                FontWeight="Bold"
+                Foreground="Green"
+                Text="&#xE70E; " />
+            <TextBlock
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                Text="{Binding PerformanceMonitor.NetworkSentBytesString}" />
+            <TextBlock
+                Grid.Row="1"
+                Grid.Column="0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                FontFamily="Segoe Fluent Icons"
+                FontSize="20"
+                Foreground="Orange"
+                Text="&#xE70D; " />
+            <TextBlock
+                Grid.Row="1"
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                Text="{Binding PerformanceMonitor.NetworkReceivedBytesString}" />
+        </Grid>
     </Grid>
 
 </Window>

@@ -8,11 +8,10 @@ using MessagePack;
 
 namespace DockBar.Core.DockItems;
 
-[MessagePackObject(AllowPrivate = true)]
+[MessagePackObject(keyAsPropertyName: true)]
 public sealed partial class KeyActionDockItem : DockItemBase
 {
     [ObservableProperty]
-    [Key(3)]
     public partial string? ActionKey { get; set; }
 
     protected override void StartCore()
