@@ -1,0 +1,69 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:astructs="using:DockBar.AvaloniaApp.Structs"
+                    xmlns:controls="using:DockBar.AvaloniaApp.Controls"
+                    xmlns:converters="using:DockBar.AvaloniaApp.Converters"
+                    xmlns:cores="using:DockBar.Core.Structs">
+    <Design.PreviewWith>
+        <controls:HotKeyEditBox Width="120" Height="48">
+            <controls:HotKeyEditBox.HotKey>
+                <cores:HotKeyInfo />
+            </controls:HotKeyEditBox.HotKey>
+        </controls:HotKeyEditBox>
+    </Design.PreviewWith>
+    <ControlTheme x:Key="{x:Type controls:HotKeyEditBox}" TargetType="controls:HotKeyEditBox">
+        <Setter Property="Background" Value="{DynamicResource TextControlBackground}" />
+        <Setter Property="BorderThickness" Value="{DynamicResource TextControlBorderThemeThickness}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}"></Setter>
+        <!-- <Setter Property="Padding" Value="{DynamicResource TextControlThemePadding}"></Setter> -->
+        <Setter Property="Focusable" Value="True" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Name="PART_BorderElement"
+                        Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}">
+                    <Grid Margin="{TemplateBinding Padding}" ColumnDefinitions="*,auto">
+                        <TextPresenter HorizontalAlignment="Center"
+                                       Text="{TemplateBinding HotKey,Converter={x:Static converters:HotKeyInfoStringConverter.Instance}}"
+                                       VerticalAlignment="Center" />
+                        <Button Name="PART_ClearButton" Grid.Column="1" MaxWidth="32" MaxHeight="32">
+                            <TextBlock Classes="FontIcon" Text="&#xE711;" />
+                        </Button>
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+        <!-- PointerOver State-->
+        <Style Selector="^:pointerover">
+            <Setter Property="Foreground" Value="{DynamicResource TextControlForegroundPointerOver}" />
+
+            <Style Selector="^ /template/ Border#PART_BorderElement">
+                <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrushPointerOver}" />
+                <Setter Property="Background" Value="{DynamicResource TextControlBackgroundPointerOver}" />
+            </Style>
+
+        </Style>
+
+        <!-- Focused State -->
+        <Style Selector="^:focus">
+            <Setter Property="Foreground" Value="{DynamicResource TextControlForegroundFocused}" />
+
+            <Style Selector="^ /template/ Border#PART_BorderElement">
+                <Setter Property="Background" Value="{DynamicResource TextControlBackgroundFocused}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrushFocused}" />
+                <Setter Property="BorderThickness" Value="{DynamicResource TextControlBorderThemeThicknessFocused}" />
+            </Style>
+        </Style>
+        
+        <!-- Disabled State -->
+        <Style Selector="^:disabled">
+            <Setter Property="Foreground" Value="{DynamicResource TextControlForegroundDisabled}" />
+
+            <Style Selector="^ /template/ Border#PART_BorderElement">
+                <Setter Property="Background" Value="{DynamicResource TextControlBackgroundDisabled}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrushDisabled}" />
+            </Style>
+        </Style>
+    </ControlTheme>
+</ResourceDictionary>

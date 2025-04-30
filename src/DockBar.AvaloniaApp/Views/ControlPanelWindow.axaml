@@ -1,0 +1,61 @@
+<Window
+    x:Class="DockBar.AvaloniaApp.Views.ControlPanelWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:a="using:DockBar.AvaloniaApp"
+    xmlns:cext="using:CoreLibrary.Toolkit.Avalonia.Extensions"
+    xmlns:controls="using:DockBar.AvaloniaApp.Controls"
+    xmlns:ctac="using:CoreLibrary.Toolkit.Avalonia.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:DockBar.AvaloniaApp.ViewModels"
+    xmlns:structs="clr-namespace:DockBar.Core.Structs;assembly=DockBar.Core"
+    Title="{cext:Localize ControlPanelWindow.Title}"
+    Width="1000"
+    Height="600"
+    x:DataType="vm:ControlPanelWindowViewModel"
+    WindowStartupLocation="CenterScreen"
+    mc:Ignorable="d">
+    <Design.DataContext>
+        <vm:ControlPanelWindowViewModel>
+        </vm:ControlPanelWindowViewModel>
+    </Design.DataContext>
+    <Design.DesignStyle>
+        <Style Selector="Window">
+            <!-- <Setter Property="RequestedThemeVariant" Value="Dark" /> -->
+        </Style>
+    </Design.DesignStyle>
+    <Window.Styles>
+        <Style Selector="Window">
+            <Setter Property="Background" Value="{x:Null}" />
+            <Setter Property="ExtendClientAreaToDecorationsHint" Value="True" />
+            <Setter Property="ExtendClientAreaChromeHints" Value="NoChrome" />
+            <Setter Property="TransparencyLevelHint" Value="AcrylicBlur" />
+            <Setter Property="WindowStartupLocation" Value="CenterOwner" />
+            <Setter Property="SystemDecorations" Value="BorderOnly" />
+        </Style>
+    </Window.Styles>
+    <Grid>
+        <ExperimentalAcrylicBorder CornerRadius="8">
+            <ExperimentalAcrylicBorder.Material>
+                <ExperimentalAcrylicMaterial
+                    MaterialOpacity="0.8"
+                    TintColor="{DynamicResource SystemAltHighColor}"
+                    TintOpacity="1" />
+            </ExperimentalAcrylicBorder.Material>
+        </ExperimentalAcrylicBorder>
+        <Grid RowDefinitions="auto,*">
+            <!--  标题栏区域  -->
+            <ctac:CustomTitleBar Title="{Binding $parent[Window].Title}" />
+
+            <ctac:NavigationView
+                Grid.Row="1"
+                Command="{Binding NavigateCommand}"
+                Content="{Binding Content}"
+                MenuItemSource="{Binding MenuItems}"
+                SelectedMenuItem="{Binding SelectedMenuItem, Mode=TwoWay}" />
+
+
+        </Grid>
+    </Grid>
+</Window>

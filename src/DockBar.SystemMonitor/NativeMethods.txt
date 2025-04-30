@@ -1,0 +1,14 @@
+PdhCollectQueryData
+PdhOpenQuery
+PdhAddCounter
+PdhGetFormattedCounterValue
+PdhGetFormattedCounterArray
+PdhCloseQuery
+PdhRemoveCounter
+
+GlobalMemoryStatusEx
+
+PDH_FMT
+
+MEMORYSTATUSEX
+

@@ -1,0 +1,47 @@
+<Application
+    x:Class="DockBar.AvaloniaApp.App"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:a="using:DockBar.AvaloniaApp"
+    xmlns:ac="using:DockBar.AvaloniaApp.Converters"
+    xmlns:ca="using:CoreLibrary.Toolkit.Avalonia"
+    xmlns:controls="using:DockBar.AvaloniaApp.Controls"
+    xmlns:vs="using:DockBar.AvaloniaApp.Views"
+    x:DataType="a:App"
+    RequestedThemeVariant="Light">
+    <!-- TODO 适配浅色主题 -->
+    <!--  "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options.  -->
+
+    <Application.Styles>
+        <FluentTheme />
+
+        <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
+
+        <Style Selector="Window">
+            <Setter Property="FontFamily" Value="Noto Sans SC" />
+        </Style>
+
+        <Style Selector="TextBlock.FontIcon">
+            <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+        </Style>
+
+        <Style Selector="Run.FontIcon">
+            <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+        </Style>
+    </Application.Styles>
+
+
+    <Application.Resources>
+        <ResourceDictionary>
+
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://DockBar.AvaloniaApp/Controls/DockItemControl.axaml" />
+                <ResourceInclude Source="avares://DockBar.AvaloniaApp/Controls/SettingCard.axaml" />
+                <ResourceInclude Source="avares://DockBar.AvaloniaApp/Controls/HotKeyEditBox.axaml" />
+                <!--<ResourceInclude Source="/Styles/ExpanderStyle.axaml" />-->
+                <ca:ControlsProvider />
+            </ResourceDictionary.MergedDictionaries>
+            
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

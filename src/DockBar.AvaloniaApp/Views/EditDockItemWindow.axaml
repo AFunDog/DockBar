@@ -1,0 +1,296 @@
+<Window
+    x:Class="DockBar.AvaloniaApp.Views.EditDockItemWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:a="using:DockBar.AvaloniaApp"
+    xmlns:ac="using:DockBar.AvaloniaApp.Converters"
+    xmlns:cac="using:CoreLibrary.Toolkit.Avalonia.Controls"
+    xmlns:cext="using:CoreLibrary.Toolkit.Avalonia.Extensions"
+    xmlns:controls="using:DockBar.AvaloniaApp.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="using:System"
+    xmlns:vm="using:DockBar.AvaloniaApp.ViewModels"
+    xmlns:cs="using:DockBar.DockItem.Structs"
+    Title="{Binding WindowTitle, Mode=OneWay}"
+    Width="800"
+    Height="450"
+    x:DataType="vm:EditDockItemWindowViewModel"
+    mc:Ignorable="d">
+    <Design.DataContext>
+        <vm:EditDockItemWindowViewModel IsAddMode="True">
+            <vm:EditDockItemWindowViewModel.CurrentDockItem>
+                <!--<cd:KeyActionDockItem ActionKey="Setting" ShowName="123" />-->
+                <cs:DockLinkItem LinkPath="C:" />
+            </vm:EditDockItemWindowViewModel.CurrentDockItem>
+        </vm:EditDockItemWindowViewModel>
+    </Design.DataContext>
+    <Design.DesignStyle>
+        <Style Selector="Window">
+            <Setter Property="RequestedThemeVariant" Value="Dark" />
+        </Style>
+    </Design.DesignStyle>
+    <Window.Styles>
+        <Style Selector="Window">
+            <Setter Property="Background" Value="{x:Null}" />
+            <Setter Property="ExtendClientAreaToDecorationsHint" Value="True" />
+            <Setter Property="ExtendClientAreaChromeHints" Value="NoChrome" />
+            <Setter Property="TransparencyLevelHint" Value="AcrylicBlur" />
+            <Setter Property="WindowStartupLocation" Value="CenterOwner" />
+            <Setter Property="SystemDecorations" Value="Full" />
+        </Style>
+    </Window.Styles>
+    <Grid>
+        <ExperimentalAcrylicBorder CornerRadius="8">
+            <ExperimentalAcrylicBorder.Material>
+                <ExperimentalAcrylicMaterial
+                    MaterialOpacity="0.65"
+                    TintColor="Black"
+                    TintOpacity="0.8" />
+            </ExperimentalAcrylicBorder.Material>
+        </ExperimentalAcrylicBorder>
+        <Grid RowDefinitions="32,*">
+            <!--  标题栏区域  -->
+            <!--<Grid
+                Grid.Row="0"
+                Margin="8,0,8,0"
+                ColumnDefinitions="*,auto">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    IsHitTestVisible="False"
+                    Text="{Binding $parent[Window].Title}" />
+                <Button Grid.Column="1" Click="CloseButton_Clicked">
+                    <Button.Styles>
+                        <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                            <Setter Property="Background">
+                                <Setter.Value>
+                                    <SolidColorBrush Opacity="0.8" Color="Red" />
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Styles>
+                    <TextBlock Classes="FontIcon" Text="&#xE711;" />
+                </Button>
+            </Grid>-->
+
+            <cac:CustomTitleBar
+                Title="{Binding $parent[Window].Title}"
+                IsMaximizeButtonVisible="False"
+                IsMinimizeButtonVisible="False" />
+
+            <Grid
+                Name="rootGrid"
+                Grid.Row="1"
+                Margin="16"
+                Background="Transparent"
+                ColumnDefinitions="*,*"
+                DragDrop.AllowDrop="True">
+                <Grid Grid.Column="0" RowDefinitions="*,*">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock HorizontalAlignment="Center" Text="预览" />
+                        <Border
+                            Margin="16"
+                            Padding="16"
+                            BorderBrush="{DynamicResource SystemBaseMediumColor}"
+                            BorderThickness="4"
+                            CornerRadius="16">
+                            <!--  将 IsEnabled 设置为 False 以免触发点击操作  -->
+                            <controls:DockItemControl
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                ShowName="{Binding CurrentDockItem.ShowName}"
+                                DockIcon="{Binding CurrentDockItem.IconData,Converter={x:Static ac:DockItemIconConverter.Instance}}"
+                                Width="108" Height="108" />
+
+
+                        </Border>
+                    </StackPanel>
+
+                    <Grid Grid.Row="1" RowDefinitions="*,*">
+                        <Grid
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            RowDefinitions="*,*">
+                            <TextBlock
+                                Margin="0,0,0,8"
+                                HorizontalAlignment="Center"
+                                Text="项目类型" />
+                            <!--<TextBlock
+                                Grid.Row="1"
+                                HorizontalAlignment="Center"
+                                FontWeight="Bold"
+                                Text="{Binding DockItemTypeString}" />-->
+                            <ComboBox
+                                Grid.Row="1"
+                                MinWidth="192"
+                                HorizontalContentAlignment="Center"
+                                ItemsSource="{Binding DockItemTypeStrings}"
+                                SelectedIndex="{Binding SelectedDockItemTypeIndex}">
+                                <ComboBox.Styles>
+                                    <Style Selector="ComboBoxItem">
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                    </Style>
+                                </ComboBox.Styles>
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate DataType="sys:String">
+                                        <TextBlock Text="{Binding .}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                                <!--<ComboBox.Items>
+                                    <ComboBoxItem Content="空" />
+                                -->
+                                <!--<ComboBoxItem Content="未知" />-->
+                                <!--
+                                    <ComboBoxItem Content="链接项目" />
+                                    <ComboBoxItem Content="自定义行为项目" />
+                                    <ComboBoxItem Content="文件夹项目" />
+                                </ComboBox.Items>-->
+                            </ComboBox>
+                        </Grid>
+                        <Button
+                            Grid.Row="1"
+                            HorizontalAlignment="Center"
+                            Command="{Binding ConfirmDockItemCommand}"
+                            Content="{Binding ConfirmButtonText}"
+                            IsDefault="True" />
+
+                    </Grid>
+
+
+                </Grid>
+                <Grid
+                    Grid.Column="1"
+                    ColumnDefinitions="84,32,*"
+                    RowDefinitions="auto,auto,auto,auto,auto,*">
+                    <Grid.Styles>
+                        <Style Selector="Label">
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                        </Style>
+                        <Style Selector="TextBlock">
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                        </Style>
+                        <Style Selector="TextBox">
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                        </Style>
+                    </Grid.Styles>
+                    <TextBlock
+                        Grid.ColumnSpan="3"
+                        Margin="0,0,0,16"
+                        FontSize="18"
+                        Text="属性列表" />
+                    <Label
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Content="唯一标识符"
+                        Target="{Binding #KeyTextBlock}" />
+                    <SelectableTextBlock
+                        Name="KeyTextBlock"
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Grid.ColumnSpan="2"
+                        Margin="0,4"
+                        Text="{Binding CurrentDockItem.Key}" />
+                    <Label
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Content="索引位置"
+                        Target="{Binding #IndexNumberTextBlock}" />
+                    <SelectableTextBlock
+                        Name="IndexNumberTextBlock"
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Grid.ColumnSpan="2"
+                        Margin="0,4"
+                        Text="{Binding Index}" />
+                    <Label Grid.Row="3" Content="项目图标" />
+                    <CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding CurrentDockItem.UseGeneratedIcon,Mode=TwoWay}" />
+                    <Button
+                        Grid.Row="3"
+                        Grid.Column="2"
+                        IsEnabled="{Binding !CurrentDockItem.UseGeneratedIcon,Mode=OneWay}"
+                        Command="{Binding OpenIconFileCommand}"
+                        Margin="0,4,0,4"
+                        Content="选择本地文件" />
+                    <Label
+                        Grid.Row="4"
+                        Grid.Column="0"
+                        Content="展示名称"
+                        Target="{Binding #ShowNameTextBox}" />
+                    <CheckBox
+                        Name="UseGeneratedShowNameCheckBox"
+                        Grid.Row="4"
+                        Grid.Column="1"
+                        IsChecked="{Binding CurrentDockItem.UseGeneratedShowName, Mode=TwoWay}" />
+                    <TextBox
+                        Name="ShowNameTextBox"
+                        Grid.Row="4"
+                        Grid.Column="2"
+                        Margin="0,4"
+                        IsEnabled="{Binding !CurrentDockItem.UseGeneratedShowName, Mode=OneWay}"
+                        Text="{Binding CurrentDockItem.ShowName, Mode=TwoWay}" />
+
+                    <ContentControl
+                        Grid.Row="5"
+                        Grid.ColumnSpan="3"
+                        VerticalAlignment="Top"
+                        Content="{Binding CurrentDockItem}">
+                        <ContentControl.DataTemplates>
+                            <DataTemplate DataType="cs:DockLinkItem">
+                                <Grid ColumnDefinitions="84,32,*" RowDefinitions="*,*">
+                                    <Label
+                                        Grid.Row="0"
+                                        Grid.Column="0"
+                                        Content="目标路径"
+                                        Target="{Binding #LinkPathTextBox}" />
+                                    <TextBox
+                                        Name="LinkPathTextBox"
+                                        Grid.Row="0"
+                                        Grid.Column="1"
+                                        Grid.ColumnSpan="2"
+                                        Margin="0,4"
+                                        Text="{Binding LinkPath, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                                    <Label
+                                        Grid.Row="1"
+                                        Grid.Column="0"
+                                        Content="链接类型"
+                                        Target="{Binding #LinkTypeComboBox}" />
+                                    <CheckBox Name="IsAutoDetectLinkTypeCheckBox" Grid.Row="1" Grid.Column="1"
+                                              IsChecked="{Binding IsAutoDetectLinkType,Mode=TwoWay}" />
+                                    <ComboBox
+                                        Name="LinkTypeComboBox"
+                                        Grid.Row="1"
+                                        Grid.Column="2"
+                                        IsEnabled="{Binding !IsAutoDetectLinkType, Mode=OneWay}"
+                                        HorizontalAlignment="Stretch"
+                                        SelectedIndex="{Binding LinkType, Mode=TwoWay}">
+                                        <ComboBoxItem Content="未定义" />
+                                        <ComboBoxItem Content="程序" />
+                                        <ComboBoxItem Content="链接" />
+                                        <ComboBoxItem Content="网址" />
+                                        <ComboBoxItem Content="文件" />
+                                        <ComboBoxItem Content="文件夹" />
+                                    </ComboBox>
+                                </Grid>
+                            </DataTemplate>
+                            <DataTemplate DataType="cs:KeyActionDockItem">
+                                <Grid ColumnDefinitions="84,*" RowDefinitions="*">
+                                    <Label
+                                        Grid.Row="0"
+                                        Grid.Column="0"
+                                        Content="行为标识符" />
+                                    <TextBox
+                                        Grid.Row="0"
+                                        Grid.Column="1"
+                                        Margin="0,4"
+                                        Text="{Binding ActionKey}" />
+                                </Grid>
+                            </DataTemplate>
+                            <!--<DataTemplate DataType="cd:DockLinkItem" />-->
+                        </ContentControl.DataTemplates>
+                    </ContentControl>
+                </Grid>
+
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

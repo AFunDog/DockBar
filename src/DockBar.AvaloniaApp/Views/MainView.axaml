@@ -1,0 +1,96 @@
+<UserControl
+    x:Class="DockBar.AvaloniaApp.Views.MainView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:da="using:DockBar.AvaloniaApp"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:DockBar.AvaloniaApp.ViewModels"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="vm:MainViewModel"
+    mc:Ignorable="d">
+    <Design.DataContext>
+        <vm:MainViewModel />
+    </Design.DataContext>
+    <Grid RowDefinitions="auto,*">
+        <StackPanel Margin="16,8,0,0" Orientation="Horizontal">
+            <Image
+                Height="24"
+                Margin="8"
+                VerticalAlignment="Center"
+                Source="avares://DockBar.AvaloniaApp/Assets/icon.ico" />
+            <TextBlock VerticalAlignment="Center" FontSize="28">
+                <Run BaselineAlignment="Top" Text="停靠工具栏" />
+            </TextBlock>
+        </StackPanel>
+        <Grid Grid.Row="1">
+            <StackPanel Margin="16,8,16,8" Orientation="Vertical">
+                <SelectableTextBlock Margin="8,0,0,0" HorizontalAlignment="Center">
+                    <Run
+                        BaselineAlignment="Center"
+                        FontSize="18"
+                        Text="✨停靠工具栏是个人使用的小工具🔧" />
+                </SelectableTextBlock>
+                <SelectableTextBlock LineHeight="24" Margin="8,8,0,0" TextWrapping="Wrap">
+                    <SelectableTextBlock.Styles>
+                        <Style Selector="Run.Section">
+                            <Setter Property="FontSize" Value="16" />
+                            <Setter Property="FontWeight" Value="Bold" />
+                        </Style>
+                    </SelectableTextBlock.Styles>
+                    <Run
+                        BaselineAlignment="Center"
+                        FontSize="20"
+                        Text="🛠️当前版本" />
+                    <Run FontSize="16" Text="{Binding AppVersion, StringFormat={}V{0}}" />
+                    <!--<Button Content="123" />-->
+                    <LineBreak />
+                    <Run
+                        BaselineAlignment="Center"
+                        FontSize="20"
+                        Text="📖使用方法" />
+                    <LineBreak />
+
+                    <Span>
+                        <Run Classes="Section" Text="如何添加停靠项目" />
+                        <LineBreak />
+                        <Run Text="1. 从桌面、文件夹等文件系统拖入链接、程序、文件、文件夹等到停靠面板" />
+                        <LineBreak />
+                        <Run Text="2. 右键停靠面板打开菜单，点击 [在此添加新项目] 来打开添加面板添加停靠项目" />
+
+                        <!--<InlineUIContainer>
+                            <MenuItem Header="在此添加项目">
+                                <MenuItem.Icon>
+                                    <TextBlock
+                                        Classes="FontIcon"
+                                        Foreground="Green"
+                                        Text="&#xE710;" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </InlineUIContainer>-->
+                        <!--<Run Text="" />-->
+                    </Span>
+                    <LineBreak />
+                    <Span>
+                        <Run Classes="Section" Text="如何编辑停靠项目" />
+                        <LineBreak />
+                        <Run Text="1. 右键停靠项目打开菜单，点击 [修改此项目] 来打开修改面板修改停靠项目" />
+                    </Span>
+                    <LineBreak />
+                    <Span>
+                        <Run Classes="Section" Text="如何删除停靠项目" />
+                        <LineBreak />
+                        <Run Text="1. 右键停靠项目打开菜单，点击 [删除此项目] 来删除此停靠项目" />
+                    </Span>
+                    <LineBreak />
+                    <Span>
+                        <Run Classes="Section" Text="如何移动停靠项目" />
+                        <LineBreak />
+                        <Run Text="1. 左键点击停靠项目不放，拖拽至想要的位置放开即可"></Run>
+                    </Span>
+                </SelectableTextBlock>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,121 @@
+<Window
+    x:Class="DockBar.AvaloniaApp.Views.MenuWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cext="using:CoreLibrary.Toolkit.Avalonia.Extensions"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:views="using:DockBar.AvaloniaApp.Views"
+    xmlns:vm="using:DockBar.AvaloniaApp.ViewModels"
+    Title="菜单窗口"
+    x:DataType="views:MenuWindow"
+    mc:Ignorable="d">
+    <Window.Styles>
+        <Style Selector="Window">
+            <Setter Property="ShowActivated" Value="False" />
+            <Setter Property="SizeToContent" Value="Height" />
+            <Setter Property="Width" Value="240" />
+            <Setter Property="SystemDecorations" Value="None" />
+            <Setter Property="TransparencyLevelHint" Value="AcrylicBlur" />
+            <Setter Property="Background" Value="{x:Null}" />
+            <Setter Property="ExtendClientAreaToDecorationsHint" Value="True" />
+            <Setter Property="ExtendClientAreaChromeHints" Value="NoChrome" />
+            <!--<Setter Property="ExtendClientAreaTitleBarHeightHint" Value="-1" />-->
+            <Setter Property="CanResize" Value="False" />
+            <Setter Property="ShowInTaskbar" Value="False" />
+            <Setter Property="Topmost" Value="True" />
+        </Style>
+    </Window.Styles>
+    <Grid>
+        <ExperimentalAcrylicBorder>
+            <ExperimentalAcrylicBorder.Material>
+                <ExperimentalAcrylicMaterial
+                    MaterialOpacity="0.4"
+                    TintColor="{DynamicResource SystemAltHighColor}"
+                    TintOpacity="1" />
+            </ExperimentalAcrylicBorder.Material>
+        </ExperimentalAcrylicBorder>
+        <!--<ItemsControl>
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Vertical" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>-->
+        <ContextMenu>
+            <ContextMenu.Styles>
+                <Style Selector="ContextMenu">
+                    <Setter Property="Background" Value="{x:Null}" />
+                </Style>
+                <Style Selector="MenuItem">
+                    <Setter Property="Padding" Value="8,6,8,6" />
+                </Style>
+                <Style Selector="TextBlock.FontIcon">
+                    <Setter Property="FontSize" Value="32" />
+                </Style>
+            </ContextMenu.Styles>
+            <MenuItem Command="{Binding AddDockItemCommand}" Header="{cext:Localize MenuWindow.AddDockItemButton.Content}">
+                <MenuItem.Icon>
+                    <TextBlock
+                        Classes="FontIcon"
+                        Foreground="Green"
+                        Text="&#xE710;" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Command="{Binding EditMenuItemCommand}" Header="{cext:Localize MenuWindow.EditDockItemButton.Content}">
+                <MenuItem.Icon>
+                    <TextBlock
+                        Classes="FontIcon"
+                        Foreground="Orange"
+                        Text="&#xE70F;" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Command="{Binding RemoveDockItemCommand}" Header="{cext:Localize MenuWindow.DeleteDockItemButton.Content}">
+                <MenuItem.Icon>
+                    <TextBlock
+                        Classes="FontIcon"
+                        Foreground="Red"
+                        Text="&#xE74D;" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <!--<MenuItem Background="{x:Null}" Header="添加内置项目">
+                <MenuItem.Icon>
+                    <TextBlock
+                        Classes="FontIcon"
+                        Foreground="Azure"
+                        Text="&#xE710;" />
+                </MenuItem.Icon>
+                <MenuItem Background="{x:Null}" Header="设置">
+                    <MenuItem.Icon>
+                        <TextBlock Classes="FontIcon" Text="&#xE713;" />
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>-->
+            <MenuItem Command="{Binding OpenSettingWindowCommand}" Header="{cext:Localize MenuWindow.OpenSettingWindowButton.Content}">
+                <MenuItem.Icon>
+                    <TextBlock Classes="FontIcon" Text="&#xE713;" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Command="{Binding ExitCommand}" Header="{cext:Localize MenuWindow.ExitAppButton.Content}">
+                <MenuItem.Icon>
+                    <TextBlock
+                        Classes="FontIcon"
+                        Foreground="Red"
+                        Text="&#xE711;" />
+                </MenuItem.Icon>
+            </MenuItem>
+
+            <!--<ContextMenu.ItemTemplate>
+                <DataTemplate DataType="vm:MenuItemData">
+                    <Grid ColumnDefinitions="32,auto">
+                        <TextBlock
+                            Grid.Column="0"
+                            Classes="FontIcon"
+                            Text="{Binding Glyph}" VerticalAlignment="Center" HorizontalAlignment="Center"  />
+                        <TextBlock Grid.Column="1" Text="{Binding Text}" />
+                    </Grid>
+                </DataTemplate>
+            </ContextMenu.ItemTemplate>-->
+        </ContextMenu>
+    </Grid>
+</Window>

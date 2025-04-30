@@ -1,0 +1,86 @@
+<ResourceDictionary
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:a="using:DockBar.AvaloniaApp"
+    xmlns:as="using:DockBar.AvaloniaApp.Structs"
+    xmlns:ds="using:DockBar.DockItem.Structs"
+    xmlns:controls="using:DockBar.AvaloniaApp.Controls"
+    xmlns:vm="using:DockBar.AvaloniaApp.ViewModels">
+
+    <ControlTheme x:Key="{x:Type controls:DockItemControl}" TargetType="controls:DockItemControl">
+
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid
+                    Width="{TemplateBinding Width}"
+                    Height="{TemplateBinding Height}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    Background="{TemplateBinding Background}"
+                    RowDefinitions="*,auto">
+                    <Border
+                        Name="PART_Container"
+                        Padding="8"
+                        ClipToBounds="True"
+                        CornerRadius="8"
+                        Cursor="Hand"
+                        ToolTip.Tip="{TemplateBinding ShowName}">
+                        <Border.Styles>
+                            <Style Selector="Border#PART_Container">
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <SolidColorBrush Opacity="0.1" Color="Transparent" />
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter Property="Transitions">
+                                    <Setter.Value>
+                                        <Transitions>
+                                            <BrushTransition
+                                                Easing="CubicEaseOut"
+                                                Property="Background"
+                                                Duration="0:0:0.33" />
+                                        </Transitions>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                            <Style Selector="Border#PART_Container:pointerover">
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <SolidColorBrush Opacity="0.1" Color="{DynamicResource SystemBaseHighColor}" />
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                            <Style Selector="Border#PART_Container Image">
+                                <Setter Property="Transitions">
+                                    <Setter.Value>
+                                        <Transitions>
+                                            <TransformOperationsTransition
+                                                Easing="BackEaseOut"
+                                                Property="RenderTransform"
+                                                Duration="0:0:0.16" />
+                                        </Transitions>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                            <Style Selector="controls|DockItemControl[IsPressed=true] Border#PART_Container Image">
+                                <Setter Property="RenderTransform" Value="scale(0.9)" />
+                            </Style>
+                        </Border.Styles>
+                        <Image Source="{TemplateBinding DockIcon}" Stretch="Uniform" />
+                    </Border>
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+
+    <Design.PreviewWith>
+        <Grid Width="200" Height="200">
+            <controls:DockItemControl FontSize="16" Width="108" Height="108" ShowName="DesignName" DockIcon="/Assets/setting.png">
+                <!-- <controls:DockItemControl.DockItem> -->
+                <!--     <cd:DockLinkItem ShowName="ShowName" LinkPath="C:" /> -->
+                <!-- </controls:DockItemControl.DockItem> -->
+            </controls:DockItemControl>
+        </Grid>
+    </Design.PreviewWith>
+</ResourceDictionary>

@@ -1,0 +1,5 @@
+MenuWindow.AddDockItemButton.Content : 在此添加项目;
+MenuWindow.EditDockItemButton.Content : 修改此项目;
+MenuWindow.DeleteDockItemButton.Content : 删除此项目;
+MenuWindow.OpenSettingWindowButton.Content : 设置;
+MenuWindow.ExitAppButton.Content : 退出;
