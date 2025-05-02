@@ -25,9 +25,9 @@
 
     <Design.DataContext>
         <vm:MainWindowViewModel>
-            <vm:MainWindowViewModel.GlobalSetting>
+            <vm:MainWindowViewModel.AppSetting>
                 <structs:AppSetting />
-            </vm:MainWindowViewModel.GlobalSetting>
+            </vm:MainWindowViewModel.AppSetting>
             <vm:MainWindowViewModel.DockItems>
                 <ds:DockLinkItem LinkPath="" ShowName="停靠项目1" />
                 <ds:DockLinkItem LinkPath="" ShowName="停靠项目2" />
@@ -46,14 +46,12 @@
     </Design.DesignStyle>
     <Window.Styles>
         <Style Selector="Window">
-            <Setter Property="TransparencyLevelHint" Value="AcrylicBlur,Blur,Transparent,None" />
-            <Setter Property="TransparencyBackgroundFallback">
+
+            <Setter Property="Background">
                 <Setter.Value>
-                    <SolidColorBrush Opacity="0.8" Color="Black" />
+                    <SolidColorBrush Color="{Binding AppSetting.DockPanelBackgroundColor,Converter={x:Static converters:ColorValueColorConverter.Instance},Mode=OneWay}"></SolidColorBrush>
                 </Setter.Value>
             </Setter>
-
-            <Setter Property="Background" Value="Transparent" />
             <Setter Property="SystemDecorations" Value="BorderOnly" />
             <Setter Property="ExtendClientAreaToDecorationsHint" Value="True" />
             <Setter Property="ExtendClientAreaChromeHints" Value="NoChrome" />
@@ -106,16 +104,16 @@
 
     <Grid Name="RootGrid" RowDefinitions="*,auto,auto">
 
-        <ExperimentalAcrylicBorder Grid.RowSpan="3">
-            <!-- 使用多重绑定生成 Material 解决 AOT 下不生效的问题 -->
-            <ExperimentalAcrylicBorder.Material>
-                <MultiBinding Converter="{x:Static ac:ExperimentalAcrylicBorderMaterialConverter.Instance}">
-                    <Binding Path="GlobalSetting.DockPanelBackgroundColor" Converter="{x:Static converters:ColorValueColorConverter.Instance}"/>
-                    <Binding Path="GlobalSetting.DockPanelBackgroundOpacity"/>
-                    <Binding FallbackValue="0.4"/>
-                </MultiBinding>
-            </ExperimentalAcrylicBorder.Material>
-        </ExperimentalAcrylicBorder>
+        <!-- <ExperimentalAcrylicBorder Grid.RowSpan="3"> -->
+        <!--     ~1~ 使用多重绑定生成 Material 解决 AOT 下不生效的问题 @1@ -->
+        <!--     <ExperimentalAcrylicBorder.Material> -->
+        <!--         <MultiBinding Converter="{x:Static ac:ExperimentalAcrylicBorderMaterialConverter.Instance}"> -->
+        <!--             <Binding Path="AppSetting.DockPanelBackgroundColor" Converter="{x:Static converters:ColorValueColorConverter.Instance}"/> -->
+        <!--             <Binding Path="AppSetting.DockPanelBackgroundOpacity"/> -->
+        <!--             <Binding FallbackValue="0.4"/> -->
+        <!--         </MultiBinding> -->
+        <!--     </ExperimentalAcrylicBorder.Material> -->
+        <!-- </ExperimentalAcrylicBorder> -->
         <!-- <Border Grid.RowSpan="3" -->
         <!--         Background="{Binding GlobalSetting.DockPanelBackgroundColor,Converter={x:Static converters:ColorValueColorConverter.Instance}}" -->
         <!--         Opacity="{Binding GlobalSetting.DockPanelBackgroundOpacity,Mode=OneWay}" /> -->
@@ -232,7 +230,7 @@
                     ItemsSource="{Binding DockItems, Mode=OneWay}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal" Spacing="{Binding GlobalSetting.DockItemSpacing}" />
+                            <StackPanel Orientation="Horizontal" Spacing="{Binding AppSetting.DockItemSpacing}" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
@@ -241,12 +239,12 @@
                                 DockItemKey="{Binding Key}"
                                 ShowName="{Binding ShowName}"
                                 DockIcon="{Binding IconData,Converter={x:Static ac:DockItemIconConverter.Instance}}"
-                                FontSize="{Binding #DockItemList.((vm:MainWindowViewModel)DataContext).GlobalSetting.DockItemNameFontSize}"
+                                FontSize="{Binding #DockItemList.((vm:MainWindowViewModel)DataContext).AppSetting.DockItemNameFontSize}"
                                 Command="{Binding #DockItemList.((vm:MainWindowViewModel)DataContext).ExecuteDockItemCommand}"
                                 CommandParameter="{Binding Key}"
                                 PointerReleased="DockItem_PointerReleased"
-                                Width="{Binding #DockItemList.((vm:MainWindowViewModel)DataContext).GlobalSetting.DockItemSize}"
-                                Height="{Binding #DockItemList.((vm:MainWindowViewModel)DataContext).GlobalSetting.DockItemSize}" />
+                                Width="{Binding #DockItemList.((vm:MainWindowViewModel)DataContext).AppSetting.DockItemSize}"
+                                Height="{Binding #DockItemList.((vm:MainWindowViewModel)DataContext).AppSetting.DockItemSize}" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>

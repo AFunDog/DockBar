@@ -92,17 +92,6 @@
                         <controls:SettingCard Header="停靠面板背景颜色">
                             <ColorPicker Color="{Binding AppSetting.DockPanelBackgroundColor, Mode=TwoWay,Converter={x:Static converters:ColorValueColorConverter.Instance}, UpdateSourceTrigger=PropertyChanged}" />
                         </controls:SettingCard>
-                        <controls:SettingCard Header="停靠面板背景透明度">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <Slider
-                                    Width="108"
-                                    VerticalAlignment="Center"
-                                    Maximum="1"
-                                    Minimum="0"
-                                    Value="{Binding AppSetting.DockPanelBackgroundOpacity, Mode=TwoWay}" />
-                                <TextBlock VerticalAlignment="Center" Text="{Binding AppSetting.DockPanelBackgroundOpacity, StringFormat={}{0:F2}}" />
-                            </StackPanel>
-                        </controls:SettingCard>
                     </StackPanel>
                 </Expander>
                 

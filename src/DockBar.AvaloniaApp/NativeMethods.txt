@@ -2,6 +2,9 @@ RegisterHotKey
 UnregisterHotKey
 LoadIcon
 GetCursorPos
+LoadLibrary
+GetProcAddress
+
 
 VIRTUAL_KEY
 
@@ -15,6 +18,8 @@ WM_RBUTTONUP
 
 WINDOW_EX_STYLE
 NOTIFYICONDATAW
+
+COLORREF
 
 IDI_APPLICATION
 

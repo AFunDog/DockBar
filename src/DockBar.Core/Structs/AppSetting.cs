@@ -10,7 +10,6 @@ namespace DockBar.Core.Structs;
 [MessagePackObject(AllowPrivate = true)]
 public sealed partial class AppSetting : ObservableObject
 {
-    
     #region 停靠项目尺寸
 
     /// <summary>
@@ -39,7 +38,6 @@ public sealed partial class AppSetting : ObservableObject
     public partial double DockItemSpacing { get; set; } = 0;
 
     #endregion
-    
 
     #region 颜色
 
@@ -51,12 +49,7 @@ public sealed partial class AppSetting : ObservableObject
     /// </remarks>
     [ObservableProperty]
     [Key(nameof(DockPanelBackgroundColor))]
-    public partial ColorValue DockPanelBackgroundColor { get; set; } = new(16,16,16);
-        
-
-    [ObservableProperty]
-    [Key(nameof(DockPanelBackgroundOpacity))]
-    public partial double DockPanelBackgroundOpacity { get; set; } = 0.6;
+    public partial ColorValue DockPanelBackgroundColor { get; set; } = new(16, 16, 16, 144);
 
     #endregion
 
@@ -74,6 +67,4 @@ public sealed partial class AppSetting : ObservableObject
     public partial HotKeyInfo KeepMainWindowHotKey { get; set; } = default;
 
     #endregion
-    
-
 }

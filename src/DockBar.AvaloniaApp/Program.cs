@@ -2,7 +2,6 @@ using System;
 using System.ComponentModel.Design.Serialization;
 using System.Linq;
 using System.Reflection;
-using Windows.Win32.UI.Input.KeyboardAndMouse;
 using Avalonia;
 using CoreLibrary.Toolkit.Avalonia.Extensions;
 using CoreLibrary.Toolkit.Avalonia.Structs;
@@ -24,10 +23,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
+using Windows.Win32.UI.Input.KeyboardAndMouse;
 
 namespace DockBar.AvaloniaApp;
-
-// TODO 能够更改或关闭快捷键
 
 internal sealed class Program
 {
@@ -53,7 +51,6 @@ internal sealed class Program
             ServiceProvider.GetRequiredService<ILogger>().Fatal(e, "未处理的崩溃");
         }
     }
-
 
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp() =>
@@ -120,7 +117,6 @@ internal sealed class Program
     private static void BeforeSetup()
     {
         ServiceProvider.GetRequiredService<IDataProvider<AppSetting>>().LoadData();
-        
 
         LocalizeExtension.SetLocalizeService(ServiceProvider.GetRequiredService<ILocalizeService>());
         // 初始化全局热键服务

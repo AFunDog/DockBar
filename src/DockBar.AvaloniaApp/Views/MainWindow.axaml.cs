@@ -16,34 +16,34 @@ using Avalonia.VisualTree;
 using CoreLibrary.Toolkit.Avalonia.Structs;
 using DockBar.AvaloniaApp;
 using DockBar.AvaloniaApp.Controls;
+using DockBar.AvaloniaApp.Helpers;
 using DockBar.AvaloniaApp.Structs;
 using DockBar.AvaloniaApp.ViewModels;
 using DockBar.AvaloniaApp.Views;
 using DockBar.Core.Helpers;
+using DockBar.Core.Structs;
+using DockBar.DockItem.Structs;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.Input.KeyboardAndMouse;
 using Windows.Win32.UI.Shell;
 using Windows.Win32.UI.WindowsAndMessaging;
-using DockBar.Core.Structs;
-using DockBar.DockItem.Structs;
 using static Windows.Win32.PInvoke;
+using Color = Avalonia.Media.Color;
 
 namespace DockBar.AvaloniaApp.Views;
 
 internal partial class MainWindow : Window
 {
     private const uint WM_TRAYICON = WM_USER + 1;
-    
+
     private bool IsRightPressed { get; set; }
 
     internal MainWindowViewModel ViewModel => (DataContext as MainWindowViewModel)!;
 
     public MainWindow()
-        : this(new())
-    {
-    }
+        : this(new()) { }
 
     public MainWindow(MainWindowViewModel viewModel)
     {
@@ -52,7 +52,7 @@ internal partial class MainWindow : Window
         InitializeComponent();
 
         ViewModel.GlobalHotKeyManager.Host = this;
-        ViewModel.GlobalHotKeyManager.Bind(nameof(AppSetting.KeepMainWindowHotKey),KeyMainWindow);
+        ViewModel.GlobalHotKeyManager.Bind(nameof(AppSetting.KeepMainWindowHotKey), KeyMainWindow);
         DockPanelGrid.PropertyChanged += (s, e) =>
         {
             if (e.Property == HeightProperty)
@@ -60,7 +60,7 @@ internal partial class MainWindow : Window
                 TryMoveWindowToTopCenter();
             }
         };
-        
+
         DockItemPanel.AddHandler(DragDrop.DropEvent, OnDockItemPanelDrop);
         DockItemPanel.AddHandler(DragDrop.DragEnterEvent, OnDockItemPanelDragEnter);
         DockItemPanel.AddHandler(DragDrop.DragLeaveEvent, OnDockItemPanelDragLeave);
@@ -75,6 +75,7 @@ internal partial class MainWindow : Window
         RegisterDockItemKeyAction();
         CreateTrayIcon();
 
+        AcrylicHelper.EnableAcrylic(this, Colors.Transparent);
 
         ViewModel.Logger.Verbose("MainWindow 启动");
     }
@@ -235,12 +236,12 @@ internal partial class MainWindow : Window
                     Program.ServiceProvider.GetRequiredService<MenuWindow>().ShowMenu(point.X, point.Y);
                     handled = true;
                 }
+
                 break;
         }
 
         return nint.Zero;
     }
-
 
     private void KeyMainWindow()
     {
@@ -285,7 +286,7 @@ internal partial class MainWindow : Window
         else if (e.Data.Contains("key"))
         {
             // 由于不是插入所以按整个 DockItem 进行位置索引转化
-            targetIndex = PosXToIndex(e.GetPosition(DockItemPanel).X - ViewModel.GlobalSetting.DockItemSize / 2);
+            targetIndex = PosXToIndex(e.GetPosition(DockItemPanel).X - ViewModel.AppSetting.DockItemSize / 2);
             ViewModel.Logger.Verbose("Drop 字符串数据 在 {Index}", targetIndex);
             var data = e.Data.Get("key");
             if (data is int key)
@@ -330,7 +331,7 @@ internal partial class MainWindow : Window
 
     private void OnMenuWindowPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
     {
-        // 当菜单可见时，保持面板打开 
+        // 当菜单可见时，保持面板打开
         // 前提时 atWindow
         if (e.Property == MenuWindow.IsVisibleProperty)
         {
@@ -367,9 +368,12 @@ internal partial class MainWindow : Window
 
     private void TryOpenMenuWindow(PointerReleasedEventArgs e)
     {
-        if (IsRightPressed && e.GetCurrentPoint(this).Properties.PointerUpdateKind is PointerUpdateKind.RightButtonReleased &&
-            e.Source is Visual source &&
-            source.GetVisualsAt(e.GetPosition(source)).Any(c => c == source || source.IsVisualAncestorOf(c)))
+        if (
+            IsRightPressed
+            && e.GetCurrentPoint(this).Properties.PointerUpdateKind is PointerUpdateKind.RightButtonReleased
+            && e.Source is Visual source
+            && source.GetVisualsAt(e.GetPosition(source)).Any(c => c == source || source.IsVisualAncestorOf(c))
+        )
         {
             // 不重置 IsRightPressed 是因为要能不停顿地再次打开菜单
             // IsRightPressed = false;
@@ -399,14 +403,12 @@ internal partial class MainWindow : Window
 
         // 尝试处理右键事件
         TryHandleRightMouseButton(e);
-        
     }
-
 
     protected override void OnPointerReleased(PointerReleasedEventArgs e)
     {
         base.OnPointerReleased(e);
-        
+
         // 处理当前选择的项是什么
         // 会影响打开菜单的模式
         switch (e.Source)
@@ -418,9 +420,9 @@ internal partial class MainWindow : Window
                 SelectDockPanel(e);
                 break;
         }
+
         TryOpenMenuWindow(e);
     }
-
 
     private void SelectDockItem(int itemKey)
     {
@@ -438,7 +440,6 @@ internal partial class MainWindow : Window
         e.Source = sender;
     }
 
-
     private async void OpenSettingWindow()
     {
         try
@@ -455,15 +456,14 @@ internal partial class MainWindow : Window
         ViewModel.HasOwnedWindow = false;
     }
 
-
     int PosXToIndex(double x)
     {
-        var curRight = ViewModel.GlobalSetting.DockItemSize / 2;
+        var curRight = ViewModel.AppSetting.DockItemSize / 2;
         for (int i = 0; i < ViewModel.DockItems.Count; i++)
         {
             if (x <= curRight)
                 return i;
-            curRight += ViewModel.GlobalSetting.DockItemSize + ViewModel.GlobalSetting.DockItemSpacing;
+            curRight += ViewModel.AppSetting.DockItemSize + ViewModel.AppSetting.DockItemSpacing;
         }
 
         return ViewModel.DockItems.Count;

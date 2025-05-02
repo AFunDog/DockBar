@@ -9,19 +9,21 @@ namespace DockBar.AvaloniaApp.Converters;
 public sealed class ColorValueColorConverter : IValueConverter
 {
     public static ColorValueColorConverter Instance { get; } = new();
-    
+
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value is ColorValue colorValue)
         {
             switch (parameter)
             {
+                default:
                 case "Argb":
                     return Color.FromUInt32(colorValue.Argb);
-                default:
+                case "Rgba":
                     return Color.FromUInt32(colorValue.Rgba);
             }
         }
+
         return null;
     }
 
@@ -29,7 +31,7 @@ public sealed class ColorValueColorConverter : IValueConverter
     {
         if (value is Color color)
         {
-            return new ColorValue(color.R,color.G,color.B,color.A);
+            return new ColorValue(color.R, color.G, color.B, color.A);
         }
 
         return null;

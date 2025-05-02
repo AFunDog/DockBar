@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using CoreLibrary.Toolkit.Avalonia.Structs;
 using CoreLibrary.Toolkit.Contacts;
 using CoreLibrary.Toolkit.Services.Navigate;
+using DockBar.AvaloniaApp.Contacts;
 using DockBar.AvaloniaApp.Views;
 using DockBar.Core.Contacts;
 using DockBar.Core.Helpers;

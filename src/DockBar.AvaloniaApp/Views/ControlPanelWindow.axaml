@@ -27,23 +27,20 @@
     </Design.DesignStyle>
     <Window.Styles>
         <Style Selector="Window">
-            <Setter Property="Background" Value="{x:Null}" />
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="{DynamicResource SystemChromeMediumColor}" Opacity="0.9"></SolidColorBrush>
+                </Setter.Value>
+            </Setter>
             <Setter Property="ExtendClientAreaToDecorationsHint" Value="True" />
             <Setter Property="ExtendClientAreaChromeHints" Value="NoChrome" />
-            <Setter Property="TransparencyLevelHint" Value="AcrylicBlur" />
+            <!-- <Setter Property="TransparencyLevelHint" Value="AcrylicBlur" /> -->
             <Setter Property="WindowStartupLocation" Value="CenterOwner" />
-            <Setter Property="SystemDecorations" Value="BorderOnly" />
+            <!-- BorderOnly 属性会导致窗口没有最小化最大化动画 -->
+            <!-- <Setter Property="SystemDecorations" Value="BorderOnly" /> -->
         </Style>
     </Window.Styles>
     <Grid>
-        <ExperimentalAcrylicBorder CornerRadius="8">
-            <ExperimentalAcrylicBorder.Material>
-                <ExperimentalAcrylicMaterial
-                    MaterialOpacity="0.8"
-                    TintColor="{DynamicResource SystemAltHighColor}"
-                    TintOpacity="1" />
-            </ExperimentalAcrylicBorder.Material>
-        </ExperimentalAcrylicBorder>
         <Grid RowDefinitions="auto,*">
             <!--  标题栏区域  -->
             <ctac:CustomTitleBar Title="{Binding $parent[Window].Title}" />

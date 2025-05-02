@@ -14,10 +14,11 @@ using DockBar.AvaloniaApp;
 using DockBar.AvaloniaApp.Contacts;
 using DockBar.AvaloniaApp.Structs;
 using DockBar.AvaloniaApp.ViewModels;
-using DockBar.DockItem;
-using DockBar.DockItem.Structs;
+using DockBar.Core.Contacts;
 using DockBar.Core.Helpers;
 using DockBar.Core.Structs;
+using DockBar.DockItem;
+using DockBar.DockItem.Structs;
 using DockBar.SystemMonitor;
 using Serilog;
 
@@ -33,11 +34,10 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
 {
     public IDockItemService DockItemService { get; }
     public ILogger Logger { get; }
-    public AppSetting GlobalSetting { get; set; }
-    public IPerformanceMonitor PerformanceMonitor { get; set; }
+    public AppSetting AppSetting { get; set; }
+    public IPerformanceMonitor PerformanceMonitor { get; }
+    public IGlobalHotKeyManager GlobalHotKeyManager { get; }
 
-    public IGlobalHotKeyManager  GlobalHotKeyManager { get; set; }
-    
     public ObservableCollection<DockItemBase> DockItems { get; } = [];
 
     [ObservableProperty]
@@ -54,13 +54,6 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
     /// 是否选中了 DockItem
     /// </summary>
     public bool IsSelectedDockItem => SelectedDockItem is not null;
-
-    /// <summary>
-    /// 是否处于移动模式
-    /// </summary>
-    //[ObservableProperty]
-    //[NotifyPropertyChangedFor(nameof(IsPanelShow))]
-    //public partial bool IsMoveMode { get; set; } = false;
 
     /// <summary>
     /// 是否处于文件拖入模式
@@ -112,17 +105,15 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
     /// </summary>
     public bool IsPanelShowDelay => IsPanelShow;
 
-    public double ExtendDockPanelHeight => GlobalSetting.DockItemSize * 2;
-    
+    public double ExtendDockPanelHeight => AppSetting.DockItemSize * 2;
+
     public MainWindowViewModel()
-        : this(Log.Logger, IDockItemService.Empty, IDataProvider<AppSetting>.Empty, IPerformanceMonitor.Empty, IGlobalHotKeyManager.Empty)
-    {
-    }
+        : this(Log.Logger, IDockItemService.Empty, IAppSettingWrapper.Empty, IPerformanceMonitor.Empty, IGlobalHotKeyManager.Empty) { }
 
     public MainWindowViewModel(
         ILogger logger,
         IDockItemService dockItemService,
-        IDataProvider<AppSetting> appSettingProvider,
+        IAppSettingWrapper appSettingWrapper,
         IPerformanceMonitor performanceMonitor,
         IGlobalHotKeyManager globalHotKeyManager
     )
@@ -131,22 +122,13 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
         DockItemService = dockItemService;
 
         // 读取应用设置，在读取前数据就应该要被加载
-        GlobalSetting = appSettingProvider.Datas.FirstOrDefault() ?? new();
+        AppSetting = appSettingWrapper.Data;
+
         PerformanceMonitor = performanceMonitor;
 
         GlobalHotKeyManager = globalHotKeyManager;
 
         InitDockItemService(DockItemService);
-
-        // GlobalSetting.PropertyChanged += (s, e) =>
-        // {
-        //     //NotifyPanelSize();
-        //     if (e.PropertyName == nameof(GlobalSetting.DockItemSize))
-        //     {
-        //         //OnPropertyChanged(nameof(DockPanelHeight));
-        //         //OnPropertyChanged(nameof(ExtendDockPanelHeight));
-        //     }
-        // };
     }
 
     private void InitDockItemService(IDockItemService dockItemService)

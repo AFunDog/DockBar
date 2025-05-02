@@ -9,14 +9,20 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Controls.Primitives.PopupPositioning;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using CommunityToolkit.Mvvm.Input;
+using DockBar.AvaloniaApp.Contacts;
+using DockBar.AvaloniaApp.Helpers;
+using DockBar.AvaloniaApp.Structs;
 using DockBar.AvaloniaApp.ViewModels;
+using DockBar.Core.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using Windows.Win32.Foundation;
 using Windows.Win32.UI.WindowsAndMessaging;
-using Avalonia.Threading;
-using DockBar.Core.Helpers;
+using static Windows.Win32.PInvoke;
 
 namespace DockBar.AvaloniaApp.Views;
 
@@ -29,9 +35,7 @@ internal partial class MenuWindow : Window
     private MainWindow MainWindow { get; set; }
 
     public MenuWindow()
-        : this(Log.Logger, new())
-    {
-    }
+        : this(Log.Logger, new()) { }
 
     public MenuWindow(ILogger logger, MainWindow mainWindow)
     {
@@ -49,15 +53,12 @@ internal partial class MenuWindow : Window
         InitializeComponent();
 
         ChangeWindowStyle();
-    }
 
-    //private void OnDeactivated(object? sender, EventArgs e)
-    //{
-    //    if (IsActive is false && (TargetWindow is null || TargetWindow.IsActive is false))
-    //    {
-    //        Hide();
-    //    }
-    //}
+        RenderOptions.SetTextRenderingMode(this, TextRenderingMode.Antialias);
+
+        AcrylicHelper.EnableAcrylic(this, Colors.Transparent);
+        // AcrylicHoster.ApplyWithTheme(this);
+    }
 
     /// <summary>
     /// 覆盖改变窗口类型
@@ -161,7 +162,10 @@ internal partial class MenuWindow : Window
                 addDockItemWindow.ViewModel.Index = MainWindow.ViewModel.SelectedIndex;
                 MainWindow.ViewModel.HasOwnedWindow = true;
                 addDockItemWindow.Show(MainWindow);
-                addDockItemWindow.Closing += (s, e) => { MainWindow.ViewModel.HasOwnedWindow = false; };
+                addDockItemWindow.Closing += (s, e) =>
+                {
+                    MainWindow.ViewModel.HasOwnedWindow = false;
+                };
             }
             catch (Exception ex)
             {

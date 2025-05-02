@@ -1,7 +1,9 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using DockBar.AvaloniaApp;
+using DockBar.AvaloniaApp.Helpers;
 using DockBar.AvaloniaApp.ViewModels;
 using DockBar.Core.Helpers;
 
@@ -19,6 +21,10 @@ internal partial class ControlPanelWindow : Window
         using var _ = LogHelper.Trace();
         DataContext = viewModel;
         InitializeComponent();
+
+        RenderOptions.SetTextRenderingMode(this, TextRenderingMode.Antialias);
+
+        AcrylicHelper.EnableAcrylic(this, Colors.Transparent);
 
         ViewModel.Logger.Information("ControlPanelWindow 启动");
     }

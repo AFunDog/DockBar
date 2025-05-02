@@ -5,11 +5,12 @@
     xmlns:a="using:DockBar.AvaloniaApp"
     xmlns:ac="using:DockBar.AvaloniaApp.Converters"
     xmlns:ca="using:CoreLibrary.Toolkit.Avalonia"
+    xmlns:med="using:Avalonia.Media"
     xmlns:controls="using:DockBar.AvaloniaApp.Controls"
     xmlns:vs="using:DockBar.AvaloniaApp.Views"
+    
     x:DataType="a:App"
-    RequestedThemeVariant="Light">
-    <!-- TODO 适配浅色主题 -->
+    RequestedThemeVariant="Default">
     <!--  "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options.  -->
 
     <Application.Styles>

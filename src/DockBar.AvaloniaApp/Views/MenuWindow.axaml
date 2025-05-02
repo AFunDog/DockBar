@@ -5,6 +5,7 @@
     xmlns:cext="using:CoreLibrary.Toolkit.Avalonia.Extensions"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    RenderOptions.TextRenderingMode="Antialias"
     xmlns:views="using:DockBar.AvaloniaApp.Views"
     xmlns:vm="using:DockBar.AvaloniaApp.ViewModels"
     Title="菜单窗口"
@@ -16,8 +17,12 @@
             <Setter Property="SizeToContent" Value="Height" />
             <Setter Property="Width" Value="240" />
             <Setter Property="SystemDecorations" Value="None" />
-            <Setter Property="TransparencyLevelHint" Value="AcrylicBlur" />
-            <Setter Property="Background" Value="{x:Null}" />
+            <!-- <Setter Property="TransparencyLevelHint" Value="AcrylicBlur" /> -->
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="{DynamicResource SystemAltMediumLowColor}" />
+                </Setter.Value>
+            </Setter>
             <Setter Property="ExtendClientAreaToDecorationsHint" Value="True" />
             <Setter Property="ExtendClientAreaChromeHints" Value="NoChrome" />
             <!--<Setter Property="ExtendClientAreaTitleBarHeightHint" Value="-1" />-->
@@ -27,21 +32,6 @@
         </Style>
     </Window.Styles>
     <Grid>
-        <ExperimentalAcrylicBorder>
-            <ExperimentalAcrylicBorder.Material>
-                <ExperimentalAcrylicMaterial
-                    MaterialOpacity="0.4"
-                    TintColor="{DynamicResource SystemAltHighColor}"
-                    TintOpacity="1" />
-            </ExperimentalAcrylicBorder.Material>
-        </ExperimentalAcrylicBorder>
-        <!--<ItemsControl>
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <StackPanel Orientation="Vertical" />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-        </ItemsControl>-->
         <ContextMenu>
             <ContextMenu.Styles>
                 <Style Selector="ContextMenu">
