@@ -13,7 +13,7 @@ using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.VisualTree;
-using CoreLibrary.Toolkit.Avalonia.Structs;
+using Zeng.CoreLibrary.Toolkit.Avalonia.Structs;
 using DockBar.AvaloniaApp;
 using DockBar.AvaloniaApp.Controls;
 using DockBar.AvaloniaApp.Helpers;
@@ -75,7 +75,7 @@ internal partial class MainWindow : Window
         RegisterDockItemKeyAction();
         CreateTrayIcon();
 
-        AcrylicHelper.EnableAcrylic(this, Colors.Transparent);
+        AcrylicHelper.EnableAcrylic(this, Color.FromArgb(0, 0, 0, 0));
 
         ViewModel.Logger.Verbose("MainWindow 启动");
     }

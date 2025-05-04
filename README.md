@@ -37,7 +37,7 @@
 ```sh
 git clone https://github.com/AFunDog/DockBar.git
 cd DockBar/src/DockBar.AvaloniaApp
-dotnet publish -p:PublishProfile=Publish --ucr false
+dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:DebugSymbols=false -o ./publish --ucr false
 ```
 
-在编译完成后，你能在仓库根目录`DockBar/publish`下看到生成完毕的文件，双击其中的`exe`文件即可运行
+在编译完成后，你能在仓库根目录`DockBar/DockBar.AvaloniaApp/publish`下看到生成完毕的文件，双击其中的`exe`文件即可运行

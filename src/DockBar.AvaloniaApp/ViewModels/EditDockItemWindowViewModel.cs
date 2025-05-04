@@ -11,7 +11,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CoreLibrary.Toolkit.Contacts;
+using Zeng.CoreLibrary.Toolkit.Contacts;
 using DockBar.AvaloniaApp.Extensions;
 using DockBar.AvaloniaApp.Structs;
 using DockBar.Core.Structs;

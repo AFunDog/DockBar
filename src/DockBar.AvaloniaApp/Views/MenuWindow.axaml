@@ -2,11 +2,12 @@
     x:Class="DockBar.AvaloniaApp.Views.MenuWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:cext="using:CoreLibrary.Toolkit.Avalonia.Extensions"
+    xmlns:cext="using:Zeng.CoreLibrary.Toolkit.Avalonia.Extensions"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     RenderOptions.TextRenderingMode="Antialias"
     xmlns:views="using:DockBar.AvaloniaApp.Views"
+    xmlns:converters="using:DockBar.AvaloniaApp.Converters"
     xmlns:vm="using:DockBar.AvaloniaApp.ViewModels"
     Title="菜单窗口"
     x:DataType="views:MenuWindow"
@@ -30,20 +31,32 @@
             <Setter Property="ShowInTaskbar" Value="False" />
             <Setter Property="Topmost" Value="True" />
         </Style>
+        <Style Selector=":is(TemplatedControl).ShowMenu">
+            <Setter Property="Margin" 
+                    Value="0,-80,0,0"
+                    >
+            </Setter>
+            <Setter Property="Background" Value="{x:Null}"></Setter>
+            <Setter Property="Transitions">
+                <Setter.Value>
+                    <Transitions>
+                        <ThicknessTransition Property="Margin" Duration="0.3" Easing="ExponentialEaseOut" />
+                    </Transitions>
+                </Setter.Value>
+            </Setter>
+            <Style Selector="^ MenuItem">
+                <Setter Property="Padding" Value="8,6,8,6"></Setter>
+            </Style>
+            <Style Selector="^ TextBlock.FontIcon">
+                <Setter Property="FontSize" Value="32"></Setter>
+            </Style>
+        </Style>
+        <Style Selector="Window[IsActive=True] :is(TemplatedControl).ShowMenu">
+            <Setter Property="Margin" Value="0" />
+        </Style>
     </Window.Styles>
     <Grid>
-        <ContextMenu>
-            <ContextMenu.Styles>
-                <Style Selector="ContextMenu">
-                    <Setter Property="Background" Value="{x:Null}" />
-                </Style>
-                <Style Selector="MenuItem">
-                    <Setter Property="Padding" Value="8,6,8,6" />
-                </Style>
-                <Style Selector="TextBlock.FontIcon">
-                    <Setter Property="FontSize" Value="32" />
-                </Style>
-            </ContextMenu.Styles>
+        <ContextMenu Classes="ShowMenu">
             <MenuItem Command="{Binding AddDockItemCommand}" Header="{cext:Localize MenuWindow.AddDockItemButton.Content}">
                 <MenuItem.Icon>
                     <TextBlock

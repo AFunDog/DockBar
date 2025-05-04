@@ -1,0 +1,54 @@
+﻿name: .NET APP
+on:
+  push:
+    tags:
+      - 'v*'
+jobs:
+  build:
+    
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        rid: [ win-x64,win-x86 ]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Publish
+        working-directory: ./src/DockBar.AvaloniaApp/
+        run: >-
+          dotnet publish -c Release -r ${{ matrix.rid }}
+          --self-contained true 
+          -p:PublishSingleFile=true 
+          -p:PublishReadyToRun=true 
+          -p:DebugSymbols=false
+          -p:TrimmerRemoveSymbols=true
+          -o ./publish --ucr false
+
+      - name: Compress published files
+        working-directory: ./src/DockBar.AvaloniaApp/
+        run: Compress-Archive -Path ./publish/* -DestinationPath ./DockBar-${{ github.ref_name }}-${{ matrix.rid }}.zip
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        id: create_release
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          files: ./src/DockBar.AvaloniaApp/DockBar-${{ github.ref_name }}-${{ matrix.rid }}.zip
+
+#      - name: Upload Release Asset
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }}
+#          asset_path: ./src/DockBar.AvaloniaApp/publish.zip
+#          asset_name: DockBar-${{ github.ref_name }}-win-x64.zip
+#          asset_content_type: application/zip

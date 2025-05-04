@@ -3,12 +3,12 @@ using System.ComponentModel.Design.Serialization;
 using System.Linq;
 using System.Reflection;
 using Avalonia;
-using CoreLibrary.Toolkit.Avalonia.Extensions;
-using CoreLibrary.Toolkit.Avalonia.Structs;
-using CoreLibrary.Toolkit.Contacts;
-using CoreLibrary.Toolkit.Extensions;
-using CoreLibrary.Toolkit.Services.Localization;
-using CoreLibrary.Toolkit.Services.Navigate;
+using Zeng.CoreLibrary.Toolkit.Avalonia.Extensions;
+using Zeng.CoreLibrary.Toolkit.Avalonia.Structs;
+using Zeng.CoreLibrary.Toolkit.Contacts;
+using Zeng.CoreLibrary.Toolkit.Extensions;
+using Zeng.CoreLibrary.Toolkit.Services.Localization;
+using Zeng.CoreLibrary.Toolkit.Services.Navigate;
 using DockBar.AvaloniaApp.Contacts;
 using DockBar.AvaloniaApp.Services;
 using DockBar.AvaloniaApp.ViewModels;
@@ -24,6 +24,7 @@ using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using Windows.Win32.UI.Input.KeyboardAndMouse;
+using Zeng.CoreLibrary.Toolkit.Structs;
 
 namespace DockBar.AvaloniaApp;
 

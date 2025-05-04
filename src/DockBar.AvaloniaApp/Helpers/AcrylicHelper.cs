@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Windows.Win32.Foundation;
 using Avalonia.Controls;
 using Avalonia.Media;
 using DockBar.AvaloniaApp.Structs;
+using Windows.Win32.Foundation;
 using static Windows.Win32.PInvoke;
 
 namespace DockBar.AvaloniaApp.Helpers;
 
 internal static class AcrylicHelper
 {
-    
-
     private delegate bool SetWindowCompositionAttribute(HWND hwnd, ref WindowCompositionAttributeData data);
 
     private static SetWindowCompositionAttribute? SetWindowCompositionAttributeFunc { get; set; }
@@ -25,11 +23,10 @@ internal static class AcrylicHelper
             {
                 SetWindowCompositionAttributeFunc = GetProcAddress(hModule, "SetWindowCompositionAttribute")
                     .CreateDelegate<SetWindowCompositionAttribute>();
-                
             }
         }
     }
-    
+
     /// <summary>
     /// 使用 Win32API 让窗口应用亚克力效果
     /// </summary>
@@ -40,12 +37,12 @@ internal static class AcrylicHelper
     {
         var colorValue = new COLORREF((uint)((color.A << 24) + (color.B << 16) + (color.G << 8) + color.R));
 
-        if (topLevel.TryGetPlatformHandle() is not { Handle: {} handle})
+        if (topLevel.TryGetPlatformHandle() is not { Handle: { } handle })
         {
             return false;
         }
         var hwnd = new HWND(handle);
-        
+
         TryGetSetWindowFunc();
 
         if (SetWindowCompositionAttributeFunc is not null)
@@ -57,14 +54,14 @@ internal static class AcrylicHelper
                     AccentState = AccentState.ACCENT_ENABLE_ACRYLICBLURBEHIND,
                     AccentFlags = 0,
                     GradientColor = (int)colorValue.Value,
-                    AnimationId = 0
+                    AnimationId = 0,
                 };
 
                 var data = new WindowCompositionAttributeData
                 {
                     Attribute = WindowCompositionAttribute.WCA_ACCENT_POLICY,
                     Data = (IntPtr)(&accent),
-                    SizeOfData = Marshal.SizeOf(typeof(AccentPolicy))
+                    SizeOfData = Marshal.SizeOf(typeof(AccentPolicy)),
                 };
                 return SetWindowCompositionAttributeFunc(hwnd, ref data);
             }
@@ -72,6 +69,7 @@ internal static class AcrylicHelper
 
         return false;
     }
+
     /// <summary>
     /// 使用 Win32API 让窗口取消亚克力效果
     /// </summary>
@@ -79,12 +77,12 @@ internal static class AcrylicHelper
     /// <returns>是否取消成功</returns>
     public static bool DisableAcrylic(TopLevel topLevel)
     {
-        if (topLevel.TryGetPlatformHandle() is not { Handle: {} handle})
+        if (topLevel.TryGetPlatformHandle() is not { Handle: { } handle })
         {
             return false;
         }
         var hwnd = new HWND(handle);
-        
+
         TryGetSetWindowFunc();
 
         if (SetWindowCompositionAttributeFunc is not null)
@@ -96,14 +94,14 @@ internal static class AcrylicHelper
                     AccentState = AccentState.ACCENT_DISABLED,
                     AccentFlags = 0,
                     GradientColor = 0,
-                    AnimationId = 0
+                    AnimationId = 0,
                 };
 
                 var data = new WindowCompositionAttributeData
                 {
                     Attribute = WindowCompositionAttribute.WCA_ACCENT_POLICY,
                     Data = (IntPtr)(&accent),
-                    SizeOfData = Marshal.SizeOf(typeof(AccentPolicy))
+                    SizeOfData = Marshal.SizeOf(typeof(AccentPolicy)),
                 };
                 return SetWindowCompositionAttributeFunc(hwnd, ref data);
             }
@@ -111,6 +109,4 @@ internal static class AcrylicHelper
 
         return false;
     }
-    
-    
 }

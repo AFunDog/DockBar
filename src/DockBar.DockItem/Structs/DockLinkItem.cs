@@ -2,8 +2,8 @@ using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
-using DockBar.DockItem.Helpers;
 using DockBar.Core.Helpers;
+using DockBar.DockItem.Helpers;
 using MessagePack;
 
 namespace DockBar.DockItem.Structs;
@@ -34,20 +34,20 @@ public partial class DockLinkItem : DockItemBase
     // LinkType 必须在 LinkPath 的位置前面
     // 因为在反序列化时，LinkType 会被先被反序列化
     // 如果 LinkPath 先被反序列化那么会导致 LinkType 被设置时会覆盖 LinkPath
-    
+
     /// <summary>
     /// 链接类型
     /// </summary>
     [ObservableProperty]
     [Key(nameof(LinkType))]
     public partial LinkType LinkType { get; set; }
+
     /// <summary>
     /// 链接路径
     /// </summary>
     [ObservableProperty]
     [Key(nameof(LinkPath))]
     public partial string? LinkPath { get; set; }
-
 
     public DockLinkItem()
     {
@@ -69,7 +69,7 @@ public partial class DockLinkItem : DockItemBase
     protected override void ExecuteCore()
     {
         using var _ = LogHelper.Trace();
-        Logger.Verbose("DockLinItem 执行 {Path}",LinkPath);
+        Logger.Verbose("DockLinItem 执行 {Path}", LinkPath);
         if (LinkPath is null)
             return;
         switch (LinkType)
@@ -93,7 +93,7 @@ public partial class DockLinkItem : DockItemBase
         if (IsAutoDetectLinkType)
             DetectLinkTypeFromLinkPath(LinkPath);
     }
-    
+
     partial void OnLinkTypeChanged(LinkType value)
     {
         if (UseGeneratedShowName)
@@ -115,9 +115,7 @@ public partial class DockLinkItem : DockItemBase
                         var message = (await client.GetAsync(uri)).EnsureSuccessStatusCode();
                         LinkType = LinkType.Web;
                     }
-                    catch (Exception)
-                    {
-                    }
+                    catch (Exception) { }
             }
         }
 
@@ -169,9 +167,7 @@ public partial class DockLinkItem : DockItemBase
                             return;
                         }
                     }
-                    catch (Exception)
-                    {
-                    }
+                    catch (Exception) { }
             }
             //Uri.TryCreate(weburi, UriKind.Absolute, out var weburi);
             //if (weburi is { } && (weburi.Scheme == Uri.UriSchemeHttp || weburi.Scheme == Uri.UriSchemeHttps))
@@ -232,7 +228,7 @@ public partial class DockLinkItem : DockItemBase
                 ShowName = Path.GetFileName(Path.GetDirectoryName(path));
                 break;
             default:
-                ShowName = Path.GetFileName(path);
+                ShowName = Path.GetFileNameWithoutExtension(path);
                 break;
         }
     }

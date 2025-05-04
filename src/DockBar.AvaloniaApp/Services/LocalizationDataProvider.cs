@@ -7,9 +7,10 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using CoreLibrary.Toolkit.Avalonia.Structs;
-using CoreLibrary.Toolkit.Contacts;
+using Zeng.CoreLibrary.Toolkit.Avalonia.Structs;
+using Zeng.CoreLibrary.Toolkit.Contacts;
 using Serilog;
+using Zeng.CoreLibrary.Toolkit.Structs;
 
 namespace DockBar.AvaloniaApp.Services;
 
