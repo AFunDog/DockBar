@@ -1,4 +1,4 @@
-using CoreLibrary.Core.Contacts;
+using Zeng.CoreLibrary.Core.Contacts;
 using DockBar.SystemMonitor.Contacts;
 
 namespace DockBar.SystemMonitor.Internals;

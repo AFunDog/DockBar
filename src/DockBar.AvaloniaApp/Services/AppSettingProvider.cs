@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using CoreLibrary.Toolkit.Contacts;
+using Zeng.CoreLibrary.Toolkit.Contacts;
 using DockBar.Core.Helpers;
 using DockBar.Core.Structs;
 using MessagePack;

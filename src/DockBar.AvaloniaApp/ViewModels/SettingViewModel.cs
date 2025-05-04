@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CoreLibrary.Toolkit.Contacts;
+using Zeng.CoreLibrary.Toolkit.Contacts;
 using DockBar.Core.Contacts;
 using DockBar.Core.Structs;
 using Serilog;
