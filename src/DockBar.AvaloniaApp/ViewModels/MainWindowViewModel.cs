@@ -9,7 +9,7 @@ using Avalonia;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CoreLibrary.Toolkit.Contacts;
+using Zeng.CoreLibrary.Toolkit.Contacts;
 using DockBar.AvaloniaApp;
 using DockBar.AvaloniaApp.Contacts;
 using DockBar.AvaloniaApp.Structs;

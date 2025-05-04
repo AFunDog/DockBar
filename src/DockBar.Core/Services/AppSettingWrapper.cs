@@ -1,9 +1,9 @@
-﻿using CoreLibrary.Toolkit.Contacts;
-using DockBar.Core.Contacts;
+﻿using DockBar.Core.Contacts;
 using DockBar.Core.Helpers;
 using DockBar.Core.Structs;
 using MessagePack;
 using Serilog;
+using Zeng.CoreLibrary.Toolkit.Contacts;
 
 namespace DockBar.Core.Services;
 

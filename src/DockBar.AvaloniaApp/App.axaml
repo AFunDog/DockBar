@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:a="using:DockBar.AvaloniaApp"
     xmlns:ac="using:DockBar.AvaloniaApp.Converters"
-    xmlns:ca="using:CoreLibrary.Toolkit.Avalonia"
+    xmlns:ca="using:Zeng.CoreLibrary.Toolkit.Avalonia"
     xmlns:med="using:Avalonia.Media"
     xmlns:controls="using:DockBar.AvaloniaApp.Controls"
     xmlns:vs="using:DockBar.AvaloniaApp.Views"
