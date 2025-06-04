@@ -47,18 +47,21 @@ internal sealed partial class PerformanceMonitor : ObservableObject, IPerformanc
 
     public string NetworkReceivedBytesString => NetworkBytesToString(NetworkReceivedBytes);
 
-    private static string NetworkBytesToString(double bytes) =>
-        bytes switch
+    private static string NetworkBytesToString(double bytes)
+    {
+        return bytes switch
         {
             <= 768 => $"{bytes:F2} B/S",
             > 768 and < 768 * 1024 => $"{bytes / 1024:F2} KB/S",
             > 768 * 1024 and < 768 * 1024 * 1024 => $"{bytes / 1024 / 1024:F2} MB/S",
             > 768 * 1024 * 1024 => $"{bytes / 1024 / 1024 / 1024:F2} GB/S",
-            _ => $"{bytes:F2}",
+            _ => $"{bytes:F2}"
         };
+    }
 
-    public PerformanceMonitor()
-        : this(Log.Logger) { }
+    public PerformanceMonitor() : this(Log.Logger)
+    {
+    }
 
     public PerformanceMonitor(ILogger logger)
     {
@@ -69,7 +72,10 @@ internal sealed partial class PerformanceMonitor : ObservableObject, IPerformanc
         //CpuUsageCounter = new PdhPerformanceCounter(@"\Processor(_Total)\% Processor Time");
         MemoryUsageCounter = new PdhPerformanceCounter(@"\Memory\Available MBytes");
 
-        NetworkReceivedBytesCounter = new PdhPerformanceCounter(@"\Network Interface(*)\Bytes Received/sec", CountWay.Sum);
+        NetworkReceivedBytesCounter = new PdhPerformanceCounter(
+            @"\Network Interface(*)\Bytes Received/sec",
+            CountWay.Sum
+        );
         NetworkSentBytesCounter = new PdhPerformanceCounter(@"\Network Interface(*)\Bytes Sent/sec", CountWay.Sum);
 
         MonitorTask = MonitorAsync(MonitorCancellationTokenSource.Token);
@@ -103,6 +109,7 @@ internal sealed partial class PerformanceMonitor : ObservableObject, IPerformanc
                 Logger.Error(e, "监视器出错");
                 break;
             }
+
             if (logCount == LogTimeMs / TraceTimeMs)
             {
                 Logger.Verbose(
@@ -114,6 +121,7 @@ internal sealed partial class PerformanceMonitor : ObservableObject, IPerformanc
                 );
                 logCount = 0;
             }
+
             logCount++;
             try
             {
@@ -131,9 +139,7 @@ internal sealed partial class PerformanceMonitor : ObservableObject, IPerformanc
         MEMORYSTATUSEX memStatus = new();
         memStatus.dwLength = (uint)Marshal.SizeOf(memStatus);
         if (GlobalMemoryStatusEx(ref memStatus))
-        {
             return memStatus.ullTotalPhys;
-        }
         return 1;
     }
 

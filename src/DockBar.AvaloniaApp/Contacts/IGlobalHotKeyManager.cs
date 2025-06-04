@@ -11,7 +11,7 @@ public interface IGlobalHotKeyManager
     void Register(string key, uint hotKeyModifiers, uint hotKey);
     void Unregister(string key);
     void Bind(string key, Action action);
-    void Unbind(string key,Action? action);
+    void Unbind(string key, Action? action);
 
     public static IGlobalHotKeyManager Empty { get; } = new EmptyManager();
 
@@ -32,7 +32,7 @@ public interface IGlobalHotKeyManager
         {
         }
 
-        public void Unbind(string key,Action? action)
+        public void Unbind(string key, Action? action)
         {
         }
     }

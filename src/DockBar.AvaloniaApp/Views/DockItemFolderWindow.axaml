@@ -1,0 +1,80 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        xmlns:views="using:DockBar.AvaloniaApp.Views"
+        x:Class="DockBar.AvaloniaApp.Views.DockItemFolderWindow"
+        RenderOptions.TextRenderingMode="Antialias"
+        x:DataType="views:DockItemFolderWindow"
+        Title="DockItemFolderWindow">
+    <Window.Styles>
+        <Style Selector="Window">
+            <Setter Property="SizeToContent" Value="WidthAndHeight" />
+            <Setter Property="ShowActivated" Value="False" />
+            <!-- <Setter Property="Width" Value="240" /> -->
+            <Setter Property="SystemDecorations" Value="None" />
+            <Setter Property="Background" Value="{x:Null}" />
+            <Setter Property="ExtendClientAreaToDecorationsHint" Value="True" />
+            <Setter Property="ExtendClientAreaChromeHints" Value="NoChrome" />
+            <Setter Property="ExtendClientAreaTitleBarHeightHint" Value="-1" />
+            <Setter Property="CanResize" Value="False" />
+            <Setter Property="ShowInTaskbar" Value="False" />
+            <Setter Property="Topmost" Value="True" />
+            <Style Selector="^ LayoutTransformControl#RootControl">
+                <Setter Property="LayoutTransform" Value="scale(1)" />
+                <Setter Property="Transitions">
+                    <Setter.Value>
+                        <Transitions>
+                            <TransformOperationsTransition Property="LayoutTransform" Easing="ExponentialEaseOut"
+                                                           Duration="0:0:0.13" />
+                        </Transitions>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style Selector="^.ToHide">
+                <Style Selector="^ LayoutTransformControl#RootControl">
+                    <Setter Property="LayoutTransform" Value="scale(0.3)" />
+                </Style>
+                <!-- <Style.Animations> -->
+                <!--     <Animation Duration="0:0:0.083" Easing="ExponentialEaseOut" FillMode="Both" IterationCount="1"> -->
+                <!--         <KeyFrame Cue="0%"> -->
+                <!--             <Setter Property="IsVisible" Value="True"></Setter> -->
+                <!--         </KeyFrame> -->
+                <!--         <KeyFrame Cue="100%"> -->
+                <!--             <Setter Property="IsVisible" Value="False"></Setter> -->
+                <!--         </KeyFrame> -->
+                <!--     </Animation> -->
+                <!-- </Style.Animations> -->
+            </Style>
+        </Style>
+
+    </Window.Styles>
+    <Design.DesignStyle>
+        <Style Selector="Window">
+            <Setter Property="RequestedThemeVariant" Value="Light" />
+            <Style Selector="^ Grid#ItemGrid">
+                <Setter Property="ShowGridLines" Value="True" />
+            </Style>
+        </Style>
+    </Design.DesignStyle>
+    <Grid Margin="8">
+        <LayoutTransformControl Name="RootControl">
+            <Grid Name="ItemGrid" ColumnDefinitions="*,*,*" RowDefinitions="*,*,*"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch">
+                <Rectangle Width="64" Height="64" Grid.Row="0" Grid.Column="0" Fill="AliceBlue" />
+                <Rectangle Width="64" Height="64" Grid.Row="0" Grid.Column="1" Fill="AntiqueWhite" />
+                <Rectangle Width="64" Height="64" Grid.Row="0" Grid.Column="2" Fill="Aquamarine" />
+                <Rectangle Width="64" Height="64" Grid.Row="1" Grid.Column="0" Fill="Azure" />
+                <Rectangle Width="64" Height="64" Grid.Row="1" Grid.Column="1" Fill="CadetBlue" />
+                <Rectangle Width="64" Height="64" Grid.Row="1" Grid.Column="2" Fill="Chocolate" />
+                <Rectangle Width="64" Height="64" Grid.Row="2" Grid.Column="0" Fill="CornflowerBlue" />
+                <Rectangle Width="64" Height="64" Grid.Row="2" Grid.Column="1" Fill="Red" />
+                <Rectangle Width="64" Height="64" Grid.Row="2" Grid.Column="2" />
+            </Grid>
+        </LayoutTransformControl>
+
+    </Grid>
+
+</Window>

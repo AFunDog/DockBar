@@ -1,11 +1,7 @@
 <ResourceDictionary
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:a="using:DockBar.AvaloniaApp"
-    xmlns:as="using:DockBar.AvaloniaApp.Structs"
-    xmlns:ds="using:DockBar.DockItem.Structs"
-    xmlns:controls="using:DockBar.AvaloniaApp.Controls"
-    xmlns:vm="using:DockBar.AvaloniaApp.ViewModels">
+    xmlns:controls="using:DockBar.AvaloniaApp.Controls">
 
     <ControlTheme x:Key="{x:Type controls:DockItemControl}" TargetType="controls:DockItemControl">
 
@@ -76,7 +72,8 @@
 
     <Design.PreviewWith>
         <Grid Width="200" Height="200">
-            <controls:DockItemControl FontSize="16" Width="108" Height="108" ShowName="DesignName" DockIcon="/Assets/setting.png">
+            <controls:DockItemControl FontSize="16" Width="108" Height="108" ShowName="DesignName"
+                                      DockIcon="/Assets/setting.png">
                 <!-- <controls:DockItemControl.DockItem> -->
                 <!--     <cd:DockLinkItem ShowName="ShowName" LinkPath="C:" /> -->
                 <!-- </controls:DockItemControl.DockItem> -->

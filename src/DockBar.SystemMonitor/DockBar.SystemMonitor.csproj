@@ -1,35 +1,37 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net9.0-windows</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<LangVersion>preview</LangVersion>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-	</PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net9.0-windows</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>preview</LangVersion>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <Configurations>Debug;Release</Configurations>
+        <Platforms>AnyCPU;x64</Platforms>
+    </PropertyGroup>
 
-	<ItemGroup>
-	  <AdditionalFiles Include="NativeMethods.json" />
-	  <AdditionalFiles Include="NativeMethods.txt" />
-	</ItemGroup>
+    <ItemGroup>
+        <AdditionalFiles Include="NativeMethods.json"/>
+        <AdditionalFiles Include="NativeMethods.txt"/>
+    </ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.183">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="Serilog" Version="4.2.0" />
-		<!--<PackageReference Include="Vanara.PInvoke.User32" Version="4.1.1" />
-		<PackageReference Include="Vanara.PInvoke.Pdh" Version="4.1.1" />
-		<PackageReference Include="Vanara.PInvoke.IpHlpApi" Version="4.1.1" />-->
-	</ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.183">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Serilog" Version="4.2.0"/>
+        <!--<PackageReference Include="Vanara.PInvoke.User32" Version="4.1.1" />
+        <PackageReference Include="Vanara.PInvoke.Pdh" Version="4.1.1" />
+        <PackageReference Include="Vanara.PInvoke.IpHlpApi" Version="4.1.1" />-->
+    </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\DockBar.Core\DockBar.Core.csproj" />
-	</ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\DockBar.Core\DockBar.Core.csproj"/>
+    </ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Helpers\" />
-	</ItemGroup>
+    <ItemGroup>
+        <Folder Include="Helpers\"/>
+    </ItemGroup>
 
 </Project>

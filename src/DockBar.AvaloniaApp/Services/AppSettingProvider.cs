@@ -14,8 +14,7 @@ public class AppSettingProvider : IDataProvider<AppSetting>
 {
     private ILogger Logger { get; set; }
 
-    public AppSettingProvider()
-        : this(Log.Logger)
+    public AppSettingProvider() : this(Log.Logger)
     {
     }
 
@@ -47,11 +46,10 @@ public class AppSettingProvider : IDataProvider<AppSetting>
         }
     }
 
-    public Task LoadDataAsync()
-        => Task.Run(LoadData);
+    public Task LoadDataAsync() => Task.Run(LoadData);
 
-    private AppSetting? AppSetting { get; set; }
+    private AppSetting AppSetting { get; set; } = new();
 
-    public IEnumerable<AppSetting> Datas => AppSetting is null ? [] : [AppSetting];
+    public IEnumerable<AppSetting> Datas => [AppSetting];
     public event Action<IDataProvider<AppSetting>>? DataChanged;
 }

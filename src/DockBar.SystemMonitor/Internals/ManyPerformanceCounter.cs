@@ -3,8 +3,7 @@ using DockBar.SystemMonitor.Contacts;
 
 namespace DockBar.SystemMonitor.Internals;
 
-internal sealed class ManyPerformanceCounter<T> : DisposableObject, IPerformanceCounter
-    where T : IPerformanceCounter
+internal sealed class ManyPerformanceCounter<T> : DisposableObject, IPerformanceCounter where T : IPerformanceCounter
 {
     private HashSet<T> CounterSet { get; } = [];
 
@@ -14,9 +13,7 @@ internal sealed class ManyPerformanceCounter<T> : DisposableObject, IPerformance
     {
         //CounterSet.AddRange(counters);
         foreach (var counter in counters)
-        {
             CounterSet.Add(counter);
-        }
     }
 
     public double NextValue()
@@ -32,21 +29,21 @@ internal sealed class ManyPerformanceCounter<T> : DisposableObject, IPerformance
     public void RemoveCounter(T counter)
     {
         if (CounterSet.Remove(counter))
-        {
             counter.Dispose();
-        }
     }
 
-    protected override void DisposeManagedResource() { }
+    protected override void DisposeManagedResource()
+    {
+    }
 
     protected override void DisposeUnmanagedResource()
     {
         foreach (var counter in CounterSet)
-        {
             counter.Dispose();
-        }
         CounterSet.Clear();
     }
 
-    protected override void OnDisposed() { }
+    protected override void OnDisposed()
+    {
+    }
 }

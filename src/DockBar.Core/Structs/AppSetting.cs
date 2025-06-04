@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DockBar.Core.Helpers;
 using MessagePack;
@@ -39,17 +40,11 @@ public sealed partial class AppSetting : ObservableObject
 
     #endregion
 
-    #region 颜色
+    #region 个性化
 
-    /// <summary>
-    /// 停靠面板背景颜色
-    /// </summary>
-    /// <remarks>
-    /// 这个属性不会被存储，而是会被转化为 <see cref="DockPanelBackgroundColorUInt"/> 进行存储
-    /// </remarks>
     [ObservableProperty]
-    [Key(nameof(DockPanelBackgroundColor))]
-    public partial ColorValue DockPanelBackgroundColor { get; set; } = new(16, 16, 16, 144);
+    [Key(nameof(颜色主题))]
+    public partial 颜色主题 颜色主题 { get; set; } = 颜色主题.跟随系统;
 
     #endregion
 

@@ -21,7 +21,13 @@ internal static class IconHelper
             unsafe
             {
                 SHFILEINFOW fileInfo = default;
-                SHGetFileInfo(path, 0, &fileInfo, (uint)sizeof(SHFILEINFOW), SHGFI_FLAGS.SHGFI_OPENICON | SHGFI_FLAGS.SHGFI_SYSICONINDEX);
+                SHGetFileInfo(
+                    path,
+                    0,
+                    &fileInfo,
+                    (uint)sizeof(SHFILEINFOW),
+                    SHGFI_FLAGS.SHGFI_OPENICON | SHGFI_FLAGS.SHGFI_SYSICONINDEX
+                );
                 SHGetImageList((int)SHIL_JUMBO, IImageList.IID_Guid, out var ppvObj);
                 var list = (IImageList*)ppvObj;
                 list->GetIcon(
@@ -37,7 +43,9 @@ internal static class IconHelper
                 return TrimSmallIcon(bitmap);
             }
         }
-        catch (Exception) { }
+        catch (Exception)
+        {
+        }
 
         return null;
     }
@@ -49,7 +57,6 @@ internal static class IconHelper
             using HttpClient client = new();
 
             foreach (var uri in path.ToWebUris())
-            {
                 if (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
                     try
                     {
@@ -59,8 +66,9 @@ internal static class IconHelper
                         var bitmap = new Bitmap(stream);
                         return bitmap;
                     }
-                    catch (Exception) { }
-            }
+                    catch (Exception)
+                    {
+                    }
 
             //Uri.TryCreate(path, UriKind.Absolute, out Uri? uri);
             //if (uri is { } && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
@@ -102,7 +110,10 @@ internal static class IconHelper
             //    catch (Exception) { }
             //}
         }
-        catch (Exception) { }
+        catch (Exception)
+        {
+        }
+
         return null;
     }
 
@@ -114,9 +125,7 @@ internal static class IconHelper
     private static Bitmap TrimSmallIcon(Bitmap bitmap)
     {
         if (bitmap.PixelFormat != System.Drawing.Imaging.PixelFormat.Format32bppArgb)
-        {
             return bitmap;
-        }
         var data = bitmap.LockBits(
             new(0, 0, bitmap.Width, bitmap.Height),
             System.Drawing.Imaging.ImageLockMode.ReadWrite,
@@ -129,23 +138,21 @@ internal static class IconHelper
                 // 如果透明度为0
                 return ptr[(y * width + x) * 4 + 3] == 0;
             }
-            var ptr = (byte*)data.Scan0;
-            int smallWidth = (int)(48 * (bitmap.HorizontalResolution / 96));
-            int smallHeight = (int)(48 * (bitmap.VerticalResolution / 96));
 
-            bool transparent = true;
-            for (int i = 0; i < data.Height; i++)
+            var ptr = (byte*)data.Scan0;
+            var smallWidth = (int)(48 * (bitmap.HorizontalResolution / 96));
+            var smallHeight = (int)(48 * (bitmap.VerticalResolution / 96));
+
+            var transparent = true;
+            for (var i = 0; i < data.Height; i++)
+            for (var j = 0; j < data.Width; j++)
             {
-                for (int j = 0; j < data.Width; j++)
-                {
-                    if (i <= smallHeight && j <= smallWidth)
-                        continue;
-                    if (!IsTransparent(ptr, j, i, data.Width))
-                    {
-                        transparent = false;
-                    }
-                }
+                if (i <= smallHeight && j <= smallWidth)
+                    continue;
+                if (!IsTransparent(ptr, j, i, data.Width))
+                    transparent = false;
             }
+
             bitmap.UnlockBits(data);
             if (!transparent)
             {

@@ -1,61 +1,75 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net9.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
-    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-    <LangVersion>preview</LangVersion>
-    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
-    <VersionPrefix>1.0.1</VersionPrefix>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <OutputType>WinExe</OutputType>
-    <PublishTrimmed>True</PublishTrimmed>
-    <PublishAot>True</PublishAot>
-  </PropertyGroup>
-  <ItemGroup>
-    <AvaloniaResource Include="Assets\**" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Avalonia" Version="11.2.5" />
-    <PackageReference Include="Avalonia.Controls.ColorPicker" Version="11.2.5" />
-    <PackageReference Include="Avalonia.Desktop" Version="11.2.5" />
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.5" />
-    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.5" />
-    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.2.5" />
-    <!--<PackageReference Include="FluentAvaloniaUI" Version="2.2.0" />-->
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.183">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
-    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
-    <PackageReference Include="System.Reactive" Version="6.0.1" />
-    <PackageReference Include="Zeng.CoreLibrary.Toolkit.Avalonia" Version="1.0.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\DockBar.DockItem\DockBar.DockItem.csproj" />
-    <ProjectReference Include="..\DockBar.Core\DockBar.Core.csproj" />
-    <ProjectReference Include="..\DockBar.SystemMonitor\DockBar.SystemMonitor.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <AdditionalFiles Include="NativeMethods.json" />
-    <AdditionalFiles Include="NativeMethods.txt" />
-  </ItemGroup>
-  <!-- 本地化数据 -->
-  <ItemGroup>
-    <None Update="Localization\*\*.loc">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <AvaloniaResource Remove="Assets\app.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\PublishProfiles\" />
-  </ItemGroup>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net9.0-windows</TargetFramework>
+        <Nullable>enable</Nullable>
+        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <LangVersion>preview</LangVersion>
+        <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+        <VersionPrefix>1.0.1</VersionPrefix>
+        <Configurations>Debug;Release</Configurations>
+        <Platforms>AnyCPU;x64</Platforms>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <OutputType>WinExe</OutputType>
+        <PublishTrimmed>True</PublishTrimmed>
+        <PublishAot>True</PublishAot>
+    </PropertyGroup>
+    <ItemGroup>
+        <AvaloniaResource Include="Assets\**"/>
+        <AvaloniaResource Remove="publish\**"/>
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Avalonia" Version="11.2.5"/>
+        <PackageReference Include="Avalonia.Controls.ColorPicker" Version="11.2.5"/>
+        <PackageReference Include="Avalonia.Desktop" Version="11.2.5"/>
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.5"/>
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.5"/>
+        <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.2.5"/>
+        <!--<PackageReference Include="FluentAvaloniaUI" Version="2.2.0" />-->
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0"/>
+        <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.183">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0"/>
+        <PackageReference Include="Serilog.Sinks.File" Version="6.0.0"/>
+        <PackageReference Include="System.Reactive" Version="6.0.1"/>
+        <PackageReference Include="Zeng.CoreLibrary.Toolkit.Avalonia" Version="1.0.0"/>
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\DockBar.DockItem\DockBar.DockItem.csproj"/>
+        <ProjectReference Include="..\DockBar.Core\DockBar.Core.csproj"/>
+        <ProjectReference Include="..\DockBar.SystemMonitor\DockBar.SystemMonitor.csproj"/>
+    </ItemGroup>
+    <ItemGroup>
+        <AdditionalFiles Include="NativeMethods.json"/>
+        <AdditionalFiles Include="NativeMethods.txt"/>
+        <AdditionalFiles Remove="publish\**"/>
+    </ItemGroup>
+    <!-- 本地化数据 -->
+    <ItemGroup>
+        <None Update="Localization\*\*.loc">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Remove="publish\**"/>
+    </ItemGroup>
+    <ItemGroup>
+        <AvaloniaResource Remove="Assets\app.ico"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Folder Include="Properties\PublishProfiles\"/>
+    </ItemGroup>
+    <ItemGroup>
+        <AvaloniaXaml Remove="publish\**"/>
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Remove="publish\**"/>
+    </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Remove="publish\**"/>
+    </ItemGroup>
 </Project>

@@ -5,11 +5,9 @@
     xmlns:cext="using:Zeng.CoreLibrary.Toolkit.Avalonia.Extensions"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    RenderOptions.TextRenderingMode="Antialias"
     xmlns:views="using:DockBar.AvaloniaApp.Views"
-    xmlns:converters="using:DockBar.AvaloniaApp.Converters"
-    xmlns:vm="using:DockBar.AvaloniaApp.ViewModels"
     Title="菜单窗口"
+    RenderOptions.TextRenderingMode="Antialias"
     x:DataType="views:MenuWindow"
     mc:Ignorable="d">
     <Window.Styles>
@@ -18,12 +16,7 @@
             <Setter Property="SizeToContent" Value="Height" />
             <Setter Property="Width" Value="240" />
             <Setter Property="SystemDecorations" Value="None" />
-            <!-- <Setter Property="TransparencyLevelHint" Value="AcrylicBlur" /> -->
-            <Setter Property="Background">
-                <Setter.Value>
-                    <SolidColorBrush Color="{DynamicResource SystemAltMediumLowColor}" />
-                </Setter.Value>
-            </Setter>
+            <Setter Property="Background" Value="{x:Null}" />
             <Setter Property="ExtendClientAreaToDecorationsHint" Value="True" />
             <Setter Property="ExtendClientAreaChromeHints" Value="NoChrome" />
             <!--<Setter Property="ExtendClientAreaTitleBarHeightHint" Value="-1" />-->
@@ -32,11 +25,9 @@
             <Setter Property="Topmost" Value="True" />
         </Style>
         <Style Selector=":is(TemplatedControl).ShowMenu">
-            <Setter Property="Margin" 
-                    Value="0,-80,0,0"
-                    >
-            </Setter>
-            <Setter Property="Background" Value="{x:Null}"></Setter>
+            <Setter Property="Margin" Value="0,-80,0,0" />
+            <Setter Property="MinHeight" Value="100" />
+            <Setter Property="Background" Value="{x:Null}" />
             <Setter Property="Transitions">
                 <Setter.Value>
                     <Transitions>
@@ -45,19 +36,22 @@
                 </Setter.Value>
             </Setter>
             <Style Selector="^ MenuItem">
-                <Setter Property="Padding" Value="8,6,8,6"></Setter>
+                <Setter Property="Padding" Value="8,6,8,6" />
             </Style>
             <Style Selector="^ TextBlock.FontIcon">
-                <Setter Property="FontSize" Value="32"></Setter>
+                <Setter Property="FontSize" Value="32" />
             </Style>
         </Style>
         <Style Selector="Window[IsActive=True] :is(TemplatedControl).ShowMenu">
             <Setter Property="Margin" Value="0" />
+            <Setter Property="MinHeight" Value="0" />
         </Style>
     </Window.Styles>
-    <Grid>
-        <ContextMenu Classes="ShowMenu">
-            <MenuItem Command="{Binding AddDockItemCommand}" Header="{cext:Localize MenuWindow.AddDockItemButton.Content}">
+    <Grid Name="RootGrid">
+        <ContextMenu Name="RootShowMenu" Classes="ShowMenu">
+            <!-- <StackPanel> -->
+            <MenuItem Command="{Binding AddDockItemCommand}"
+                      Header="{cext:Localize MenuWindow.AddDockItemButton.Content}">
                 <MenuItem.Icon>
                     <TextBlock
                         Classes="FontIcon"
@@ -65,7 +59,8 @@
                         Text="&#xE710;" />
                 </MenuItem.Icon>
             </MenuItem>
-            <MenuItem Command="{Binding EditMenuItemCommand}" Header="{cext:Localize MenuWindow.EditDockItemButton.Content}">
+            <MenuItem Command="{Binding EditMenuItemCommand}"
+                      Header="{cext:Localize MenuWindow.EditDockItemButton.Content}">
                 <MenuItem.Icon>
                     <TextBlock
                         Classes="FontIcon"
@@ -73,7 +68,8 @@
                         Text="&#xE70F;" />
                 </MenuItem.Icon>
             </MenuItem>
-            <MenuItem Command="{Binding RemoveDockItemCommand}" Header="{cext:Localize MenuWindow.DeleteDockItemButton.Content}">
+            <MenuItem Command="{Binding RemoveDockItemCommand}"
+                      Header="{cext:Localize MenuWindow.DeleteDockItemButton.Content}">
                 <MenuItem.Icon>
                     <TextBlock
                         Classes="FontIcon"
@@ -94,7 +90,8 @@
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>-->
-            <MenuItem Command="{Binding OpenSettingWindowCommand}" Header="{cext:Localize MenuWindow.OpenSettingWindowButton.Content}">
+            <MenuItem Command="{Binding OpenSettingWindowCommand}"
+                      Header="{cext:Localize MenuWindow.OpenSettingWindowButton.Content}">
                 <MenuItem.Icon>
                     <TextBlock Classes="FontIcon" Text="&#xE713;" />
                 </MenuItem.Icon>
@@ -107,6 +104,7 @@
                         Text="&#xE711;" />
                 </MenuItem.Icon>
             </MenuItem>
+            <!-- </StackPanel> -->
 
             <!--<ContextMenu.ItemTemplate>
                 <DataTemplate DataType="vm:MenuItemData">

@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DockBar.DockItem", "DockBar
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "解决方案项", "解决方案项", "{2269323B-6B62-419A-B2DB-D04EE59E1D28}"
 	ProjectSection(SolutionItems) = preProject
-		.csharpierrc = .csharpierrc
+		.editorconfig = .editorconfig
 		..\.gitignore = ..\.gitignore
 		..\LICENSE.txt = ..\LICENSE.txt
 		..\README.md = ..\README.md

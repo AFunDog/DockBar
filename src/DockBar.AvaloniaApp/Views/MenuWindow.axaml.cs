@@ -22,42 +22,122 @@ using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.WindowsAndMessaging;
+using Avalonia.Input;
+using Avalonia.Styling;
+using CommunityToolkit.Mvvm.ComponentModel;
+using DockBar.DockItem;
+using DockBar.DockItem.Items;
 using static Windows.Win32.PInvoke;
 
 namespace DockBar.AvaloniaApp.Views;
 
 internal partial class MenuWindow : Window
 {
+    public static readonly StyledProperty<int> SelectedIndexProperty
+        = AvaloniaProperty.Register<MenuWindow, int>(nameof(SelectedIndex));
+
+    public int SelectedIndex
+    {
+        get => GetValue(SelectedIndexProperty);
+        set => SetValue(SelectedIndexProperty, value);
+    }
+
+    public static readonly StyledProperty<DockItemBase?> SelectedDockItemProperty
+        = AvaloniaProperty.Register<MenuWindow, DockItemBase?>(nameof(SelectedDockItem));
+
+    public DockItemBase? SelectedDockItem
+    {
+        get => GetValue(SelectedDockItemProperty);
+        set => SetValue(SelectedDockItemProperty, value);
+    }
+
+    public static readonly StyledProperty<bool> CanAddItemProperty
+        = AvaloniaProperty.Register<MenuWindow, bool>(nameof(CanAddItem));
+
+    public bool CanAddItem
+    {
+        get => GetValue(CanAddItemProperty);
+        set => SetValue(CanAddItemProperty, value);
+    }
+
     //public MenuWindowViewModel ViewModel => (DataContext as MenuWindowViewModel)!;
 
     private ILogger Logger { get; }
+    private IDockItemService DockItemService { get; }
 
-    private MainWindow MainWindow { get; set; }
+    // public partial int SelectedIndex { get; set; }
 
-    public MenuWindow()
-        : this(Log.Logger, new()) { }
 
-    public MenuWindow(ILogger logger, MainWindow mainWindow)
+    // private MainWindow MainWindow { get; }
+
+    public MenuWindow() : this(Log.Logger, IDockItemService.Empty)
+    {
+    }
+
+    public MenuWindow(ILogger logger, IDockItemService dockItemService)
     {
         Logger = logger;
-        MainWindow = mainWindow;
-        MainWindow.ViewModel.PropertyChanged += (_, _) =>
-        {
-            // Logger.Debug("MainWindowViewModelPropertyChange {Data}",MainWindow.ViewModel.SelectedDockItem);
-            EditMenuItemCommand.NotifyCanExecuteChanged();
-            RemoveDockItemCommand.NotifyCanExecuteChanged();
-        };
-        Owner = MainWindow;
+        DockItemService = dockItemService;
+        // MainWindow = mainWindow;
+        // MainWindow.ViewModel.PropertyChanged += (_, _) =>
+        // {
+        //     // Logger.Debug("MainWindowViewModelPropertyChange {Data}",MainWindow.ViewModel.SelectedDockItem);
+        //     EditMenuItemCommand.NotifyCanExecuteChanged();
+        //     RemoveDockItemCommand.NotifyCanExecuteChanged();
+        // };
+
         DataContext = this;
         Deactivated += OnDeactivated;
+        LayoutUpdated += OnLayoutUpdated;
         InitializeComponent();
 
         ChangeWindowStyle();
 
-        RenderOptions.SetTextRenderingMode(this, TextRenderingMode.Antialias);
+        // RenderOptions.SetTextRenderingMode(this, TextRenderingMode.Antialias);
 
-        AcrylicHelper.EnableAcrylic(this, Colors.Transparent);
+        OnActualThemeVariantPropertyChanged(ActualThemeVariant, ActualThemeVariant);
         // AcrylicHoster.ApplyWithTheme(this);
+    }
+
+    protected override void OnPointerPressed(PointerPressedEventArgs e)
+    {
+        base.OnPointerPressed(e);
+        using var _ = LogHelper.Trace();
+        Logger.Debug("MenuWindow OnPointerPressed");
+    }
+
+    protected override void OnPointerReleased(PointerReleasedEventArgs e)
+    {
+        base.OnPointerReleased(e);
+        using var _ = LogHelper.Trace();
+        Logger.Debug("MenuWindow OnPointerReleased");
+    }
+
+    // TODO 这是用来展示解决打开右键菜单时，面板上下抽动的问题，之后改掉
+    private void OnLayoutUpdated(object? sender, EventArgs e)
+    {
+        if (App.Instance.MainWindow is not null)
+            App.Instance.MainWindow.NotifyIsPanelShow();
+    }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+        if (change.Property == ActualThemeVariantProperty)
+        {
+            OnActualThemeVariantPropertyChanged(change.GetOldValue<ThemeVariant>(), change.GetNewValue<ThemeVariant>());
+        }
+        else if (change.Property == SelectedDockItemProperty || change.Property == SelectedIndexProperty)
+        {
+            EditMenuItemCommand.NotifyCanExecuteChanged();
+            RemoveDockItemCommand.NotifyCanExecuteChanged();
+        }
+    }
+
+    private void OnActualThemeVariantPropertyChanged(ThemeVariant oldValue, ThemeVariant newValue)
+    {
+        if (this.TryFindResource("SystemAltHighColor", newValue, out var resource) && resource is Color color)
+            AcrylicHelper.EnableAcrylic(this, new(128, color.R, color.G, color.B));
     }
 
     /// <summary>
@@ -92,65 +172,47 @@ internal partial class MenuWindow : Window
         //    Hide();
     }
 
-    public void ShowMenu(int x, int y, bool atWindow = false)
+    public void ShowMenu(int x, int y)
     {
         using var _ = LogHelper.Trace();
+
+        const int ExtendBottom = 24;
+
+
         // 调整菜单位置让其不会超出屏幕
         if (Screens.ScreenFromWindow(this) is { } screen)
         {
-            if (x + Width * screen.Scaling > screen.WorkingArea.Right)
-                x -= (int)(Width * screen.Scaling);
-            if (y + Height * screen.Scaling > screen.WorkingArea.Bottom)
-                y -= (int)(Height * screen.Scaling);
+            if (x + RootGrid.Bounds.Width * screen.Scaling + ExtendBottom > screen.WorkingArea.Right)
+                x -= (int)(RootGrid.Bounds.Width * screen.Scaling);
+            if (y + RootGrid.Bounds.Height * screen.Scaling + ExtendBottom > screen.WorkingArea.Bottom)
+                y -= (int)(RootGrid.Bounds.Height * screen.Scaling);
             Position = new(x, y);
         }
 
         Logger.Debug("展示菜单窗口 {X} {Y}", x, y);
         // Deactivated += OnDeactivated;
-        Show();
+
+        Show(App.Instance.MainWindow);
+
+        // 并在之后将其设为焦点窗口，触发主窗口的 Deactivated 事件
         Activate();
     }
 
-    void OnDeactivated(object? sender, EventArgs e)
+    private void OnDeactivated(object? sender, EventArgs e)
     {
-        //ContextMenu contextMenu = new();
-        //if(sender is WindowBase)
-        HideMenu(sender);
+        HideMenu();
     }
 
-    void HideMenu(object? sender)
+    private void HideMenu()
     {
+        // Activate();
+        // 恢复焦点
+        var owner = Owner;
         Hide();
-        // if (sender is MainWindow window)
-        // {
-        //     window.Deactivated -= OnDeactivated;
-        // }
-        // else
-        // {
-        //     Deactivated -= OnDeactivated;
-        // }
+        owner?.Activate();
     }
 
-    //public void ShowMenu(int x, int y)
-    //{
-    //    void OnDeactivated(object? sender, EventArgs e)
-    //    {
-    //        Hide();
-    //        Deactivated -= OnDeactivated;
-    //    }
-    //    if (Screens.ScreenFromWindow(this) is { } screen)
-    //    {
-    //        if (x + Width * screen.Scaling > screen.WorkingArea.Right)
-    //            x -= (int)(Width * screen.Scaling);
-    //        if (y + Height * screen.Scaling > screen.WorkingArea.Bottom)
-    //            y -= (int)(Height * screen.Scaling);
-    //        Position = new(x, y);
-    //    }
-    //    Deactivated += OnDeactivated;
-    //    Show();
-    //}
-
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanAddItem))]
     private void AddDockItem()
     {
         void OpenEditDockItemWindow()
@@ -159,74 +221,81 @@ internal partial class MenuWindow : Window
             {
                 var addDockItemWindow = Program.ServiceProvider.GetRequiredService<EditDockItemWindow>();
                 addDockItemWindow.ViewModel.IsAddMode = true;
-                addDockItemWindow.ViewModel.Index = MainWindow.ViewModel.SelectedIndex;
-                MainWindow.ViewModel.HasOwnedWindow = true;
-                addDockItemWindow.Show(MainWindow);
-                addDockItemWindow.Closing += (s, e) =>
-                {
-                    MainWindow.ViewModel.HasOwnedWindow = false;
-                };
+                addDockItemWindow.ViewModel.Index = SelectedIndex;
+                addDockItemWindow.Show(App.Instance.MainWindow);
+                // addDockItemWindow.Closing += (s, e) =>
+                // {
+                //     MainWindow.ViewModel.HasOwnedWindow = false;
+                //     MainWindow.ViewModel.SelectedDockItem = null;
+                // };
             }
             catch (Exception ex)
             {
-                MainWindow.ViewModel.Logger.Error(ex, "打开 EditDockItemWindow 异常");
+                Logger.Error(ex, "打开 EditDockItemWindow 异常");
             }
         }
 
         OpenEditDockItemWindow();
-        HideMenu(this);
+        HideMenu();
     }
 
-    public bool CanEditDockItem() => MainWindow.ViewModel.SelectedDockItem is not null;
+    public bool CanEditDockItem() => SelectedDockItem is not null;
 
     [RelayCommand(CanExecute = nameof(CanEditDockItem))]
     private void EditMenuItem()
     {
         void OpenEditDockItemWindow()
         {
-            if (MainWindow.ViewModel.SelectedDockItem is null)
+            if (SelectedDockItem is null)
                 return;
             try
             {
                 var editDockItemWindow = Program.ServiceProvider.GetRequiredService<EditDockItemWindow>();
                 editDockItemWindow.ViewModel.IsAddMode = false;
-                editDockItemWindow.ViewModel.Index = MainWindow.ViewModel.SelectedIndex;
-                editDockItemWindow.ViewModel.CurrentDockItem = MainWindow.ViewModel.SelectedDockItem;
-                MainWindow.ViewModel.HasOwnedWindow = true;
-                editDockItemWindow.Show(MainWindow);
+                editDockItemWindow.ViewModel.Index = SelectedIndex;
+                editDockItemWindow.ViewModel.CurrentDockItem = SelectedDockItem;
+                // MainWindow.ViewModel.HasOwnedWindow = true;
+                editDockItemWindow.Show(App.Instance.MainWindow);
             }
             catch (Exception ex)
             {
-                MainWindow.ViewModel.Logger.Error(ex, "打开 EditDockItemWindow 异常");
+                Logger.Error(ex, "打开 EditDockItemWindow 异常");
             }
 
-            MainWindow.ViewModel.HasOwnedWindow = false;
+            // MainWindow.ViewModel.HasOwnedWindow = false;
         }
 
         OpenEditDockItemWindow();
-        HideMenu(this);
+        HideMenu();
     }
 
-    public bool CanRemoveDockItem() => MainWindow.ViewModel.SelectedDockItem is not null;
+    public bool CanRemoveDockItem() => SelectedDockItem is not null;
 
     [RelayCommand(CanExecute = nameof(CanRemoveDockItem))]
     private void RemoveDockItem()
     {
-        if (MainWindow.ViewModel.SelectedDockItem is null)
+        if (SelectedDockItem is null)
             return;
-        MainWindow.ViewModel.DockItemService?.UnregisterDockItem(MainWindow.ViewModel.SelectedDockItem.Key);
-        HideMenu(this);
+        DockItemService.UnregisterDockItem(SelectedDockItem.Key);
+        HideMenu();
     }
+
+    public bool CanMoveToFolder() => SelectedDockItem is not null;
+
+    // [RelayCommand(CanExecute = nameof(CanMoveToFolder))]
+    // private void MoveToFolder()
+    // {
+    //     if (SelectedDockItem is null) return;
+    //     
+    // }
 
     [RelayCommand]
     private void Exit()
     {
-        if (App.Current?.ApplicationLifetime is IControlledApplicationLifetime lifetime)
-        {
+        if (App.Instance.ApplicationLifetime is IControlledApplicationLifetime lifetime)
             lifetime.Shutdown();
-        }
 
-        HideMenu(this);
+        HideMenu();
     }
 
     [RelayCommand]
@@ -235,13 +304,14 @@ internal partial class MenuWindow : Window
         try
         {
             var settingWindow = Program.ServiceProvider.GetRequiredService<ControlPanelWindow>();
-            settingWindow.Show(MainWindow);
+            settingWindow.Show(App.Instance.MainWindow);
+            // settingWindow.Closed += (s, e) => { App.Instance.MainWindow. };
         }
         catch (Exception ex)
         {
             Logger.Error(ex, "打开设置窗口失败");
         }
 
-        HideMenu(this);
+        HideMenu();
     }
 }

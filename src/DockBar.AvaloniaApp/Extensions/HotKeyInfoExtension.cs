@@ -18,12 +18,11 @@ public static class HotKeyInfoExtension
             _ => hotKeyInfo with { Key = (uint)KeyInterop.VirtualKeyFromKey(key) }
         };
     }
-    
-    public static HotKeyInfo FromKey(this HotKeyInfo hotKeyInfo,Key key, KeyModifiers modifiers)
+
+    public static HotKeyInfo FromKey(this HotKeyInfo hotKeyInfo, Key key, KeyModifiers modifiers)
     {
         var res = hotKeyInfo.FromKey(key);
         var mod = (uint)modifiers;
-        return res with{ Modifiers = res.Modifiers | mod};
+        return res with { Modifiers = res.Modifiers | mod };
     }
-    
 }

@@ -13,8 +13,9 @@ internal sealed partial class MainViewModel : ViewModelBase
 
     public string AppVersion { get; } = Program.AppVersion.ToString();
 
-    public MainViewModel()
-        : this(Log.Logger) { }
+    public MainViewModel() : this(Log.Logger)
+    {
+    }
 
     public MainViewModel(ILogger logger)
     {

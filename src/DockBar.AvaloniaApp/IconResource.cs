@@ -10,8 +10,8 @@ namespace DockBar.AvaloniaApp;
 
 internal static class IconResource
 {
-    public static Uri AppIconUri { get; } = new Uri("avares://DockBar.AvaloniaApp/Assets/icon.ico");
-    public static Uri SettingIconUri { get; } = new Uri("avares://DockBar.AvaloniaApp/Assets/setting.png");
+    public static Uri AppIconUri { get; } = new("avares://DockBar.AvaloniaApp/Assets/icon.ico");
+    public static Uri SettingIconUri { get; } = new("avares://DockBar.AvaloniaApp/Assets/setting.png");
 
     public static MemoryStream ToMemoryStream(this Stream stream)
     {

@@ -1,9 +1,8 @@
 <UserControl
-    x:Class="DockBar.AvaloniaApp.Views.MainView"
+    x:Class="DockBar.AvaloniaApp.Views.ControlPanelMainView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:da="using:DockBar.AvaloniaApp"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:DockBar.AvaloniaApp.ViewModels"
     d:DesignHeight="450"
@@ -87,7 +86,7 @@
                     <Span>
                         <Run Classes="Section" Text="如何移动停靠项目" />
                         <LineBreak />
-                        <Run Text="1. 左键点击停靠项目不放，拖拽至想要的位置放开即可"></Run>
+                        <Run Text="1. 左键点击停靠项目不放，拖拽至想要的位置放开即可" />
                     </Span>
                 </SelectableTextBlock>
             </StackPanel>

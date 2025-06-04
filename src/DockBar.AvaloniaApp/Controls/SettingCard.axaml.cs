@@ -6,9 +6,11 @@ namespace DockBar.AvaloniaApp.Controls;
 
 public class SettingCard : TemplatedControl
 {
-    public static readonly StyledProperty<object?> HeaderProperty = AvaloniaProperty.Register<SettingCard, object?>(nameof(Header));
+    public static readonly StyledProperty<object?> HeaderProperty
+        = AvaloniaProperty.Register<SettingCard, object?>(nameof(Header));
 
-    public static readonly StyledProperty<object?> ContentProperty = AvaloniaProperty.Register<SettingCard, object?>(nameof(Content));
+    public static readonly StyledProperty<object?> ContentProperty
+        = AvaloniaProperty.Register<SettingCard, object?>(nameof(Content));
 
     public object? Header
     {

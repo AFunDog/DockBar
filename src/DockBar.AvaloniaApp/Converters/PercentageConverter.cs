@@ -12,17 +12,14 @@ public class PercentageConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        double percentage = double.TryParse(parameter?.ToString(), out var res) ? res : 1;
+        var percentage = double.TryParse(parameter?.ToString(), out var res) ? res : 1;
         return value switch
         {
             double real => real * percentage,
             int num => (int)(num * percentage),
-            _ => value,
+            _ => value
         };
     }
 
-    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        return null;
-    }
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => null;
 }

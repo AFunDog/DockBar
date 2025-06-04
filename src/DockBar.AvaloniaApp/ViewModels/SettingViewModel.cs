@@ -21,8 +21,9 @@ internal sealed partial class SettingViewModel : ViewModelBase
     [ObservableProperty]
     public partial object? Content { get; set; }
 
-    public SettingViewModel()
-        : this(Log.Logger, IAppSettingWrapper.Empty) { }
+    public SettingViewModel() : this(Log.Logger, IAppSettingWrapper.Empty)
+    {
+    }
 
     public SettingViewModel(ILogger logger, IAppSettingWrapper appSettingWrapper)
     {

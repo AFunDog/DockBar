@@ -20,10 +20,8 @@ internal static class AcrylicHelper
         {
             var hModule = LoadLibrary("user32.dll");
             if (hModule.IsInvalid is false)
-            {
                 SetWindowCompositionAttributeFunc = GetProcAddress(hModule, "SetWindowCompositionAttribute")
                     .CreateDelegate<SetWindowCompositionAttribute>();
-            }
         }
     }
 
@@ -38,15 +36,12 @@ internal static class AcrylicHelper
         var colorValue = new COLORREF((uint)((color.A << 24) + (color.B << 16) + (color.G << 8) + color.R));
 
         if (topLevel.TryGetPlatformHandle() is not { Handle: { } handle })
-        {
             return false;
-        }
         var hwnd = new HWND(handle);
 
         TryGetSetWindowFunc();
 
         if (SetWindowCompositionAttributeFunc is not null)
-        {
             unsafe
             {
                 var accent = new AccentPolicy
@@ -54,18 +49,17 @@ internal static class AcrylicHelper
                     AccentState = AccentState.ACCENT_ENABLE_ACRYLICBLURBEHIND,
                     AccentFlags = 0,
                     GradientColor = (int)colorValue.Value,
-                    AnimationId = 0,
+                    AnimationId = 0
                 };
 
                 var data = new WindowCompositionAttributeData
                 {
                     Attribute = WindowCompositionAttribute.WCA_ACCENT_POLICY,
                     Data = (IntPtr)(&accent),
-                    SizeOfData = Marshal.SizeOf(typeof(AccentPolicy)),
+                    SizeOfData = Marshal.SizeOf(typeof(AccentPolicy))
                 };
                 return SetWindowCompositionAttributeFunc(hwnd, ref data);
             }
-        }
 
         return false;
     }
@@ -78,34 +72,27 @@ internal static class AcrylicHelper
     public static bool DisableAcrylic(TopLevel topLevel)
     {
         if (topLevel.TryGetPlatformHandle() is not { Handle: { } handle })
-        {
             return false;
-        }
         var hwnd = new HWND(handle);
 
         TryGetSetWindowFunc();
 
         if (SetWindowCompositionAttributeFunc is not null)
-        {
             unsafe
             {
                 var accent = new AccentPolicy
                 {
-                    AccentState = AccentState.ACCENT_DISABLED,
-                    AccentFlags = 0,
-                    GradientColor = 0,
-                    AnimationId = 0,
+                    AccentState = AccentState.ACCENT_DISABLED, AccentFlags = 0, GradientColor = 0, AnimationId = 0
                 };
 
                 var data = new WindowCompositionAttributeData
                 {
                     Attribute = WindowCompositionAttribute.WCA_ACCENT_POLICY,
                     Data = (IntPtr)(&accent),
-                    SizeOfData = Marshal.SizeOf(typeof(AccentPolicy)),
+                    SizeOfData = Marshal.SizeOf(typeof(AccentPolicy))
                 };
                 return SetWindowCompositionAttributeFunc(hwnd, ref data);
             }
-        }
 
         return false;
     }

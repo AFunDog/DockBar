@@ -1,13 +1,13 @@
 {
-  "profiles": {
-    "DockBar.AvaloniaApp": {
-      "commandName": "Project"
-    },
-    "AOT": {
-      "commandName": "Executable",
-      "executablePath": "D:\\GitRepository\\DockBar\\src\\DockBar.AvaloniaApp\\bin\\Release\\net9.0-windows\\publish\\win-x64\\DockBar.AvaloniaApp.exe",
-      "nativeDebugging": true,
-      "remoteDebugEnabled": false
+    "profiles": {
+        "DockBar.AvaloniaApp": {
+            "commandName": "Project"
+        },
+        "AOT": {
+            "commandName": "Executable",
+            "executablePath": "D:\\GitRepository\\DockBar\\src\\DockBar.AvaloniaApp\\bin\\Release\\net9.0-windows\\publish\\win-x64\\DockBar.AvaloniaApp.exe",
+            "nativeDebugging": true,
+            "remoteDebugEnabled": false
+        }
     }
-  }
 }

@@ -13,8 +13,9 @@ internal partial class ControlPanelWindow : Window
 {
     internal ControlPanelWindowViewModel ViewModel => (DataContext as ControlPanelWindowViewModel)!;
 
-    public ControlPanelWindow()
-        : this(new()) { }
+    public ControlPanelWindow() : this(new())
+    {
+    }
 
     public ControlPanelWindow(ControlPanelWindowViewModel viewModel)
     {
@@ -28,6 +29,7 @@ internal partial class ControlPanelWindow : Window
 
         ViewModel.Logger.Information("ControlPanelWindow 启动");
     }
+
 
     protected override void OnClosed(EventArgs e)
     {

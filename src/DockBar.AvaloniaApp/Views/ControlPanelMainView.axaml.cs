@@ -7,14 +7,15 @@ using DockBar.Core.Helpers;
 
 namespace DockBar.AvaloniaApp.Views;
 
-internal partial class MainView : UserControl
+internal partial class ControlPanelMainView : UserControl
 {
     public MainViewModel ViewModel => (DataContext as MainViewModel)!;
 
-    public MainView()
-        : this(new()) { }
+    public ControlPanelMainView() : this(new())
+    {
+    }
 
-    public MainView(MainViewModel mainViewModel)
+    public ControlPanelMainView(MainViewModel mainViewModel)
     {
         using var _ = LogHelper.Trace();
 

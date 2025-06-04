@@ -12,12 +12,7 @@ using static Windows.Win32.PInvoke;
 
 namespace DockBar.SystemMonitor.Internals;
 
-internal enum CountWay
-{
-    Single,
-    Sum,
-    Average,
-}
+internal enum CountWay { Single, Sum, Average }
 
 internal sealed class PdhPerformanceCounter : DisposableObject, IPerformanceCounter
 {
@@ -55,22 +50,19 @@ internal sealed class PdhPerformanceCounter : DisposableObject, IPerformanceCoun
                 switch (_countWay)
                 {
                     case CountWay.Sum:
-                        for (int i = 0; i < itemCount; i++)
-                        {
+                        for (var i = 0; i < itemCount; i++)
                             value += values[i].FmtValue.Anonymous.doubleValue;
-                        }
                         break;
                     case CountWay.Average:
-                        for (int i = 0; i < itemCount; i++)
-                        {
+                        for (var i = 0; i < itemCount; i++)
                             value += values[i].FmtValue.Anonymous.doubleValue;
-                        }
                         if (itemCount is not 0)
                             value /= itemCount;
                         break;
                     default:
                         break;
                 }
+
                 Marshal.FreeHGlobal((nint)values);
                 return value;
 #pragma warning restore CS8500 // 这会获取托管类型的地址、获取其大小或声明指向它的指针
@@ -83,7 +75,9 @@ internal sealed class PdhPerformanceCounter : DisposableObject, IPerformanceCoun
         }
     }
 
-    protected override void DisposeManagedResource() { }
+    protected override void DisposeManagedResource()
+    {
+    }
 
     protected override void DisposeUnmanagedResource()
     {
@@ -91,5 +85,7 @@ internal sealed class PdhPerformanceCounter : DisposableObject, IPerformanceCoun
         PdhCloseQuery(_HQUERY);
     }
 
-    protected override void OnDisposed() { }
+    protected override void OnDisposed()
+    {
+    }
 }

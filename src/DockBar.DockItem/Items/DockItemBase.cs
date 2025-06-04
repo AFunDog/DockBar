@@ -1,9 +1,12 @@
+using System.Windows.Markup;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DockBar.Core.Helpers;
+using DockBar.DockItem.Structs;
 using MessagePack;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
-namespace DockBar.DockItem.Structs;
+namespace DockBar.DockItem.Items;
 
 [MessagePackObject(AllowPrivate = true)]
 [Union(0, typeof(DockLinkItem))]
@@ -15,7 +18,10 @@ public abstract partial class DockItemBase : ObservableObject
     /// 基于 <see cref="Serilog"/> 的日志系统
     /// </summary>
     [IgnoreMember]
-    public ILogger Logger { get; set; } = Log.Logger;
+    public ILogger Logger { get; internal set; } = Log.Logger;
+
+    [IgnoreMember]
+    public virtual IDockItemService DockItemService { get; internal set; } = IDockItemService.Empty;
 
     /// <summary>
     /// 是否使用生成的图标
@@ -34,10 +40,6 @@ public abstract partial class DockItemBase : ObservableObject
     [Key(nameof(Key))]
     public int Key { get; internal set; }
 
-    // [ObservableProperty]
-    [Key(nameof(Index))]
-    public int Index { get; internal set; }
-
     [ObservableProperty]
     [Key(nameof(ShowName))]
     public partial string? ShowName { get; set; }
@@ -50,17 +52,12 @@ public abstract partial class DockItemBase : ObservableObject
     /// <summary>
     /// 当前 <see cref="Execute"/> 是否可执行
     /// </summary>
+    /// <remarks>
+    /// 由子类决定是否通知改变 <see cref="INotifyPropertyChangedAttribute"/>
+    /// </remarks>
     [IgnoreMember]
-    public bool CanExecute => CanExecuteCore;
+    public abstract bool CanExecute { get; protected set; }
 
-    /// <summary>
-    /// 由子类控制的是否可执行属性
-    /// </summary>
-    [ObservableProperty]
-    [IgnoreMember]
-    protected partial bool CanExecuteCore { get; set; }
-
-    // 使用 internal 修饰符，使得只有 DockBar.DockItem 程序集内的类可以继承 DockItemBase 类
     internal DockItemBase()
     {
     }
@@ -75,21 +72,20 @@ public abstract partial class DockItemBase : ObservableObject
     internal bool Execute()
     {
         using var _ = LogHelper.Trace();
-        Logger.Verbose("DockItem {Key} 尝试执行",Key);
+        Logger.Verbose("DockItem {Key} 尝试执行", Key);
         if (CanExecute)
-        {
             try
             {
                 ExecuteCore();
-                Logger.Information("DockItem {Key} 执行完毕",Key);
+                Logger.Information("DockItem {Key} 执行完毕", Key);
                 return true;
             }
             catch (Exception e)
             {
-                Logger.Error(e,"{Key} 尝试执行",Key);
+                Logger.Error(e, "{Key} 尝试执行时出错", Key);
             }
-        }
-        Logger.Warning("DockItem {Key} 不可执行",Key);
+
+        Logger.Warning("DockItem {Key} 不可执行", Key);
         return false;
     }
 

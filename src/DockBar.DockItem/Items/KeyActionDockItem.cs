@@ -1,7 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using MessagePack;
 
-namespace DockBar.DockItem.Structs;
+namespace DockBar.DockItem.Items;
 
 [MessagePackObject(AllowPrivate = true)]
 public sealed partial class KeyActionDockItem : DockItemBase
@@ -9,6 +9,8 @@ public sealed partial class KeyActionDockItem : DockItemBase
     [ObservableProperty]
     [Key(nameof(ActionKey))]
     public partial string? ActionKey { get; set; }
+
+    public override bool CanExecute { get; protected set; } = true;
 
     protected override void ExecuteCore()
     {

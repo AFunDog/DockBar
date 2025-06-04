@@ -7,5 +7,5 @@ namespace DockBar.Core.Extensions;
 public static class ServiceExtension
 {
     public static IServiceCollection UseAppSettingWrapper(this IServiceCollection serviceCollection)
-        => serviceCollection.AddSingleton<IAppSettingWrapper,AppSettingWrapper>();
+        => serviceCollection.AddSingleton<IAppSettingWrapper, AppSettingWrapper>();
 }

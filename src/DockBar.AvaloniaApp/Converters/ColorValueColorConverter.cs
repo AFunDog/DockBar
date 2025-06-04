@@ -13,7 +13,6 @@ public sealed class ColorValueColorConverter : IValueConverter
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value is ColorValue colorValue)
-        {
             switch (parameter)
             {
                 default:
@@ -22,7 +21,6 @@ public sealed class ColorValueColorConverter : IValueConverter
                 case "Rgba":
                     return Color.FromUInt32(colorValue.Rgba);
             }
-        }
 
         return null;
     }
@@ -30,9 +28,7 @@ public sealed class ColorValueColorConverter : IValueConverter
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value is Color color)
-        {
             return new ColorValue(color.R, color.G, color.B, color.A);
-        }
 
         return null;
     }

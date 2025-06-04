@@ -14,9 +14,10 @@ using CommunityToolkit.Mvvm.Input;
 using Zeng.CoreLibrary.Toolkit.Contacts;
 using DockBar.AvaloniaApp.Extensions;
 using DockBar.AvaloniaApp.Structs;
+using DockBar.Core.Contacts;
 using DockBar.Core.Structs;
 using DockBar.DockItem;
-using DockBar.DockItem.Structs;
+using DockBar.DockItem.Items;
 using Serilog;
 
 namespace DockBar.AvaloniaApp.ViewModels;
@@ -27,7 +28,7 @@ internal sealed partial class EditDockItemWindowViewModel : ViewModelBase
     internal IDockItemService DockItemService { get; }
 
     internal IDockItemFactory DockItemFactory { get; }
-    
+
     internal IStorageProvider? StorageProvider { get; set; }
 
 
@@ -36,7 +37,7 @@ internal sealed partial class EditDockItemWindowViewModel : ViewModelBase
     // public IDataProvider<AppSetting> LocalSettingProvider { get; }
 
     public AppSetting AppSetting { get; }
-    
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(WindowTitle), nameof(ConfirmButtonText))]
     public partial bool IsAddMode { get; set; }
@@ -44,47 +45,53 @@ internal sealed partial class EditDockItemWindowViewModel : ViewModelBase
     public string WindowTitle => IsAddMode ? "添加停靠项目" : "编辑停靠项目";
     public string ConfirmButtonText => IsAddMode ? "确认添加" : "确认修改";
 
-    [ObservableProperty] public partial int Index { get; set; }
+    [ObservableProperty]
+    public partial int Index { get; set; }
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ConfirmDockItemCommand), nameof(OpenIconFileCommand))]
     [NotifyPropertyChangedFor(nameof(SelectedDockItemTypeIndex))]
     public partial DockItemBase? CurrentDockItem { get; set; }
 
-    private IReadOnlyList<(Type ItemType, string Key, Func<DockItemBase> Builder)> DockItemTypeTable { get; } 
-    
+    private IReadOnlyList<(Type ItemType, string Key, Func<DockItemBase> Builder)> DockItemTypeTable { get; }
+
     public IEnumerable<string> DockItemTypeStrings => DockItemTypeTable.Select(v => v.Key);
 
     public int SelectedDockItemTypeIndex
     {
-        get =>
-            CurrentDockItem is null
-                ? -1
-                : DockItemTypeTable.Index().FirstOrDefault(i => i.Item.ItemType == CurrentDockItem.GetType()) is
-                    { } item && item != default
-                    ? item.Index
-                    : -1;
+        get => CurrentDockItem is null ? -1 :
+            DockItemTypeTable.Index().FirstOrDefault(i => i.Item.ItemType == CurrentDockItem.GetType()) is { } item
+            && item != default ? item.Index : -1;
         set => CurrentDockItem = value == -1 ? null : DockItemTypeTable[value].Builder();
     }
 
-    public EditDockItemWindowViewModel()
-        : this(Log.Logger, IDockItemService.Empty, IDataProvider<AppSetting>.Empty,IDockItemFactory.Empty)
+    public EditDockItemWindowViewModel() : this(
+        Log.Logger,
+        IDockItemService.Empty,
+        IAppSettingWrapper.Empty,
+        IDockItemFactory.Empty
+    )
     {
     }
 
-    public EditDockItemWindowViewModel(ILogger logger, IDockItemService dockItemService, IDataProvider<AppSetting> appSettingProvider,IDockItemFactory dockItemFactory)
+    public EditDockItemWindowViewModel(
+        ILogger logger,
+        IDockItemService dockItemService,
+        IAppSettingWrapper appSettingWrapper,
+        IDockItemFactory dockItemFactory)
     {
         Logger = logger;
         DockItemService = dockItemService;
         // LocalSettingProvider = globalSettingProvider;
-        AppSetting = appSettingProvider.Datas.FirstOrDefault() ?? new();
+        // AppSetting = appSettingProvider.Datas.First();
+        AppSetting = appSettingWrapper.Data;
         DockItemFactory = dockItemFactory;
-        
+
         DockItemTypeTable =
         [
-            (typeof(DockLinkItem), "链接项目", () => DockItemFactory.Create(DockItemType.LinkItem)),
-            (typeof(KeyActionDockItem), "自定义行为项目", () => new KeyActionDockItem()),
-            (typeof(DockItemFolder), "文件夹项目", () => new DockItemFolder()),
+            (typeof(DockLinkItem), "链接项目", () => DockItemFactory.Create<DockLinkItem>()),
+            (typeof(KeyActionDockItem), "自定义行为项目", () => DockItemFactory.Create<KeyActionDockItem>()),
+            (typeof(DockItemFolder), "文件夹项目", () => DockItemFactory.Create<DockItemFolder>())
         ];
     }
 
@@ -98,7 +105,8 @@ internal sealed partial class EditDockItemWindowViewModel : ViewModelBase
 
         if (IsAddMode)
         {
-            DockItemService.RegisterDockItem(Index, CurrentDockItem);
+            DockItemService.RegisterDockItem(CurrentDockItem);
+            DockItemService.Root.Insert(Index, CurrentDockItem.Key);
         }
 
         // 如果是修改模式，实际上什么都不用做，因为 CurrentDockItem 已经是引用类型
@@ -116,8 +124,9 @@ internal sealed partial class EditDockItemWindowViewModel : ViewModelBase
         var files = await StorageProvider.OpenFilePickerAsync(new() { Title = "选择图标文件", AllowMultiple = false });
 
         var iconFile = files.FirstOrDefault();
-        if (iconFile is null) return;
-        
+        if (iconFile is null)
+            return;
+
         await using var stream = await iconFile.OpenReadAsync();
         if (stream.Length >= 1024 * 1024 * 32)
         {

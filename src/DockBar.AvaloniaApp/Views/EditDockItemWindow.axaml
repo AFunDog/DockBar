@@ -2,16 +2,14 @@
     x:Class="DockBar.AvaloniaApp.Views.EditDockItemWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:a="using:DockBar.AvaloniaApp"
     xmlns:ac="using:DockBar.AvaloniaApp.Converters"
     xmlns:cac="using:Zeng.CoreLibrary.Toolkit.Avalonia.Controls"
-    xmlns:cext="using:Zeng.CoreLibrary.Toolkit.Avalonia.Extensions"
     xmlns:controls="using:DockBar.AvaloniaApp.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:sys="using:System"
     xmlns:vm="using:DockBar.AvaloniaApp.ViewModels"
-    xmlns:cs="using:DockBar.DockItem.Structs"
+    xmlns:items="clr-namespace:DockBar.DockItem.Items;assembly=DockBar.DockItem"
     Title="{Binding WindowTitle, Mode=OneWay}"
     Width="800"
     Height="450"
@@ -21,7 +19,8 @@
         <vm:EditDockItemWindowViewModel IsAddMode="True">
             <vm:EditDockItemWindowViewModel.CurrentDockItem>
                 <!--<cd:KeyActionDockItem ActionKey="Setting" ShowName="123" />-->
-                <cs:DockLinkItem LinkPath="C:" />
+                <!-- <cs:DockLinkItem LinkPath="C:" /> -->
+                <items:DockItemFolder />
             </vm:EditDockItemWindowViewModel.CurrentDockItem>
         </vm:EditDockItemWindowViewModel>
     </Design.DataContext>
@@ -203,7 +202,8 @@
                         Margin="0,4"
                         Text="{Binding Index}" />
                     <Label Grid.Row="3" Content="项目图标" />
-                    <CheckBox Grid.Row="3" Grid.Column="1" IsChecked="{Binding CurrentDockItem.UseGeneratedIcon,Mode=TwoWay}" />
+                    <CheckBox Grid.Row="3" Grid.Column="1"
+                              IsChecked="{Binding CurrentDockItem.UseGeneratedIcon,Mode=TwoWay}" />
                     <Button
                         Grid.Row="3"
                         Grid.Column="2"
@@ -235,7 +235,7 @@
                         VerticalAlignment="Top"
                         Content="{Binding CurrentDockItem}">
                         <ContentControl.DataTemplates>
-                            <DataTemplate DataType="cs:DockLinkItem">
+                            <DataTemplate DataType="items:DockLinkItem">
                                 <Grid ColumnDefinitions="84,32,*" RowDefinitions="*,*">
                                     <Label
                                         Grid.Row="0"
@@ -272,7 +272,7 @@
                                     </ComboBox>
                                 </Grid>
                             </DataTemplate>
-                            <DataTemplate DataType="cs:KeyActionDockItem">
+                            <DataTemplate DataType="items:KeyActionDockItem">
                                 <Grid ColumnDefinitions="84,*" RowDefinitions="*">
                                     <Label
                                         Grid.Row="0"
@@ -286,6 +286,7 @@
                                 </Grid>
                             </DataTemplate>
                             <!--<DataTemplate DataType="cd:DockLinkItem" />-->
+                            <DataTemplate DataType="items:DockItemFolder" />
                         </ContentControl.DataTemplates>
                     </ContentControl>
                 </Grid>

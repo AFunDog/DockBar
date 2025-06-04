@@ -8,8 +8,8 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using DockBar.AvaloniaApp.Structs;
 using DockBar.AvaloniaApp.ViewModels;
-using DockBar.DockItem.Structs;
 using DockBar.Core.Helpers;
+using DockBar.DockItem.Items;
 
 namespace DockBar.AvaloniaApp.Views;
 
@@ -17,8 +17,7 @@ internal partial class EditDockItemWindow : Window
 {
     internal EditDockItemWindowViewModel ViewModel => (DataContext as EditDockItemWindowViewModel)!;
 
-    public EditDockItemWindow()
-        : this(new EditDockItemWindowViewModel())
+    public EditDockItemWindow() : this(new EditDockItemWindowViewModel())
     {
     }
 
@@ -58,9 +57,7 @@ internal partial class EditDockItemWindow : Window
         var datas = e.Data.GetFiles();
 
         if (datas is not null && datas.FirstOrDefault() is IStorageItem data)
-        {
             ViewModel.CurrentDockItem = new DockLinkItem { LinkPath = data.Path.LocalPath, LinkType = LinkType.File };
-        }
     }
 
     private void CloseButton_Clicked(object? sender, RoutedEventArgs e)

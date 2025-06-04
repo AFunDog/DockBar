@@ -22,7 +22,10 @@ internal sealed partial class ControlPanelWindowViewModel : ViewModelBase
     public IAppSettingWrapper AppSettingWrapper { get; }
     public INavigateService NavigateService { get; }
 
-    public IEnumerable<MenuItemData> MenuItems { get; } = [new("主页", '\uE80F', "/"), new("设置", '\uE713', "/Settings")];
+    public IEnumerable<MenuItemData> MenuItems { get; } =
+    [
+        new("主页", '\uE80F', "/"), new("停靠项目", '\uE71D', "/DockItems"), new("设置", '\uE713', "/Settings")
+    ];
 
     [ObservableProperty]
     public partial object? Content { get; set; }
@@ -35,16 +38,21 @@ internal sealed partial class ControlPanelWindowViewModel : ViewModelBase
         Logger.Information("SelectedMenuItem changed to {Value}", value?.Title);
     }
 
-    public ControlPanelWindowViewModel()
-        : this(Log.Logger, IAppSettingWrapper.Empty, INavigateService.Empty) { }
+    public ControlPanelWindowViewModel() : this(Log.Logger, IAppSettingWrapper.Empty, INavigateService.Empty)
+    {
+    }
 
-    public ControlPanelWindowViewModel(ILogger logger, IAppSettingWrapper appSettingWrapper, INavigateService navigateService)
+    public ControlPanelWindowViewModel(
+        ILogger logger,
+        IAppSettingWrapper appSettingWrapper,
+        INavigateService navigateService)
     {
         Logger = logger;
         AppSettingWrapper = appSettingWrapper;
         NavigateService = navigateService
-            .RegisterViewRoute("/", Program.ServiceProvider.GetRequiredService<MainView>)
-            .RegisterViewRoute("/Settings", Program.ServiceProvider.GetRequiredService<SettingView>);
+            .RegisterViewRoute("/", Program.ServiceProvider.GetRequiredService<ControlPanelMainView>)
+            .RegisterViewRoute("/DockItems", Program.ServiceProvider.GetRequiredService<ControlPanelDockItemsView>)
+            .RegisterViewRoute("/Settings", Program.ServiceProvider.GetRequiredService<ControlPanelSettingView>);
         NavigateService.OnNavigated += (s, e) =>
         {
             using var _ = LogHelper.Trace();
@@ -60,8 +68,6 @@ internal sealed partial class ControlPanelWindowViewModel : ViewModelBase
     private void Navigate(MenuItemData data)
     {
         if (data.Tag is string route)
-        {
             NavigateService.Navigate(route);
-        }
     }
 }

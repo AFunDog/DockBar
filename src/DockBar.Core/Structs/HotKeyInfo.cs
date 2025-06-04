@@ -12,8 +12,5 @@ namespace DockBar.Core.Structs;
 [MessagePackObject]
 public readonly record struct HotKeyInfo([property: Key(0)] uint Modifiers, [property: Key(1)] uint Key)
 {
-    public bool IsValid()
-    {
-        return Key != 0;
-    }
+    public bool IsValid() => Key != 0;
 }

@@ -6,19 +6,18 @@ using DockBar.Core.Helpers;
 using DockBar.DockItem.Helpers;
 using MessagePack;
 
-namespace DockBar.DockItem.Structs;
+namespace DockBar.DockItem.Items;
 
 // HACK DockLinkItem 在网络方面获取名称不会被覆盖的问题
 
 public enum LinkType
 {
     Undefined,
-
     Exe,
     Lnk,
     Web,
     File,
-    Folder,
+    Folder
 }
 
 [MessagePackObject(AllowPrivate = true)]
@@ -49,12 +48,6 @@ public partial class DockLinkItem : DockItemBase
     [Key(nameof(LinkPath))]
     public partial string? LinkPath { get; set; }
 
-    public DockLinkItem()
-    {
-        // 默认为可执行状态
-        CanExecuteCore = true;
-    }
-
     // public override async void RefreshData()
     // {
     //     base.RefreshData();
@@ -65,6 +58,8 @@ public partial class DockLinkItem : DockItemBase
     //     if (UseGeneratedIcon)
     //         GetIconDataFromPath(LinkPath);
     // }
+
+    public override bool CanExecute { get; protected set; } = true;
 
     protected override void ExecuteCore()
     {
@@ -108,15 +103,15 @@ public partial class DockLinkItem : DockItemBase
         {
             using var client = new HttpClient();
             foreach (var uri in weburi.ToWebUris())
-            {
                 if (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
                     try
                     {
                         var message = (await client.GetAsync(uri)).EnsureSuccessStatusCode();
                         LinkType = LinkType.Web;
                     }
-                    catch (Exception) { }
-            }
+                    catch (Exception)
+                    {
+                    }
         }
 
         if (string.IsNullOrEmpty(path))
@@ -129,17 +124,11 @@ public partial class DockLinkItem : DockItemBase
             {
                 LinkType = LinkType.File;
                 if (Directory.Exists(path))
-                {
                     LinkType = LinkType.Folder;
-                }
                 else if (path.EndsWith(".exe"))
-                {
                     LinkType = LinkType.Exe;
-                }
                 else if (path.EndsWith(".lnk"))
-                {
                     LinkType = LinkType.Lnk;
-                }
             }
             else
             {
@@ -155,8 +144,7 @@ public partial class DockLinkItem : DockItemBase
             const string Pattern = @"<title>(.+)</title>";
             using var client = new HttpClient();
             foreach (var uri in path.ToWebUris())
-            {
-                if (uri is { } && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
+                if (uri is not null && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
                     try
                     {
                         var content = await client.GetStringAsync(uri);
@@ -167,8 +155,9 @@ public partial class DockLinkItem : DockItemBase
                             return;
                         }
                     }
-                    catch (Exception) { }
-            }
+                    catch (Exception)
+                    {
+                    }
             //Uri.TryCreate(weburi, UriKind.Absolute, out var weburi);
             //if (weburi is { } && (weburi.Scheme == Uri.UriSchemeHttp || weburi.Scheme == Uri.UriSchemeHttps))
             //    try
@@ -279,10 +268,15 @@ public partial class DockLinkItem : DockItemBase
     {
         try
         {
-            var processStartInfo = new ProcessStartInfo() { FileName = pathOrUrl, UseShellExecute = true };
-            if (workingDir is not null)
-                processStartInfo.WorkingDirectory = workingDir;
-            Process.Start(processStartInfo);
+            // 防止 Start 时间过长造成 UI 卡顿
+            _ = Task.Run(() =>
+                {
+                    var processStartInfo = new ProcessStartInfo { FileName = pathOrUrl, UseShellExecute = true };
+                    if (workingDir is not null)
+                        processStartInfo.WorkingDirectory = workingDir;
+                    Process.Start(processStartInfo);
+                }
+            );
         }
         catch (Exception e)
         {

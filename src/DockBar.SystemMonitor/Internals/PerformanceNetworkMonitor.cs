@@ -37,23 +37,22 @@ internal sealed class PerformanceNetworkMonitor : IDisposable
             //ResetCounter();
 
 
-
             float value = 0;
             try
             {
                 foreach (var counter in NetworkSentCounter)
-                {
                     value += counter.NextValue();
-                }
             }
             catch (Exception e)
             {
                 Logger.Verbose(e, "网络监控器异常 {Instance}", InstanceNames);
                 ResetCounter();
             }
+
             return value;
         }
     }
+
     public float TotalNetworkReceived
     {
         get
@@ -72,21 +71,21 @@ internal sealed class PerformanceNetworkMonitor : IDisposable
             try
             {
                 foreach (var counter in NetworkReceivedCounter)
-                {
                     value += counter.NextValue();
-                }
             }
             catch (Exception e)
             {
                 Logger.Verbose(e, "网络监控器异常 {Instance}", InstanceNames);
                 ResetCounter();
             }
+
             return value;
         }
     }
 
-    public PerformanceNetworkMonitor()
-        : this(Log.Logger) { }
+    public PerformanceNetworkMonitor() : this(Log.Logger)
+    {
+    }
 
     public PerformanceNetworkMonitor(ILogger logger)
     {
@@ -105,34 +104,44 @@ internal sealed class PerformanceNetworkMonitor : IDisposable
 
         var instanceNames = InstanceNames;
         var newInstances = instanceNames.Except(NetworkSentCounter.Select(counter => counter.InstanceName)).ToArray();
-        var removeInstances = NetworkSentCounter.Select(counter => counter.InstanceName).Except(instanceNames).ToArray();
+        var removeInstances
+            = NetworkSentCounter.Select(counter => counter.InstanceName).Except(instanceNames).ToArray();
         try
         {
             if (removeInstances.Length != 0)
             {
                 NetworkSentCounter.RemoveAll(counter =>
-                {
-                    if (removeInstances.Contains(counter.InstanceName))
                     {
-                        counter.Dispose();
-                        return true;
+                        if (removeInstances.Contains(counter.InstanceName))
+                        {
+                            counter.Dispose();
+                            return true;
+                        }
+
+                        return false;
                     }
-                    return false;
-                });
+                );
                 NetworkReceivedCounter.RemoveAll(counter =>
-                {
-                    if (removeInstances.Contains(counter.InstanceName))
                     {
-                        counter.Dispose();
-                        return true;
+                        if (removeInstances.Contains(counter.InstanceName))
+                        {
+                            counter.Dispose();
+                            return true;
+                        }
+
+                        return false;
                     }
-                    return false;
-                });
+                );
             }
+
             if (newInstances.Length != 0)
             {
-                NetworkSentCounter.AddRange(newInstances.Select(ins => new PerformanceCounter(CategoryName, SentCounterName, ins)));
-                NetworkReceivedCounter.AddRange(newInstances.Select(ins => new PerformanceCounter(CategoryName, ReceivedCounterName, ins)));
+                NetworkSentCounter.AddRange(
+                    newInstances.Select(ins => new PerformanceCounter(CategoryName, SentCounterName, ins))
+                );
+                NetworkReceivedCounter.AddRange(
+                    newInstances.Select(ins => new PerformanceCounter(CategoryName, ReceivedCounterName, ins))
+                );
             }
 
             //NetworkSentCounter = instanceNames.Select(ins => new PerformanceCounter("Network Interface", "Bytes Sent/sec", ins)).ToList();
@@ -154,6 +163,7 @@ internal sealed class PerformanceNetworkMonitor : IDisposable
                 counter.Dispose();
             NetworkSentCounter.Clear();
         }
+
         if (NetworkReceivedCounter is not null)
         {
             foreach (var counter in NetworkReceivedCounter)

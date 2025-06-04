@@ -18,17 +18,14 @@ using DockBar.Core.Contacts;
 using DockBar.Core.Helpers;
 using DockBar.Core.Structs;
 using DockBar.DockItem;
-using DockBar.DockItem.Structs;
+using DockBar.DockItem.Items;
 using DockBar.SystemMonitor;
 using Serilog;
 
 namespace DockBar.AvaloniaApp.ViewModels;
 
 [Flags]
-internal enum PanelState
-{
-    Hide = 0,
-}
+internal enum PanelState { Hide = 0 }
 
 internal sealed partial class MainWindowViewModel : ViewModelBase
 {
@@ -38,7 +35,11 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
     public IPerformanceMonitor PerformanceMonitor { get; }
     public IGlobalHotKeyManager GlobalHotKeyManager { get; }
 
-    public ObservableCollection<DockItemBase> DockItems { get; } = [];
+    // public ObservableCollection<DockItemBase> DockItems =>
+    // [
+    //     ..DockItemService.Root.Select(key => DockItemService.GetDockItem(key))
+    //         .OfType<DockItemBase>()
+    // ];
 
     [ObservableProperty]
     public partial int SelectedIndex { get; set; }
@@ -69,12 +70,12 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(IsPanelShow))]
     public partial bool IsMouseEntered { get; set; } = false;
 
-    /// <summary>
-    /// 是否处于显示右键菜单
-    /// </summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsPanelShow))]
-    public partial bool IsMenuShow { get; set; } = false;
+    // /// <summary>
+    // /// 是否处于显示右键菜单
+    // /// </summary>
+    // [ObservableProperty]
+    // [NotifyPropertyChangedFor(nameof(IsPanelShow))]
+    // public partial bool IsMenuShow { get; set; } = false;
 
     /// <summary>
     /// 是否处于热键按下
@@ -87,17 +88,12 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(IsPanelShow))]
     public partial bool HasOwnedWindow { get; set; } = false;
 
-    //[ObservableProperty]
-    //[NotifyPropertyChangedFor(nameof(IsPanelShow))]
-    //public partial bool IsMainWindowActivated { get; set; }
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsPanelShow))]
-    public partial bool IsDockItemDraging { get; set; } = false;
-
     /// <summary>
     /// 面板是否显示
     /// </summary>
-    public bool IsPanelShow => IsMouseEntered || IsMenuShow || IsDragMode || IsHotKeyPressed || HasOwnedWindow || IsDockItemDraging;
+    public bool IsPanelShow => IsMouseEntered || IsDragMode || IsHotKeyPressed || HasOwnedWindow
+    // || IsDockItemDraging
+    ;
 
     /// <summary>
     /// 面板是否显示
@@ -105,18 +101,23 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
     /// </summary>
     public bool IsPanelShowDelay => IsPanelShow;
 
-    public double ExtendDockPanelHeight => AppSetting.DockItemSize * 2;
 
-    public MainWindowViewModel()
-        : this(Log.Logger, IDockItemService.Empty, IAppSettingWrapper.Empty, IPerformanceMonitor.Empty, IGlobalHotKeyManager.Empty) { }
+    public MainWindowViewModel() : this(
+        Log.Logger,
+        IDockItemService.Empty,
+        IAppSettingWrapper.Empty,
+        IPerformanceMonitor.Empty,
+        IGlobalHotKeyManager.Empty
+    )
+    {
+    }
 
     public MainWindowViewModel(
         ILogger logger,
         IDockItemService dockItemService,
         IAppSettingWrapper appSettingWrapper,
         IPerformanceMonitor performanceMonitor,
-        IGlobalHotKeyManager globalHotKeyManager
-    )
+        IGlobalHotKeyManager globalHotKeyManager)
     {
         Logger = logger;
         DockItemService = dockItemService;
@@ -133,27 +134,27 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
 
     private void InitDockItemService(IDockItemService dockItemService)
     {
-        void OnDockItemAdded(IDockItemService service, DockItemBase dockItem)
-        {
-            DockItems.Insert(dockItem.Index, dockItem);
-            dockItemService.SaveData(App.StorageFile);
-            //NotifyPanelSize();
-        }
-
-        void OnDockItemRemoved(IDockItemService service, DockItemBase dockItem)
-        {
-            DockItems.Remove(dockItem);
-            dockItemService.SaveData(App.StorageFile);
-            //NotifyPanelSize();
-        }
-
-        void OnDockItemMoved(IDockItemService service, (int oldIndex, int newIndex) args)
-        {
-            DockItems.Move(args.oldIndex, args.newIndex);
-            // 暂时用这个来解决问题
-            IsDockItemDraging = false;
-            dockItemService.SaveData(App.StorageFile);
-        }
+        // void OnDockItemAdded(IDockItemService service, DockItemBase dockItem)
+        // {
+        //     DockItems.Insert(dockItem.Index, dockItem);
+        //     dockItemService.SaveData(App.StorageFile);
+        //     //NotifyPanelSize();
+        // }
+        //
+        // void OnDockItemRemoved(IDockItemService service, DockItemBase dockItem)
+        // {
+        //     DockItems.Remove(dockItem);
+        //     dockItemService.SaveData(App.StorageFile);
+        //     //NotifyPanelSize();
+        // }
+        //
+        // void OnDockItemMoved(IDockItemService service, (int oldIndex, int newIndex) args)
+        // {
+        //     DockItems.Move(args.oldIndex, args.newIndex);
+        //     // 暂时用这个来解决问题
+        //     IsDockItemDraging = false;
+        //     dockItemService.SaveData(App.StorageFile);
+        // }
 
         void OnDockItemStarted(IDockItemService service, DockItemBase dockItem)
         {
@@ -161,7 +162,6 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
             if (dockItem is KeyActionDockItem { ActionKey: not null } keyActionDockItem)
             {
                 if (KeyActionDockItems.KeyActions.TryGetValue(keyActionDockItem.ActionKey, out var action))
-                {
                     try
                     {
                         action();
@@ -170,20 +170,19 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
                     {
                         Logger?.Error(e, "执行 KeyActionDockItem 的任务时发生错误");
                     }
-                }
                 else
-                {
                     Logger?.Warning("KeyActionDockItem 的任务未找到");
-                }
             }
         }
+        // bool isLoaded = false;
 
         dockItemService.LoadData(App.StorageFile);
-        DockItems.Clear();
-        foreach (var dockItem in dockItemService.DockItems)
-        {
-            DockItems.Add(dockItem);
-        }
+        // isLoaded = true;
+        // DockItems.Clear();
+        // foreach (var dockItem in dockItemService.Root)
+        // {
+        //     DockItems.Add(dockItem);
+        // }
 
         //foreach (
         //    var wrappedItem in dockItemService
@@ -198,10 +197,10 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
         //{
         //    DockItems.Add(dockItem);
         //}
-        dockItemService.DockItemAdded += OnDockItemAdded;
-        dockItemService.DockItemRemoved += OnDockItemRemoved;
-        dockItemService.DockItemMoved += OnDockItemMoved;
-        dockItemService.DockItemStarted += OnDockItemStarted;
+        // dockItemService.DockItemAdded += OnDockItemAdded;
+        // dockItemService.DockItemRemoved += OnDockItemRemoved;
+        // dockItemService.DockItemMoved += OnDockItemMoved;
+        dockItemService.DockItemExecuted += OnDockItemStarted;
     }
 
     /// <summary>
@@ -212,7 +211,7 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
     {
         try
         {
-            Process.Start(new ProcessStartInfo() { FileName = "taskmgr", UseShellExecute = true });
+            Process.Start(new ProcessStartInfo { FileName = "taskmgr", UseShellExecute = true });
         }
         catch (Exception e)
         {
@@ -229,18 +228,18 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
         DockItemService.ExecuteDockItem(dockItemKey);
     }
 
-    public void InsertDockLinkItem(int index, string fullPath)
-    {
-        DockItemService.RegisterDockItem(index, new DockLinkItem { LinkPath = fullPath });
-
-        //NotifyPanelSize();
-    }
-
-    public void RemoveDockItem(int key)
-    {
-        DockItemService.UnregisterDockItem(key);
-        //NotifyPanelSize();
-    }
+    // public void InsertDockLinkItem(int index, string fullPath)
+    // {
+    //     DockItemService.RegisterDockItem(new DockLinkItem { LinkPath = fullPath }, index);
+    //
+    //     //NotifyPanelSize();
+    // }
+    //
+    // public void RemoveDockItem(int key)
+    // {
+    //     DockItemService.UnregisterDockItem(key);
+    //     //NotifyPanelSize();
+    // }
 
     /// <summary>
     /// 用来延迟属性变化的 Timer
@@ -257,21 +256,31 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
         {
             DelayTimer?.Dispose();
             if (IsPanelShow)
-            {
                 OnPropertyChanged(nameof(IsPanelShowDelay));
-            }
+            // IsPanelShowDelay = IsPanelShow;
             else
-            {
                 DelayTimer = DispatcherTimer.RunOnce(
                     () =>
                     {
+                        // IsPanelShowDelay = IsPanelShow;
                         OnPropertyChanged(nameof(IsPanelShowDelay));
                         Logger.Verbose("IsPanelShowDelay 属性改变 {Property}", IsPanelShowDelay);
                     },
                     TimeSpan.FromSeconds(0.33)
                 );
-                Logger.Verbose("IsPanelShow 属性改变 {Property}", IsPanelShow);
-            }
+
+            Logger.Verbose(
+                "IsPanelShow 属性改变 {Property} {Others}",
+                IsPanelShow,
+                new Dictionary<string, bool>
+                {
+                    [nameof(IsMouseEntered)] = IsMouseEntered,
+                    [nameof(IsDragMode)] = IsDragMode,
+                    [nameof(IsHotKeyPressed)] = IsHotKeyPressed,
+                    [nameof(HasOwnedWindow)] = HasOwnedWindow
+                    // [nameof(IsDockItemDraging)] = IsDockItemDraging
+                }
+            );
         }
     }
 

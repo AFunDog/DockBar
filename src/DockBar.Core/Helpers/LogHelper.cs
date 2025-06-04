@@ -14,9 +14,8 @@ public static class LogHelper
     public static IDisposable Trace(
         [CallerFilePath] string file = "",
         [CallerLineNumber] int line = 0,
-        [CallerMemberName] string member = ""
-    )
-    {
-        return LogContext.PushProperty("Caller", $"{Path.GetFileName(file)} {line} {member} ");
-    }
+        [CallerMemberName] string member = "") => LogContext.PushProperty(
+        "Caller",
+        $"{Path.GetFileName(file)} {line} {member} "
+    );
 }

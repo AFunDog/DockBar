@@ -9,15 +9,13 @@ namespace DockBar.AvaloniaApp.Converters;
 
 public sealed class ExperimentalAcrylicBorderMaterialConverter : IMultiValueConverter
 {
-    public static ExperimentalAcrylicBorderMaterialConverter  Instance { get; } = new();
-    
+    public static ExperimentalAcrylicBorderMaterialConverter Instance { get; } = new();
+
     public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
     {
-        var material = new ExperimentalAcrylicMaterial()
+        var material = new ExperimentalAcrylicMaterial
         {
-            TintColor = Colors.Black,
-            TintOpacity = 0.8,
-            MaterialOpacity = 0.4
+            TintColor = Colors.Black, TintOpacity = 0.8, MaterialOpacity = 0.4
         };
         try
         {
@@ -27,7 +25,6 @@ public sealed class ExperimentalAcrylicBorderMaterialConverter : IMultiValueConv
         }
         catch (Exception e)
         {
-            
         }
 
         return material;

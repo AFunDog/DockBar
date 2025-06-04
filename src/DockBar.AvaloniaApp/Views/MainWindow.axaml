@@ -2,24 +2,22 @@
     x:Class="DockBar.AvaloniaApp.Views.MainWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:a="using:DockBar.AvaloniaApp"
     xmlns:ac="using:DockBar.AvaloniaApp.Converters"
     xmlns:controls="using:DockBar.AvaloniaApp.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:media="using:Avalonia.Media"
-    xmlns:sm="using:DockBar.SystemMonitor"
     xmlns:sys="using:System"
-    xmlns:ds="using:DockBar.DockItem.Structs"
     xmlns:vm="using:DockBar.AvaloniaApp.ViewModels"
     xmlns:structs="using:DockBar.Core.Structs"
     xmlns:converters="using:DockBar.AvaloniaApp.Converters"
+    xmlns:items="clr-namespace:DockBar.DockItem.Items;assembly=DockBar.DockItem"
     Title="DockBar"
     x:DataType="vm:MainWindowViewModel"
     Classes.IsPanelShow="{Binding IsPanelShowDelay}"
     Design.Width="1000"
     Icon="avares://DockBar.AvaloniaApp/Assets/icon.ico"
     SizeToContent="WidthAndHeight"
+    RenderOptions.TextRenderingMode="SubpixelAntialias"
     Topmost="True"
     mc:Ignorable="d">
 
@@ -28,16 +26,16 @@
             <vm:MainWindowViewModel.AppSetting>
                 <structs:AppSetting />
             </vm:MainWindowViewModel.AppSetting>
-            <vm:MainWindowViewModel.DockItems>
-                <ds:DockLinkItem LinkPath="" ShowName="停靠项目1" />
-                <ds:DockLinkItem LinkPath="" ShowName="停靠项目2" />
-                <ds:DockLinkItem LinkPath="" ShowName="停靠项目3" />
-            </vm:MainWindowViewModel.DockItems>
+            <!-- <vm:MainWindowViewModel.DockItems> -->
+            <!--     <items:DockLinkItem LinkPath="" ShowName="停靠项目1" /> -->
+            <!--     <items:DockLinkItem LinkPath="" ShowName="停靠项目2" /> -->
+            <!--     <items:DockLinkItem LinkPath="" ShowName="停靠项目3" /> -->
+            <!-- </vm:MainWindowViewModel.DockItems> -->
         </vm:MainWindowViewModel>
     </Design.DataContext>
     <Design.DesignStyle>
         <Style Selector="Window">
-            <Setter Property="Background" Value="Gray" />
+            <!-- <Setter Property="Background" Value="Gray" /> -->
             <Setter Property="RequestedThemeVariant" Value="Dark" />
             <Style Selector="^ Grid#DockPanelGrid">
                 <Setter Property="ShowGridLines" Value="True" />
@@ -46,14 +44,9 @@
     </Design.DesignStyle>
     <Window.Styles>
         <Style Selector="Window">
-
-            <Setter Property="Background">
-                <Setter.Value>
-                    <SolidColorBrush Color="{Binding AppSetting.DockPanelBackgroundColor,Converter={x:Static converters:ColorValueColorConverter.Instance},Mode=OneWay}"></SolidColorBrush>
-                </Setter.Value>
-            </Setter>
-            <Setter Property="SystemDecorations" Value="BorderOnly" />
-            <Setter Property="ExtendClientAreaToDecorationsHint" Value="True" />
+            <Setter Property="Background" Value="{x:Null}" />
+            <Setter Property="SystemDecorations" Value="None" />
+            <Setter Property="ExtendClientAreaToDecorationsHint" Value="{Binding IsPanelShowDelay}" />
             <Setter Property="ExtendClientAreaChromeHints" Value="NoChrome" />
             <!--<Setter Property="ExtendClientAreaTitleBarHeightHint" Value="-1" />-->
             <Setter Property="CanResize" Value="False" />
@@ -101,23 +94,12 @@
         </Style>
 
     </Window.Styles>
+    <Window.Resources>
+        <converters:DockItemKeyConverter x:Key="DockItemKeyConverter"
+                                         DockItemService="{Binding DockItemService,Mode=OneTime}" />
+    </Window.Resources>
 
     <Grid Name="RootGrid" RowDefinitions="*,auto,auto">
-
-        <!-- <ExperimentalAcrylicBorder Grid.RowSpan="3"> -->
-        <!--     ~1~ 使用多重绑定生成 Material 解决 AOT 下不生效的问题 @1@ -->
-        <!--     <ExperimentalAcrylicBorder.Material> -->
-        <!--         <MultiBinding Converter="{x:Static ac:ExperimentalAcrylicBorderMaterialConverter.Instance}"> -->
-        <!--             <Binding Path="AppSetting.DockPanelBackgroundColor" Converter="{x:Static converters:ColorValueColorConverter.Instance}"/> -->
-        <!--             <Binding Path="AppSetting.DockPanelBackgroundOpacity"/> -->
-        <!--             <Binding FallbackValue="0.4"/> -->
-        <!--         </MultiBinding> -->
-        <!--     </ExperimentalAcrylicBorder.Material> -->
-        <!-- </ExperimentalAcrylicBorder> -->
-        <!-- <Border Grid.RowSpan="3" -->
-        <!--         Background="{Binding GlobalSetting.DockPanelBackgroundColor,Converter={x:Static converters:ColorValueColorConverter.Instance}}" -->
-        <!--         Opacity="{Binding GlobalSetting.DockPanelBackgroundOpacity,Mode=OneWay}" /> -->
-
         <Control Name="FillControl" Grid.Row="0" />
         <Grid
             Name="DockPanelGrid"
@@ -226,16 +208,19 @@
                     Name="DockItemList"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Bottom"
-                    CornerRadius="8"
-                    ItemsSource="{Binding DockItems, Mode=OneWay}">
+                    ItemsSource="{Binding DockItemService.Root}"
+                    CornerRadius="8">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel Orientation="Horizontal" Spacing="{Binding AppSetting.DockItemSpacing}" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="ds:DockItemBase">
+                        <DataTemplate DataType="sys:Int32">
                             <controls:DockItemControl
+                                x:DataType="items:DockItemBase"
+                                CanDrag="True"
+                                DataContext="{Binding .,Converter={StaticResource DockItemKeyConverter}}"
                                 DockItemKey="{Binding Key}"
                                 ShowName="{Binding ShowName}"
                                 DockIcon="{Binding IconData,Converter={x:Static ac:DockItemIconConverter.Instance}}"

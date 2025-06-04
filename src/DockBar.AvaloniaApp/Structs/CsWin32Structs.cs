@@ -30,7 +30,4 @@ public struct WindowCompositionAttributeData
     public int SizeOfData;
 }
 
-public enum WindowCompositionAttribute
-{
-    WCA_ACCENT_POLICY = 19
-}
+public enum WindowCompositionAttribute { WCA_ACCENT_POLICY = 19 }

@@ -1,0 +1,48 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:controls="using:DockBar.AvaloniaApp.Controls"
+             xmlns:items="using:DockBar.DockItem.Items"
+             xmlns:views="using:DockBar.AvaloniaApp.Views"
+             xmlns:ac="using:DockBar.AvaloniaApp.Converters"
+             x:DataType="views:ControlPanelDockItemsView"
+             x:Class="DockBar.AvaloniaApp.Views.ControlPanelDockItemsView">
+    <Grid RowDefinitions="*,auto">
+        <ItemsControl
+            Name="DockItemList"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Top"
+            ItemsSource="{Binding DockItems}"
+            CornerRadius="8">
+            <!-- <ItemsControl.tr></ItemsControl.tr> -->
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="items:DockItemBase">
+                    <controls:DockItemControl
+                        x:DataType="items:DockItemBase"
+                        DockItemKey="{Binding Key}"
+                        Margin="4"
+                        PointerPressed="OnDockItemControlPointerPressed"
+                        ShowName="{Binding ShowName}"
+                        DockIcon="{Binding IconData,Converter={x:Static ac:DockItemIconConverter.Instance}}"
+                        FontSize="{Binding #DockItemList.((views:ControlPanelDockItemsView)DataContext).AppSetting.DockItemNameFontSize}"
+                        Width="{Binding #DockItemList.((views:ControlPanelDockItemsView)DataContext).AppSetting.DockItemSize}"
+                        Height="{Binding #DockItemList.((views:ControlPanelDockItemsView)DataContext).AppSetting.DockItemSize}" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <Border Grid.Row="1" Margin="8" CornerRadius="{StaticResource ControlCornerRadius}"
+                Background="{StaticResource SystemChromeBlackLowColor}">
+            <StackPanel Margin="8" Spacing="8">
+                <Button Content="添加" />
+
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

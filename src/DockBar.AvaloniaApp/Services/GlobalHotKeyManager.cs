@@ -21,7 +21,7 @@ public partial class GlobalHotKeyManager : IGlobalHotKeyManager
 
     private AppSetting AppSetting { get; }
 
-    sealed class HotKeyData
+    private sealed class HotKeyData
     {
         public HotKeyInfo HotKey { get; set; }
         public int Id { get; set; } = -1;
@@ -56,7 +56,8 @@ public partial class GlobalHotKeyManager : IGlobalHotKeyManager
         get => field;
         set
         {
-            if (field == value) return;
+            if (field == value)
+                return;
             UnAttachTopLevel(field);
             field = value;
             AttachTopLevel(field);
@@ -81,14 +82,13 @@ public partial class GlobalHotKeyManager : IGlobalHotKeyManager
             else if (e.PropertyName == nameof(AppSetting.KeepMainWindowHotKey))
             {
                 if (AppSetting.KeepMainWindowHotKey.IsValid())
-                {
-                    Register(nameof(AppSetting.KeepMainWindowHotKey), AppSetting.KeepMainWindowHotKey.Modifiers,
-                        AppSetting.KeepMainWindowHotKey.Key);
-                }
+                    Register(
+                        nameof(AppSetting.KeepMainWindowHotKey),
+                        AppSetting.KeepMainWindowHotKey.Modifiers,
+                        AppSetting.KeepMainWindowHotKey.Key
+                    );
                 else
-                {
                     Unregister(nameof(AppSetting.KeepMainWindowHotKey));
-                }
             }
         }
 
@@ -100,22 +100,20 @@ public partial class GlobalHotKeyManager : IGlobalHotKeyManager
 
     private void UnAttachTopLevel(TopLevel? topLevel)
     {
-        if (topLevel is null) return;
+        if (topLevel is null)
+            return;
         Win32Properties.RemoveWndProcHookCallback(topLevel, WndProcHook);
         foreach (var hotKeyInfo in HotKeyTable.Values)
-        {
             RemoveHotKeyFromTopLevel(topLevel, hotKeyInfo);
-        }
     }
 
     private void AttachTopLevel(TopLevel? topLevel)
     {
-        if (topLevel is null) return;
+        if (topLevel is null)
+            return;
         Win32Properties.AddWndProcHookCallback(topLevel, WndProcHook);
         foreach (var hotKeyInfo in HotKeyTable.Values)
-        {
             AddHotKeyToTopLevel(topLevel, hotKeyInfo);
-        }
     }
 
     private void AddHotKeyToTopLevel(TopLevel topLevel, HotKeyData hotKeyData)
@@ -131,14 +129,15 @@ public partial class GlobalHotKeyManager : IGlobalHotKeyManager
         {
             if (topLevel.TryGetPlatformHandle() is { Handle: { } handle })
             {
-                if (RegisterHotKey(new(handle), hotKeyData.Id, (HOT_KEY_MODIFIERS)hotKeyData.HotKey.Modifiers, hotKeyData.HotKey.Key))
-                {
+                if (RegisterHotKey(
+                        new(handle),
+                        hotKeyData.Id,
+                        (HOT_KEY_MODIFIERS)hotKeyData.HotKey.Modifiers,
+                        hotKeyData.HotKey.Key
+                    ))
                     Logger.Verbose("为 TopLevel {TopLevel} 注册全局热键", topLevel.GetType().Name);
-                }
                 else
-                {
                     throw new InvalidOperationException("注册热键失败，可能时按键冲突了");
-                }
             }
         }
         catch (Exception e)
@@ -164,17 +163,20 @@ public partial class GlobalHotKeyManager : IGlobalHotKeyManager
         }
     }
 
-    private nint WndProcHook(nint hWnd, uint msg, nint wParam, nint lParam, ref bool handled)
+    private nint WndProcHook(
+        nint hWnd,
+        uint msg,
+        nint wParam,
+        nint lParam,
+        ref bool handled)
     {
         switch (msg)
         {
             case WM_HOTKEY:
                 if (IsEnabled && HotKeyTable.TryGetValue((int)wParam, out var hotKeyInfo))
-                {
                     if (HotKeyActionTable.TryGetValue(hotKeyInfo.Name, out var actions))
                     {
                         foreach (var action in actions)
-                        {
                             try
                             {
                                 action();
@@ -183,11 +185,9 @@ public partial class GlobalHotKeyManager : IGlobalHotKeyManager
                             {
                                 Logger.Error(e, "执行 {Key} 全局热键时出错 {Name}", hotKeyInfo.Name, action.Method.Name);
                             }
-                        }
 
                         handled = true;
                     }
-                }
 
                 break;
         }
@@ -212,9 +212,7 @@ public partial class GlobalHotKeyManager : IGlobalHotKeyManager
         HotKeyTable[id] = new() { Name = key, Id = id, HotKey = new(hotKeyModifiers, hotKey) };
         HotKeyNameTable[key] = HotKeyTable[id];
         if (Host is not null)
-        {
             AddHotKeyToTopLevel(Host, HotKeyTable[id]);
-        }
 
         Logger.Debug("注册全局热键完毕 {Key} {Id} {Mod} {HotKey}", key, id, hotKeyModifiers, hotKey);
     }
@@ -225,9 +223,7 @@ public partial class GlobalHotKeyManager : IGlobalHotKeyManager
         if (HotKeyNameTable.TryGetValue(key, out var hotKeyData))
         {
             if (Host is not null)
-            {
                 RemoveHotKeyFromTopLevel(Host, hotKeyData);
-            }
 
             HotKeyTable.Remove(hotKeyData.Id);
             Logger.Debug("注销全局热键完毕 {Key}", key);

@@ -1,19 +1,16 @@
 <UserControl
-    x:Class="DockBar.AvaloniaApp.Views.SettingView"
+    x:Class="DockBar.AvaloniaApp.Views.ControlPanelSettingView"
     xmlns="https://github.com/avaloniaui"
+    xmlns:views="using:DockBar.AvaloniaApp.Views"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:DockBar.AvaloniaApp.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:vm="using:DockBar.AvaloniaApp.ViewModels"
-    xmlns:converters="using:DockBar.AvaloniaApp.Converters"
+    xmlns:structs="using:DockBar.Core.Structs"
     d:DesignHeight="450"
     d:DesignWidth="800"
-    x:DataType="vm:SettingViewModel"
+    x:DataType="views:ControlPanelSettingView"
     mc:Ignorable="d">
-    <Design.DataContext>
-        <vm:SettingViewModel />
-    </Design.DataContext>
     <Grid RowDefinitions="auto,*">
         <TextBlock
             Grid.Row="0"
@@ -34,7 +31,11 @@
                 <Style Selector="Expander NumericUpDown">
                     <Setter Property="Width" Value="256" />
                 </Style>
-                <Style Selector="Expander /template/ ToggleButton#ExpanderHeader:pointerover /template/ Border#ToggleButtonBackground">
+                <Style Selector="Expander ComboBox">
+                    <Setter Property="Width" Value="256" />
+                </Style>
+                <Style
+                    Selector="Expander /template/ ToggleButton#ExpanderHeader:pointerover /template/ Border#ToggleButtonBackground">
                     <Setter Property="Background">
                         <Setter.Value>
                             <SolidColorBrush Opacity="0.8" Color="{DynamicResource SystemAltMediumColor}" />
@@ -60,23 +61,23 @@
                                 FormatString="0"
                                 Maximum="256"
                                 Minimum="24"
-                                Value="{Binding AppSetting.DockItemSize, Mode=TwoWay}" />
+                                Value="{Binding AppSettingWrapper.Data.DockItemSize, Mode=TwoWay}" />
                         </controls:SettingCard>
                         <controls:SettingCard Header="停靠项目间距">
                             <NumericUpDown
                                 FormatString="0"
                                 Maximum="256"
                                 Minimum="0"
-                                Value="{Binding AppSetting.DockItemSpacing, Mode=TwoWay}" />
+                                Value="{Binding AppSettingWrapper.Data.DockItemSpacing, Mode=TwoWay}" />
                         </controls:SettingCard>
-  
+
                         <controls:SettingCard Header="停靠项目名称字体大小">
                             <NumericUpDown
                                 FormatString="0"
                                 Increment="1"
                                 Maximum="48"
                                 Minimum="4"
-                                Value="{Binding AppSetting.DockItemNameFontSize, Mode=TwoWay}" />
+                                Value="{Binding AppSettingWrapper.Data.DockItemNameFontSize, Mode=TwoWay}" />
                         </controls:SettingCard>
                     </StackPanel>
                 </Expander>
@@ -84,31 +85,43 @@
                 <Expander>
                     <Expander.Header>
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Classes="FontIcon HeaderIcon" Text="&#xE790;" />
-                            <TextBlock Text="颜色" />
+                            <TextBlock Classes="FontIcon HeaderIcon" Text="&#xE771;" />
+                            <TextBlock Text="个性化" />
                         </StackPanel>
                     </Expander.Header>
                     <StackPanel Orientation="Vertical">
-                        <controls:SettingCard Header="停靠面板背景颜色">
-                            <ColorPicker Color="{Binding AppSetting.DockPanelBackgroundColor, Mode=TwoWay,Converter={x:Static converters:ColorValueColorConverter.Instance}, UpdateSourceTrigger=PropertyChanged}" />
+                        <controls:SettingCard Header="主题颜色">
+                            <ComboBox SelectedIndex="{Binding AppSettingWrapper.Data.颜色主题,Mode=TwoWay}">
+                                <ComboBoxItem Content="跟随系统" Tag="{x:Static structs:颜色主题.跟随系统}" />
+                                <ComboBoxItem Content="深色" Tag="{x:Static structs:颜色主题.深色}" />
+                                <ComboBoxItem Content="浅色" Tag="{x:Static structs:颜色主题.浅色}" />
+                            </ComboBox>
                         </controls:SettingCard>
                     </StackPanel>
+                    <!-- <StackPanel Orientation="Vertical"> -->
+                    <!--     <controls:SettingCard Header="停靠面板背景颜色"> -->
+                    <!--         <ColorPicker Color="{Binding AppSetting.DockPanelBackgroundColor, Mode=TwoWay,Converter={x:Static converters:ColorValueColorConverter.Instance}, UpdateSourceTrigger=PropertyChanged}" /> -->
+                    <!--     </controls:SettingCard> -->
+                    <!-- </StackPanel> -->
                 </Expander>
-                
+
                 <Expander>
                     <Expander.Header>
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock Classes="FontIcon HeaderIcon" Text="&#xE765;" />
-                            <TextBlock Text="快捷键"/>
+                            <TextBlock Text="快捷键" />
                         </StackPanel>
                     </Expander.Header>
                     <StackPanel Orientation="Vertical">
                         <controls:SettingCard Header="是否启用全局快捷键">
-                            <ToggleSwitch Name="EnableHotKeySwitch" OnContent="" OffContent="" IsChecked="{Binding AppSetting.IsEnableGlobalHotKey,Mode=TwoWay}"/>
+                            <ToggleSwitch Name="EnableHotKeySwitch" OnContent="" OffContent=""
+                                          IsChecked="{Binding AppSettingWrapper.Data.IsEnableGlobalHotKey,Mode=TwoWay}" />
                         </controls:SettingCard>
-                        <StackPanel IsEnabled="{Binding #EnableHotKeySwitch.IsChecked,Mode=OneWay}" Orientation="Vertical">
+                        <StackPanel IsEnabled="{Binding #EnableHotKeySwitch.IsChecked,Mode=OneWay}"
+                                    Orientation="Vertical">
                             <controls:SettingCard Header="打开并保持停靠窗口">
-                                <controls:HotKeyEditBox HotKey="{Binding AppSetting.KeepMainWindowHotKey,Mode=TwoWay}"/>
+                                <controls:HotKeyEditBox
+                                    HotKey="{Binding AppSettingWrapper.Data.KeepMainWindowHotKey,Mode=TwoWay}" />
                             </controls:SettingCard>
                         </StackPanel>
                     </StackPanel>

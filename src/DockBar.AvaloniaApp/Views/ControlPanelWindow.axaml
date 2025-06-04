@@ -2,14 +2,11 @@
     x:Class="DockBar.AvaloniaApp.Views.ControlPanelWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:a="using:DockBar.AvaloniaApp"
     xmlns:cext="using:Zeng.CoreLibrary.Toolkit.Avalonia.Extensions"
-    xmlns:controls="using:DockBar.AvaloniaApp.Controls"
     xmlns:ctac="using:Zeng.CoreLibrary.Toolkit.Avalonia.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:DockBar.AvaloniaApp.ViewModels"
-    xmlns:structs="clr-namespace:DockBar.Core.Structs;assembly=DockBar.Core"
     Title="{cext:Localize ControlPanelWindow.Title}"
     Width="1000"
     Height="600"
@@ -17,8 +14,7 @@
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
     <Design.DataContext>
-        <vm:ControlPanelWindowViewModel>
-        </vm:ControlPanelWindowViewModel>
+        <vm:ControlPanelWindowViewModel />
     </Design.DataContext>
     <Design.DesignStyle>
         <Style Selector="Window">
@@ -29,15 +25,20 @@
         <Style Selector="Window">
             <Setter Property="Background">
                 <Setter.Value>
-                    <SolidColorBrush Color="{DynamicResource SystemChromeMediumColor}" Opacity="0.9"></SolidColorBrush>
+                    <SolidColorBrush Color="{DynamicResource SystemChromeMediumColor}" Opacity="0.9" />
                 </Setter.Value>
             </Setter>
+
             <Setter Property="ExtendClientAreaToDecorationsHint" Value="True" />
             <Setter Property="ExtendClientAreaChromeHints" Value="NoChrome" />
             <!-- <Setter Property="TransparencyLevelHint" Value="AcrylicBlur" /> -->
             <Setter Property="WindowStartupLocation" Value="CenterOwner" />
             <!-- BorderOnly 属性会导致窗口没有最小化最大化动画 -->
             <!-- <Setter Property="SystemDecorations" Value="BorderOnly" /> -->
+            <Style Selector="^[WindowState=Maximized]">
+                <!-- 当窗口最大化时，默认的系统边框可能会被隐藏到屏幕之外，导致窗口边缘的内容被遮挡或渲染异常 -->
+                <Setter Property="Padding" Value="8" />
+            </Style>
         </Style>
     </Window.Styles>
     <Grid>

@@ -33,7 +33,8 @@
 
 ## 源码使用
 
- ![.NET 9.0](https://img.shields.io/badge/.NET%209.0-5C2D91?style=for-the-badge&logo=.net&logoColor=white)
+![.NET 9.0](https://img.shields.io/badge/.NET%209.0-5C2D91?style=for-the-badge&logo=.net&logoColor=white)
+
 ```sh
 git clone https://github.com/AFunDog/DockBar.git
 cd DockBar/src/DockBar.AvaloniaApp

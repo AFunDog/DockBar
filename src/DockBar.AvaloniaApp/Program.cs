@@ -3,13 +3,9 @@ using System.ComponentModel.Design.Serialization;
 using System.Linq;
 using System.Reflection;
 using Avalonia;
-using Zeng.CoreLibrary.Toolkit.Avalonia.Extensions;
-using Zeng.CoreLibrary.Toolkit.Avalonia.Structs;
-using Zeng.CoreLibrary.Toolkit.Contacts;
-using Zeng.CoreLibrary.Toolkit.Extensions;
-using Zeng.CoreLibrary.Toolkit.Services.Localization;
-using Zeng.CoreLibrary.Toolkit.Services.Navigate;
+using Avalonia.Threading;
 using DockBar.AvaloniaApp.Contacts;
+using DockBar.AvaloniaApp.Extensions;
 using DockBar.AvaloniaApp.Services;
 using DockBar.AvaloniaApp.ViewModels;
 using DockBar.AvaloniaApp.Views;
@@ -24,6 +20,12 @@ using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using Windows.Win32.UI.Input.KeyboardAndMouse;
+using Zeng.CoreLibrary.Toolkit.Avalonia.Extensions;
+using Zeng.CoreLibrary.Toolkit.Avalonia.Structs;
+using Zeng.CoreLibrary.Toolkit.Contacts;
+using Zeng.CoreLibrary.Toolkit.Extensions;
+using Zeng.CoreLibrary.Toolkit.Services.Localization;
+using Zeng.CoreLibrary.Toolkit.Services.Navigate;
 using Zeng.CoreLibrary.Toolkit.Structs;
 
 namespace DockBar.AvaloniaApp;
@@ -32,8 +34,9 @@ internal sealed class Program
 {
     public static IServiceProvider ServiceProvider { get; } = BuildServices();
 
-    public static Version AppVersion { get; } =
-        Assembly.GetExecutingAssembly().GetName().Version is { } v ? new(v.Major, v.Minor, v.Build) : new();
+    public static Version AppVersion { get; } = Assembly.GetExecutingAssembly().GetName().Version is { } v
+        ? new(v.Major, v.Minor, v.Build)
+        : new();
 
     [STAThread]
     public static void Main(string[] args)
@@ -54,16 +57,16 @@ internal sealed class Program
     }
 
     // Avalonia configuration, don't remove; also used by visual designer.
-    public static AppBuilder BuildAvaloniaApp() =>
-        AppBuilder
-            .Configure(ServiceProvider.GetRequiredService<App>)
-            .AfterSetup(AfterSetup)
-            .UsePlatformDetect()
-            .WithInterFont()
-            .LogToTrace();
+    public static AppBuilder BuildAvaloniaApp() => AppBuilder
+        .Configure(ServiceProvider.GetRequiredService<App>)
+        .AfterSetup(AfterSetup)
+        .UsePlatformDetect()
+        .WithInterFont()
+        .LogToTrace();
 
-    private static ServiceProvider BuildServices() =>
-        new ServiceCollection()
+    private static ServiceProvider BuildServices()
+    {
+        return new ServiceCollection()
             //注册 App
             .AddSingleton<App>()
             // 注册外部服务
@@ -81,17 +84,18 @@ internal sealed class Program
             .AddTransient<MainWindowViewModel>()
             .AddTransient<ControlPanelWindowViewModel>()
             .AddTransient<EditDockItemWindowViewModel>()
-            .AddTransient<SettingViewModel>()
+            // .AddTransient<SettingViewModel>()
             .AddTransient<MainViewModel>()
             // 注册窗口
             .AddSingleton<MainWindow>()
             // 注册模态弹窗（可能以后做优化）
+            .AddSingleton<DockItemFolderWindow>()
             .AddSingleton<MenuWindow>()
             .AddTransient<EditDockItemWindow>()
             .AddTransient<ControlPanelWindow>()
-            .AddTransient<SettingView>()
-            .AddTransient<MainView>()
-            .BuildServiceProvider(new ServiceProviderOptions() { ValidateOnBuild = true });
+            .UseControlPanelViews()
+            .BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true });
+    }
 
     private static Logger BuildLogger()
     {
@@ -107,7 +111,8 @@ internal sealed class Program
 #endif
             .WriteTo.File(
                 "Log/log.txt",
-                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Caller}{Message:lj}{NewLine}{Exception}",
+                outputTemplate:
+                "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Caller}{Message:lj}{NewLine}{Exception}",
                 restrictedToMinimumLevel: LogEventLevel.Verbose,
                 rollingInterval: RollingInterval.Day,
                 rollOnFileSizeLimit: true
@@ -117,6 +122,7 @@ internal sealed class Program
 
     private static void BeforeSetup()
     {
+        // AppSetting LoadData 只加载一次
         ServiceProvider.GetRequiredService<IDataProvider<AppSetting>>().LoadData();
 
         LocalizeExtension.SetLocalizeService(ServiceProvider.GetRequiredService<ILocalizeService>());
@@ -127,8 +133,30 @@ internal sealed class Program
     private static void AfterSetup(AppBuilder builder)
     {
         // 通过预加载 MenuWindow 可以解决第一个打开的 MenuWindow 展示位置不对的问题
-        var menuWindow = Program.ServiceProvider.GetRequiredService<MenuWindow>();
-        menuWindow.Show();
-        menuWindow.Hide();
+        var menuWindow = ServiceProvider.GetRequiredService<MenuWindow>();
+        if (menuWindow.Screens.ScreenFromWindow(menuWindow) is { } screen)
+        {
+            // menuWindow.Position =
+            //     new(screen.Bounds.Size.Width + 12, screen.Bounds.Size.Height + 12);
+            menuWindow.Show();
+            menuWindow.Hide();
+            // menuWindow.RootShowMenu.Loaded += (_, _) =>
+            // {
+            //     menuWindow.Hide();
+            // };
+
+            // menuWindow.RootShowMenu.Loaded += (_, _) =>
+            // {
+            //     menuWindow.Hide();
+            // };
+            // var timer = new DispatcherTimer() { Interval = TimeSpan.FromSeconds(1) };
+            // timer.Tick += (s, e) => { timer.Stop();menuWindow.Hide(); };
+            // timer.Start();
+        }
+
+        var folderWindow = ServiceProvider.GetRequiredService<DockItemFolderWindow>();
+        folderWindow.Show();
+        folderWindow.Classes.Add("ToHide");
+        folderWindow.Hide();
     }
 }

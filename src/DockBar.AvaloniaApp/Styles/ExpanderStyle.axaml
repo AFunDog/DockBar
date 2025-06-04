@@ -2,7 +2,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ac="using:DockBar.AvaloniaApp.Converters">
-    
+
     <Design.PreviewWith>
         <Border Padding="20">
             <StackPanel
@@ -90,7 +90,8 @@
         <Setter Property="Foreground" Value="{DynamicResource ExpanderHeaderForeground}" />
         <Setter Property="Padding" Value="{DynamicResource ExpanderHeaderPadding}" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
-        <Setter Property="HorizontalContentAlignment" Value="{DynamicResource ExpanderHeaderHorizontalContentAlignment}" />
+        <Setter Property="HorizontalContentAlignment"
+                Value="{DynamicResource ExpanderHeaderHorizontalContentAlignment}" />
         <Setter Property="VerticalContentAlignment" Value="{DynamicResource ExpanderHeaderVerticalContentAlignment}" />
         <Setter Property="Template">
             <ControlTemplate>
@@ -307,31 +308,39 @@
             <Setter Property="Tag" Value="collapsed" />
         </Style>
         <Style Selector="^:expanded:up /template/ ToggleButton#ExpanderHeader">
-            <Setter Property="CornerRadius" Value="{TemplateBinding CornerRadius, Converter={StaticResource BottomCornerRadiusFilterConverter}}" />
+            <Setter Property="CornerRadius"
+                    Value="{TemplateBinding CornerRadius, Converter={StaticResource BottomCornerRadiusFilterConverter}}" />
         </Style>
         <Style Selector="^:expanded:up /template/ Border#ExpanderContent">
-            <Setter Property="CornerRadius" Value="{TemplateBinding CornerRadius, Converter={StaticResource TopCornerRadiusFilterConverter}}" />
+            <Setter Property="CornerRadius"
+                    Value="{TemplateBinding CornerRadius, Converter={StaticResource TopCornerRadiusFilterConverter}}" />
             <Setter Property="RenderTransform" Value="TranslateY(0px)" />
         </Style>
         <Style Selector="^:expanded:down /template/ ToggleButton#ExpanderHeader">
-            <Setter Property="CornerRadius" Value="{TemplateBinding CornerRadius, Converter={StaticResource TopCornerRadiusFilterConverter}}" />
+            <Setter Property="CornerRadius"
+                    Value="{TemplateBinding CornerRadius, Converter={StaticResource TopCornerRadiusFilterConverter}}" />
         </Style>
         <Style Selector="^:expanded:down /template/ Border#ExpanderContent">
-            <Setter Property="CornerRadius" Value="{TemplateBinding CornerRadius, Converter={StaticResource BottomCornerRadiusFilterConverter}}" />
+            <Setter Property="CornerRadius"
+                    Value="{TemplateBinding CornerRadius, Converter={StaticResource BottomCornerRadiusFilterConverter}}" />
             <Setter Property="RenderTransform" Value="TranslateY(0px)" />
         </Style>
         <Style Selector="^:expanded:left /template/ ToggleButton#ExpanderHeader">
-            <Setter Property="CornerRadius" Value="{TemplateBinding CornerRadius, Converter={StaticResource RightCornerRadiusFilterConverter}}" />
+            <Setter Property="CornerRadius"
+                    Value="{TemplateBinding CornerRadius, Converter={StaticResource RightCornerRadiusFilterConverter}}" />
         </Style>
         <Style Selector="^:expanded:left /template/ Border#ExpanderContent">
-            <Setter Property="CornerRadius" Value="{TemplateBinding CornerRadius, Converter={StaticResource LeftCornerRadiusFilterConverter}}" />
+            <Setter Property="CornerRadius"
+                    Value="{TemplateBinding CornerRadius, Converter={StaticResource LeftCornerRadiusFilterConverter}}" />
             <Setter Property="RenderTransform" Value="TranslateX(0px)" />
         </Style>
         <Style Selector="^:expanded:right /template/ ToggleButton#ExpanderHeader">
-            <Setter Property="CornerRadius" Value="{TemplateBinding CornerRadius, Converter={StaticResource LeftCornerRadiusFilterConverter}}" />
+            <Setter Property="CornerRadius"
+                    Value="{TemplateBinding CornerRadius, Converter={StaticResource LeftCornerRadiusFilterConverter}}" />
         </Style>
         <Style Selector="^:expanded:right /template/ Border#ExpanderContent">
-            <Setter Property="CornerRadius" Value="{TemplateBinding CornerRadius, Converter={StaticResource RightCornerRadiusFilterConverter}}" />
+            <Setter Property="CornerRadius"
+                    Value="{TemplateBinding CornerRadius, Converter={StaticResource RightCornerRadiusFilterConverter}}" />
             <Setter Property="RenderTransform" Value="TranslateX(0px)" />
         </Style>
 
