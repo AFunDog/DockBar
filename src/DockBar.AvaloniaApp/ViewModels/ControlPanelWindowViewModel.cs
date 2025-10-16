@@ -1,30 +1,29 @@
 using System.Collections.Generic;
-using System.Linq;
-using Avalonia.Platform;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Zeng.CoreLibrary.Toolkit.Avalonia.Structs;
-using Zeng.CoreLibrary.Toolkit.Contacts;
 using Zeng.CoreLibrary.Toolkit.Services.Navigate;
-using DockBar.AvaloniaApp.Contacts;
 using DockBar.AvaloniaApp.Views;
 using DockBar.Core.Contacts;
-using DockBar.Core.Helpers;
-using DockBar.Core.Structs;
+using Lucide.Avalonia;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using Zeng.CoreLibrary.Toolkit.Logging;
 
 namespace DockBar.AvaloniaApp.ViewModels;
 
 internal sealed partial class ControlPanelWindowViewModel : ViewModelBase
 {
-    public ILogger Logger { get; }
-    public IAppSettingWrapper AppSettingWrapper { get; }
-    public INavigateService NavigateService { get; }
+    private ILogger Logger { get; }
+    private IAppSettingWrapper AppSettingWrapper { get; }
+    private INavigateService NavigateService { get; }
 
     public IEnumerable<MenuItemData> MenuItems { get; } =
     [
-        new("主页", '\uE80F', "/"), new("停靠项目", '\uE71D', "/DockItems"), new("设置", '\uE713', "/Settings")
+        new("主页", new LucideIcon() { Kind = LucideIconKind.House }, "/"),
+        new("停靠项目", new LucideIcon() { Kind = LucideIconKind.LayoutGrid }, "/DockItems"),
+        new("设置", new LucideIcon() { Kind = LucideIconKind.Settings }, "/Settings")
     ];
 
     [ObservableProperty]
@@ -38,9 +37,7 @@ internal sealed partial class ControlPanelWindowViewModel : ViewModelBase
         Logger.Information("SelectedMenuItem changed to {Value}", value?.Title);
     }
 
-    public ControlPanelWindowViewModel() : this(Log.Logger, IAppSettingWrapper.Empty, INavigateService.Empty)
-    {
-    }
+    public ControlPanelWindowViewModel() { }
 
     public ControlPanelWindowViewModel(
         ILogger logger,
@@ -55,13 +52,18 @@ internal sealed partial class ControlPanelWindowViewModel : ViewModelBase
             .RegisterViewRoute("/Settings", Program.ServiceProvider.GetRequiredService<ControlPanelSettingView>);
         NavigateService.OnNavigated += (s, e) =>
         {
-            using var _ = LogHelper.Trace();
             Content = e;
             //SelectedMenuItem = MenuItems.FirstOrDefault(x => x.Tag is string route && route == s.CurrentRoute);
-            Logger.Information("Navigated to {Route} {View}", s.CurrentRoute, e);
+            Logger.Trace().Information("Navigated to {Route} {View}", s.CurrentRoute, e);
         };
         //NavigateService.Navigate("/");
-        NavigateService.ForceRefresh();
+        // NavigateService.ForceRefresh();
+
+        WeakReferenceMessenger.Default.Register<ControlPanelWindowViewModel, string, string>(
+            this,
+            "ControlPanelWindow.OpenWindow",
+            (s, e) => { NavigateService.Navigate(e); }
+        );
     }
 
     [RelayCommand]

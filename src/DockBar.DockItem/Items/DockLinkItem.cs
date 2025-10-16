@@ -2,9 +2,10 @@ using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
-using DockBar.Core.Helpers;
 using DockBar.DockItem.Helpers;
 using MessagePack;
+using Serilog;
+using Zeng.CoreLibrary.Toolkit.Logging;
 
 namespace DockBar.DockItem.Items;
 
@@ -61,26 +62,27 @@ public partial class DockLinkItem : DockItemBase
 
     public override bool CanExecute { get; protected set; } = true;
 
-    protected override void ExecuteCore()
+    protected internal override bool Execute()
     {
-        using var _ = LogHelper.Trace();
-        Logger.Verbose("DockLinItem 执行 {Path}", LinkPath);
+        Log.Logger.Trace().Verbose("DockLinItem 执行 {Path}", LinkPath);
         if (LinkPath is null)
-            return;
+            return false;
         switch (LinkType)
         {
             case LinkType.Exe:
-                Start(LinkPath, Path.GetDirectoryName(LinkPath));
+                return Start(LinkPath, Path.GetDirectoryName(LinkPath));
                 break;
             case LinkType.Lnk:
             case LinkType.Web:
             case LinkType.File:
             case LinkType.Folder:
-                Start(LinkPath);
+                return Start(LinkPath);
                 break;
             default:
                 break;
         }
+
+        return false;
     }
 
     partial void OnLinkPathChanged(string? value)
@@ -264,12 +266,12 @@ public partial class DockLinkItem : DockItemBase
         }
     }
 
-    private static void Start(string pathOrUrl, string? workingDir = null)
+    private static bool Start(string pathOrUrl, string? workingDir = null)
     {
         try
         {
             // 防止 Start 时间过长造成 UI 卡顿
-            _ = Task.Run(() =>
+            Task.Run(() =>
                 {
                     var processStartInfo = new ProcessStartInfo { FileName = pathOrUrl, UseShellExecute = true };
                     if (workingDir is not null)
@@ -277,11 +279,14 @@ public partial class DockLinkItem : DockItemBase
                     Process.Start(processStartInfo);
                 }
             );
+            return true;
         }
         catch (Exception e)
         {
             Debug.WriteLine(e);
         }
+
+        return false;
     }
 
     //internal class DockLinkItemFormatter : IMessagePackFormatter<DockLinkItem?>

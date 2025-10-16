@@ -1,11 +1,13 @@
 using System.Drawing;
+using System.Drawing.Imaging;
 using Windows.Win32.UI.Controls;
 using Windows.Win32.UI.Shell;
+using DockBar.DockItem.Items;
 using static Windows.Win32.PInvoke;
 
 namespace DockBar.DockItem.Helpers;
 
-internal static class IconHelper
+public static class IconHelper
 {
     /// <summary>
     /// 从文件路径中提取图标
@@ -165,6 +167,49 @@ internal static class IconHelper
                 bitmap.Dispose();
                 return smallBitmap;
             }
+        }
+    }
+    
+    
+    public static async Task<byte[]> GetIconDataFromPath(string? path,LinkType linkType)
+    {
+        if (path is null)
+        {
+            return [];
+        }
+
+        if (linkType == LinkType.Undefined)
+        {
+            return [];
+        }
+
+        if (linkType == LinkType.Web)
+        {
+            return await GetIconDataFromWeb();
+        }
+        else
+        {
+            // 处理 DockItemIcon
+            using var bmp = IconHelper.ExtractFileIcon(path);
+            if (bmp is not null)
+            {
+                using var ms = new MemoryStream();
+                bmp.Save(ms, ImageFormat.Png);
+                return ms.ToArray();
+            }
+        }
+        return [];
+
+        async Task<byte[]> GetIconDataFromWeb()
+        {
+            using var bmp = await IconHelper.ExtractWebIcon(path);
+            if (bmp is not null)
+            {
+                using var ms = new MemoryStream();
+                bmp.Save(ms, ImageFormat.Png);
+                return ms.ToArray();
+            }
+            return [];
         }
     }
 }

@@ -4,26 +4,23 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:a="using:DockBar.AvaloniaApp"
     xmlns:ca="using:Zeng.CoreLibrary.Toolkit.Avalonia"
-
     x:DataType="a:App">
     <!--  "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options.  -->
 
+    <!-- TODO 网页链接 -->
     <Application.Styles>
         <FluentTheme />
 
         <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
+        <!-- <StyleInclude Source="avares://DockBar.AvaloniaApp/Controls/MetadataControl.axaml"></StyleInclude> -->
 
         <Style Selector="Window">
             <Setter Property="FontFamily" Value="Noto Sans SC" />
         </Style>
-
-        <Style Selector="TextBlock.FontIcon">
-            <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
-        </Style>
-
-        <Style Selector="Run.FontIcon">
-            <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
-        </Style>
+        
+        <!-- <Style Selector="LucideIcon"> -->
+        <!--     <Setter Property="Size" Value="24"></Setter> -->
+        <!-- </Style> -->
     </Application.Styles>
 
 

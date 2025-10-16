@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using DockBar.Core.Helpers;
 using MessagePack;
 using Serilog;
 

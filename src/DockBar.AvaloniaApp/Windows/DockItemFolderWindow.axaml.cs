@@ -1,25 +1,17 @@
 ﻿using System;
-using System.Globalization;
-using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
 using Avalonia.Media;
-using Avalonia.Platform;
 using Avalonia.Styling;
 using Avalonia.Threading;
-using CommunityToolkit.Mvvm.Input;
-using DockBar.AvaloniaApp.Controls;
-using DockBar.AvaloniaApp.Converters;
 using DockBar.AvaloniaApp.Helpers;
-using DockBar.Core.Contacts;
-using DockBar.Core.Helpers;
-using DockBar.DockItem;
+using DockBar.DockItem.Contacts;
 using DockBar.DockItem.Items;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using Zeng.CoreLibrary.Toolkit.Logging;
 
-namespace DockBar.AvaloniaApp.Views;
+namespace DockBar.AvaloniaApp.Windows;
 
 public partial class DockItemFolderWindow : Window
 {
@@ -37,7 +29,7 @@ public partial class DockItemFolderWindow : Window
     // }
 
 
-    public DockItemFolderWindow() : this(Log.Logger, IDockItemService.Empty)
+    public DockItemFolderWindow() 
     {
     }
 
@@ -76,40 +68,39 @@ public partial class DockItemFolderWindow : Window
 
     public void ShowFolder(DockItemFolder folder, int x, int y)
     {
-        using var _ = LogHelper.Trace();
-        Logger.Verbose("打开停靠文件夹窗口 {FolderKey}", folder.Key);
+        Logger.Trace().Verbose("打开停靠文件夹窗口 {FolderKey}", folder.Key);
         TopPosition = new(x, y);
 
         ItemGrid.Children.Clear();
         int dockItemX = 0, dockItemY = 0;
-        foreach (var dockItem in folder.Select(k => DockItemService.GetDockItem(k)).OfType<DockItemBase>())
-            if (DockItemIconConverter.Instance.Convert(
-                    dockItem.IconData,
-                    typeof(IImage),
-                    null,
-                    CultureInfo.CurrentCulture
-                ) is IImage icon)
-            {
-                var dockItemControl = new DockItemControl
-                {
-                    DockItemKey = dockItem.Key,
-                    DockIcon = icon,
-                    ShowName = dockItem.ShowName,
-                    Command = new RelayCommand<int>(k => DockItemService.ExecuteDockItem(k)),
-                    CommandParameter = dockItem.Key,
-                    Width = Program.ServiceProvider.GetRequiredService<IAppSettingWrapper>().Data.DockItemSize,
-                    Height = Program.ServiceProvider.GetRequiredService<IAppSettingWrapper>().Data.DockItemSize
-                };
-                Grid.SetColumn(dockItemControl, dockItemX);
-                Grid.SetRow(dockItemControl, dockItemY);
-                ItemGrid.Children.Add(dockItemControl);
-                dockItemX++;
-                if (dockItemX % ItemGrid.ColumnDefinitions.Count == 0)
-                {
-                    dockItemX = 0;
-                    dockItemY++;
-                }
-            }
+        // foreach (var dockItem in folder.Select(k => DockItemService.GetDockItem(k)).OfType<DockItemBase>())
+        //     if (DockItemIconConverter.Instance.Convert(
+        //             dockItem.IconData,
+        //             typeof(IImage),
+        //             null,
+        //             CultureInfo.CurrentCulture
+        //         ) is IImage icon)
+        //     {
+        //         var dockItemControl = new DockItemControl
+        //         {
+        //             DockItemId = dockItem.Key,
+        //             DockIcon = icon,
+        //             ShowName = dockItem.ShowName,
+        //             Command = new RelayCommand<int>(k => DockItemService.ExecuteDockItem(k)),
+        //             CommandParameter = dockItem.Key,
+        //             Width = Program.ServiceProvider.GetRequiredService<IAppSettingWrapper>().Data.DockItemSize,
+        //             Height = Program.ServiceProvider.GetRequiredService<IAppSettingWrapper>().Data.DockItemSize
+        //         };
+        //         Grid.SetColumn(dockItemControl, dockItemX);
+        //         Grid.SetRow(dockItemControl, dockItemY);
+        //         ItemGrid.Children.Add(dockItemControl);
+        //         dockItemX++;
+        //         if (dockItemX % ItemGrid.ColumnDefinitions.Count == 0)
+        //         {
+        //             dockItemX = 0;
+        //             dockItemY++;
+        //         }
+        //     }
 
         Position = new((int)TopPosition.X, TopPosition.Y);
 
@@ -122,7 +113,7 @@ public partial class DockItemFolderWindow : Window
             Position = new((int)(TopPosition.X - Bounds.Width * screen.Scaling * 0.5), TopPosition.Y);
 
 
-        Owner = App.Instance.MainWindow;
+        Owner = Program.ServiceProvider.GetRequiredKeyedService<Window>(nameof(MainWindow));
 
         Activate();
     }
@@ -131,7 +122,6 @@ public partial class DockItemFolderWindow : Window
 
     public void HideFolder()
     {
-        using var _ = LogHelper.Trace();
 
         Classes.Add("ToHide");
 

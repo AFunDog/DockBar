@@ -1,27 +1,26 @@
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Zeng.CoreLibrary.Toolkit.Avalonia.Structs;
 using Zeng.CoreLibrary.Toolkit.Contacts;
 using Serilog;
 using Zeng.CoreLibrary.Toolkit.Structs;
 
 namespace DockBar.AvaloniaApp.Services;
 
-internal sealed class LocalizationDataProvider : IDataProvider<LocalizationData>
+internal sealed class LocalizationDataProvider : IDataProvider<IEnumerable<LocalizationData>>
 {
     private const string LocalizationDir = "Localization";
 
-    private List<LocalizationData> LocalizationDatas { get; } = [];
-    public IEnumerable<LocalizationData> Datas => LocalizationDatas;
+    private List<LocalizationData> LocalizationDataList { get; } = [];
+    public IEnumerable<LocalizationData> Data => LocalizationDataList;
+    public event
+        Action<IDataProvider<IEnumerable<LocalizationData>>,
+            DataProviderDataChangedEventArgs<IEnumerable<LocalizationData>>>? DataChanged;
 
-    public event Action<IDataProvider<LocalizationData>>? DataChanged;
+    // public event Action<IDataProvider<LocalizationData>>? DataChanged;
 
     private ILogger Logger { get; }
 
@@ -71,11 +70,11 @@ internal sealed class LocalizationDataProvider : IDataProvider<LocalizationData>
 
         if (tempData.Count != 0)
         {
-            LocalizationDatas.Clear();
-            LocalizationDatas.AddRange(tempData);
+            LocalizationDataList.Clear();
+            LocalizationDataList.AddRange(tempData);
         }
 
-        DataChanged?.Invoke(this);
+        DataChanged?.Invoke(this, new());
     }
 
 
@@ -94,7 +93,7 @@ internal sealed class LocalizationDataProvider : IDataProvider<LocalizationData>
             for (var i = 0; i < matches.Count; i++)
             {
                 var key = matches[i].Groups[1].Value;
-                var value = Regex.Replace(matches[i].Groups[2].Value, "\\;", ";", RegexOptions.Compiled);
+                var value = Regex.Replace(matches[i].Groups[2].Value, @"\\(.|\n)", "$1", RegexOptions.Compiled);
                 yield return (key, value);
             }
     }

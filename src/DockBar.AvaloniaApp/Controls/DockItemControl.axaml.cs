@@ -1,22 +1,15 @@
 using System;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
 using Avalonia.VisualTree;
-using DockBar.AvaloniaApp.Extensions;
-using DockBar.Core.Helpers;
-using DockBar.DockItem.Items;
+using Serilog;
+using Zeng.CoreLibrary.Toolkit.Logging;
 using MouseButton = Avalonia.Input.MouseButton;
 
 namespace DockBar.AvaloniaApp.Controls;
@@ -27,13 +20,13 @@ internal sealed partial class DockItemControl : TemplatedControl
 {
     #region Avalonia 属性
 
-    public static readonly StyledProperty<int> DockItemKeyProperty
-        = AvaloniaProperty.Register<DockItemControl, int>(nameof(DockItemKey));
+    public static readonly StyledProperty<Guid> DockItemIdProperty
+        = AvaloniaProperty.Register<DockItemControl, Guid>(nameof(DockItemId));
 
-    public int DockItemKey
+    public Guid DockItemId
     {
-        get => GetValue(DockItemKeyProperty);
-        set => SetValue(DockItemKeyProperty, value);
+        get => GetValue(DockItemIdProperty);
+        set => SetValue(DockItemIdProperty, value);
     }
 
     public static readonly StyledProperty<IImage?> DockIconProperty
@@ -64,16 +57,16 @@ internal sealed partial class DockItemControl : TemplatedControl
         private set => SetAndRaise(IsPressedProperty, ref field, value);
     }
 
-    public static readonly DirectProperty<DockItemControl, bool> IsDragingProperty
-        = AvaloniaProperty.RegisterDirect<DockItemControl, bool>(nameof(IsDraging), o => o.IsDraging);
+    public static readonly DirectProperty<DockItemControl, bool> IsDraggingProperty
+        = AvaloniaProperty.RegisterDirect<DockItemControl, bool>(nameof(IsDragging), o => o.IsDragging);
 
 
-    public bool IsDraging
+    public bool IsDragging
     {
         get;
         private set
         {
-            if (SetAndRaise(IsDragingProperty, ref field, value))
+            if (SetAndRaise(IsDraggingProperty, ref field, value))
             {
                 if (field)
                     RaiseEvent(new RoutedEventArgs(DockItemStartDragEvent));
@@ -130,46 +123,46 @@ internal sealed partial class DockItemControl : TemplatedControl
 
     public DockItemControl()
     {
-        AddHandler(DragDrop.DropEvent, OnDrop);
+        // AddHandler(DragDrop.DropEvent, OnDrop);
     }
 
-    private void OnDrop(object? sender, DragEventArgs e)
-    {
-        using var _ = LogHelper.Trace();
-
-        e.Source = this;
-
-        //
-        // if (e.Data.Contains(DataFormats.Files))
-        // {
-        //     foreach (var data in e.Data.GetFiles() ?? [])
-        //     {
-        //         var item = new DockLinkItem { LinkPath = data.Path.LocalPath };
-        //         ViewModel.DockItemService.RegisterDockItem(item);
-        //         ViewModel.DockItemService.Root.Insert(targetIndex, item);
-        //         e.Handled = true;
-        //     }
-        // }
-        // else if (e.Data.Contains("key"))
-        // {
-        //     // 由于不是插入所以按整个 DockItem 进行位置索引转化
-        //     targetIndex = PosXToIndex(e.GetPosition(DockItemPanel).X -
-        //                               ViewModel.AppSetting.DockItemSize / 2);
-        //     ViewModel.Logger.Verbose("Drop 字符串数据 在 {Index}", targetIndex);
-        //     var data = e.Data.Get("key");
-        //     if (data is int key && ViewModel.DockItemService.GetDockItem(key) is { } item)
-        //     {
-        //         // ViewModel.DockItemService.MoveDockItemTo(key, targetIndex);
-        //         // ViewModel.DockItemService.Root.Move(key, targetIndex);
-        //         ViewModel.DockItemService.Root.Remove(item);
-        //         ViewModel.DockItemService.Root.Insert(targetIndex, item);
-        //         e.Handled = true;
-        //     }
-        // }
-        //
-        // ViewModel.IsDragMode = false;
-        // ViewModel.Logger.Debug("OnDrop {Index}", targetIndex);
-    }
+    // private void OnDrop(object? sender, DragEventArgs e)
+    // {
+    //     // using var _ = LogHelper.Trace();
+    //
+    //     // e.Source = this;
+    //
+    //     //
+    //     // if (e.Data.Contains(DataFormats.Files))
+    //     // {
+    //     //     foreach (var data in e.Data.GetFiles() ?? [])
+    //     //     {
+    //     //         var item = new DockLinkItem { LinkPath = data.Path.LocalPath };
+    //     //         ViewModel.DockItemService.RegisterDockItem(item);
+    //     //         ViewModel.DockItemService.Root.Insert(targetIndex, item);
+    //     //         e.Handled = true;
+    //     //     }
+    //     // }
+    //     // else if (e.Data.Contains("key"))
+    //     // {
+    //     //     // 由于不是插入所以按整个 DockItem 进行位置索引转化
+    //     //     targetIndex = PosXToIndex(e.GetPosition(DockItemPanel).X -
+    //     //                               ViewModel.AppSetting.DockItemSize / 2);
+    //     //     ViewModel.Logger.Verbose("Drop 字符串数据 在 {Index}", targetIndex);
+    //     //     var data = e.Data.Get("key");
+    //     //     if (data is int key && ViewModel.DockItemService.GetDockItem(key) is { } item)
+    //     //     {
+    //     //         // ViewModel.DockItemService.MoveDockItemTo(key, targetIndex);
+    //     //         // ViewModel.DockItemService.Root.Move(key, targetIndex);
+    //     //         ViewModel.DockItemService.Root.Remove(item);
+    //     //         ViewModel.DockItemService.Root.Insert(targetIndex, item);
+    //     //         e.Handled = true;
+    //     //     }
+    //     // }
+    //     //
+    //     // ViewModel.IsDragMode = false;
+    //     // ViewModel.Logger.Debug("OnDrop {Index}", targetIndex);
+    // }
 
     /// <summary>
     /// 用这个来记录按下时指针的位置
@@ -200,24 +193,24 @@ internal sealed partial class DockItemControl : TemplatedControl
             try
             {
                 var data = new DataObject();
-                data.Set("key", DockItemKey);
+                data.Set("Id", DockItemId);
                 var result = await DragDrop.DoDragDrop(e, data, DragDropEffects.Move);
             }
             catch (Exception ex)
             {
-                App.Instance.Logger.Error(ex, "DockItemControl 尝试拖拽");
+                Log.Logger.Trace().Error(ex, "DockItemControl 尝试拖拽");
             }
 
-            IsDraging = false;
+            IsDragging = false;
         }
 
         if (CanDrag is false)
             return;
 
         // 如果指针移动位置了再切换到拖放模式 以免打不开 DockItem
-        if (IsPressed && !IsDraging && PointerPos != e.GetPosition(null))
+        if (IsPressed && !IsDragging && PointerPos != e.GetPosition(null))
         {
-            IsDraging = true;
+            IsDragging = true;
             ToDragDrop();
             e.Handled = true;
         }

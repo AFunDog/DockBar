@@ -5,8 +5,6 @@ using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Input;
-using Avalonia.Win32.Input;
-using DockBar.AvaloniaApp.Structs;
 using DockBar.Core.Structs;
 using DockBar.AvaloniaApp.Extensions;
 

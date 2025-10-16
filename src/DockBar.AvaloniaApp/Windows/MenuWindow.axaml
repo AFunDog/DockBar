@@ -1,25 +1,28 @@
 <Window
-    x:Class="DockBar.AvaloniaApp.Views.MenuWindow"
+    x:Class="DockBar.AvaloniaApp.Windows.MenuWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cext="using:Zeng.CoreLibrary.Toolkit.Avalonia.Extensions"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:views="using:DockBar.AvaloniaApp.Views"
+    xmlns:vm="clr-namespace:DockBar.AvaloniaApp.ViewModels"
     Title="菜单窗口"
     RenderOptions.TextRenderingMode="Antialias"
-    x:DataType="views:MenuWindow"
+    x:DataType="vm:MenuWindowViewModel"
     mc:Ignorable="d">
+    <Design.DataContext>
+        <vm:MenuWindowViewModel />
+    </Design.DataContext>
     <Window.Styles>
         <Style Selector="Window">
             <Setter Property="ShowActivated" Value="False" />
             <Setter Property="SizeToContent" Value="Height" />
             <Setter Property="Width" Value="240" />
             <Setter Property="SystemDecorations" Value="None" />
-            <Setter Property="Background" Value="{x:Null}" />
+            <Setter Property="Background" Value="{x:Null}"></Setter>
             <Setter Property="ExtendClientAreaToDecorationsHint" Value="True" />
             <Setter Property="ExtendClientAreaChromeHints" Value="NoChrome" />
-            <!--<Setter Property="ExtendClientAreaTitleBarHeightHint" Value="-1" />-->
             <Setter Property="CanResize" Value="False" />
             <Setter Property="ShowInTaskbar" Value="False" />
             <Setter Property="Topmost" Value="True" />
@@ -42,9 +45,13 @@
                 <Setter Property="FontSize" Value="32" />
             </Style>
         </Style>
-        <Style Selector="Window[IsActive=True] :is(TemplatedControl).ShowMenu">
+        <Style Selector="Window.ShowMenu :is(TemplatedControl).ShowMenu">
             <Setter Property="Margin" Value="0" />
             <Setter Property="MinHeight" Value="0" />
+        </Style>
+        <Style Selector="LucideIcon.MenuIcon">
+            <Setter Property="Size" Value="32"></Setter>
+            <Setter Property="Margin" Value="-2"></Setter>
         </Style>
     </Window.Styles>
     <Grid Name="RootGrid">
@@ -53,28 +60,31 @@
             <MenuItem Command="{Binding AddDockItemCommand}"
                       Header="{cext:Localize MenuWindow.AddDockItemButton.Content}">
                 <MenuItem.Icon>
-                    <TextBlock
-                        Classes="FontIcon"
-                        Foreground="Green"
-                        Text="&#xE710;" />
+                    <LucideIcon Classes="MenuIcon" Kind="Plus" Foreground="Green"></LucideIcon>
+                    <!-- <TextBlock -->
+                    <!--     Classes="FontIcon" -->
+                    <!--     Foreground="Green" -->
+                    <!--     Text="&#xE710;" /> -->
                 </MenuItem.Icon>
             </MenuItem>
             <MenuItem Command="{Binding EditMenuItemCommand}"
                       Header="{cext:Localize MenuWindow.EditDockItemButton.Content}">
                 <MenuItem.Icon>
-                    <TextBlock
-                        Classes="FontIcon"
-                        Foreground="Orange"
-                        Text="&#xE70F;" />
+                    <LucideIcon Classes="MenuIcon" Kind="Pencil" Foreground="Orange"></LucideIcon>
+                    <!-- <TextBlock -->
+                    <!--     Classes="FontIcon" -->
+                    <!--     Foreground="Orange" -->
+                    <!--     Text="&#xE70F;" /> -->
                 </MenuItem.Icon>
             </MenuItem>
             <MenuItem Command="{Binding RemoveDockItemCommand}"
                       Header="{cext:Localize MenuWindow.DeleteDockItemButton.Content}">
                 <MenuItem.Icon>
-                    <TextBlock
-                        Classes="FontIcon"
-                        Foreground="Red"
-                        Text="&#xE74D;" />
+                    <LucideIcon Classes="MenuIcon" Kind="Trash2" Foreground="Red"></LucideIcon>
+                    <!-- <TextBlock -->
+                    <!--     Classes="FontIcon" -->
+                    <!--     Foreground="Red" -->
+                    <!--     Text="&#xE74D;" /> -->
                 </MenuItem.Icon>
             </MenuItem>
             <!--<MenuItem Background="{x:Null}" Header="添加内置项目">
@@ -93,15 +103,17 @@
             <MenuItem Command="{Binding OpenSettingWindowCommand}"
                       Header="{cext:Localize MenuWindow.OpenSettingWindowButton.Content}">
                 <MenuItem.Icon>
-                    <TextBlock Classes="FontIcon" Text="&#xE713;" />
+                    <LucideIcon Classes="MenuIcon" Kind="Settings"></LucideIcon>
+                    <!-- <TextBlock Classes="FontIcon" Text="&#xE713;" /> -->
                 </MenuItem.Icon>
             </MenuItem>
             <MenuItem Command="{Binding ExitCommand}" Header="{cext:Localize MenuWindow.ExitAppButton.Content}">
                 <MenuItem.Icon>
-                    <TextBlock
-                        Classes="FontIcon"
-                        Foreground="Red"
-                        Text="&#xE711;" />
+                    <LucideIcon Classes="MenuIcon" Kind="X" Foreground="Brown"></LucideIcon>
+                    <!-- <TextBlock -->
+                    <!--     Classes="FontIcon" -->
+                    <!--     Foreground="Red" -->
+                    <!--     Text="&#xE711;" /> -->
                 </MenuItem.Icon>
             </MenuItem>
             <!-- </StackPanel> -->

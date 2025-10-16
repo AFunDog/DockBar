@@ -13,31 +13,32 @@ public sealed partial class DockItemFolder : DockItemBase, IDockItemGroup
     [Key(nameof(DockItemKeys))]
     private ObservableCollection<int> DockItemKeys { get; set; } = [];
 
-    [IgnoreMember]
-    public override IDockItemService DockItemService
-    {
-        get => field;
-        internal set
-        {
-            if (field == value)
-                return;
-            field.DockItemUnregistered -= OnDockItemUnregistered;
-            field = value;
-            field.DockItemUnregistered += OnDockItemUnregistered;
-        }
-    } = IDockItemService.Empty;
+    // [IgnoreMember]
+    // public override IDockItemService DockItemService
+    // {
+    //     get => field;
+    //     internal set
+    //     {
+    //         if (field == value)
+    //             return;
+    //         field.DockItemUnregistered -= OnDockItemUnregistered;
+    //         field = value;
+    //         field.DockItemUnregistered += OnDockItemUnregistered;
+    //     }
+    // } = IDockItemService.Empty;
 
-    private void OnDockItemUnregistered(IDockItemService sender, DockItemBase item)
-    {
-        Remove(item.Key);
-    }
+    // private void OnDockItemUnregistered(IDockItemService sender, DockItemBase item)
+    // {
+    //     Remove(item.Key);
+    // }
 
     [ObservableProperty]
     [IgnoreMember]
     public override partial bool CanExecute { get; protected set; } = true;
 
-    protected override void ExecuteCore()
+    protected internal override bool Execute()
     {
+        return true;
     }
 
     #region IList

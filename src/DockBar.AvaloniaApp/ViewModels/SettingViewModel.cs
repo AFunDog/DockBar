@@ -1,10 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Zeng.CoreLibrary.Toolkit.Contacts;
 using DockBar.Core.Contacts;
 using DockBar.Core.Structs;
 using Serilog;

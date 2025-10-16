@@ -4,8 +4,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DockBar.Core.Helpers;
 using Serilog;
+using Zeng.CoreLibrary.Toolkit.Logging;
 
 namespace DockBar.SystemMonitor.Internals;
 
@@ -16,7 +16,7 @@ internal sealed class PerformanceNetworkMonitor : IDisposable
     private const string SentCounterName = "Bytes Sent/sec";
 
     private static string[] InstanceNames => new PerformanceCounterCategory(CategoryName).GetInstanceNames();
-    private ILogger Logger { get; set; } = Log.Logger;
+    private ILogger Logger { get;} 
 
     private List<PerformanceCounter> NetworkSentCounter { get; set; } = [];
     private List<PerformanceCounter> NetworkReceivedCounter { get; set; } = [];
@@ -25,7 +25,6 @@ internal sealed class PerformanceNetworkMonitor : IDisposable
     {
         get
         {
-            using var _ = LogHelper.Trace();
             //if (
             //    NetworkSentCounter is null
             //    || NetworkSentCounter.Select(counter => counter.InstanceName).SequenceEqual(InstanceNames) is false
@@ -45,7 +44,7 @@ internal sealed class PerformanceNetworkMonitor : IDisposable
             }
             catch (Exception e)
             {
-                Logger.Verbose(e, "网络监控器异常 {Instance}", InstanceNames);
+                Logger.Trace().Verbose(e, "网络监控器异常 {Instance}", InstanceNames);
                 ResetCounter();
             }
 
@@ -57,7 +56,6 @@ internal sealed class PerformanceNetworkMonitor : IDisposable
     {
         get
         {
-            using var _ = LogHelper.Trace();
             //if (
             //    NetworkReceivedCounter is null
             //    || NetworkReceivedCounter.Select(counter => counter.InstanceName).SequenceEqual(InstanceNames) is false
@@ -75,7 +73,7 @@ internal sealed class PerformanceNetworkMonitor : IDisposable
             }
             catch (Exception e)
             {
-                Logger.Verbose(e, "网络监控器异常 {Instance}", InstanceNames);
+                Logger.Trace().Verbose(e, "网络监控器异常 {Instance}", InstanceNames);
                 ResetCounter();
             }
 
@@ -83,20 +81,15 @@ internal sealed class PerformanceNetworkMonitor : IDisposable
         }
     }
 
-    public PerformanceNetworkMonitor() : this(Log.Logger)
-    {
-    }
-
     public PerformanceNetworkMonitor(ILogger logger)
     {
-        Logger = logger;
+        Logger = logger.ForContext<PerformanceNetworkMonitor>();
         ResetCounter();
     }
 
     public void ResetCounter()
     {
-        using var _ = LogHelper.Trace();
-        Logger.Verbose("尝试重置网络性能计数器");
+        Logger.Trace().Verbose("尝试重置网络性能计数器");
         //foreach (var counter in NetworkSentCounter ?? [])
         //    counter.Dispose();
         //foreach (var counter in NetworkReceivedCounter ?? [])
@@ -151,7 +144,7 @@ internal sealed class PerformanceNetworkMonitor : IDisposable
         }
         catch (Exception e)
         {
-            Logger.Error(e, "初始化或重置网络性能计数器失败");
+            Logger.Trace().Error(e, "初始化或重置网络性能计数器失败");
         }
     }
 

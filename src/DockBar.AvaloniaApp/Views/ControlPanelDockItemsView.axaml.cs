@@ -4,11 +4,11 @@ using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Markup.Xaml;
 using Avalonia.VisualTree;
+using DockBar.AvaloniaApp.Windows;
 using DockBar.Core.Contacts;
 using DockBar.Core.Structs;
-using DockBar.DockItem;
+using DockBar.DockItem.Contacts;
 using DockBar.DockItem.Items;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
@@ -27,25 +27,27 @@ public partial class ControlPanelDockItemsView : UserControl
     public DockItemBase? SelectedDockItem { get; set; }
 
 
-    public ControlPanelDockItemsView() : this(Log.Logger, IDockItemService.Empty, IAppSettingWrapper.Empty)
+    public ControlPanelDockItemsView() 
     {
+        InitializeComponent();
     }
 
     public ControlPanelDockItemsView(
         ILogger logger,
         IDockItemService dockItemService,
+        
         IAppSettingWrapper appSettingWrapper)
     {
         Logger = logger;
         DockItemService = dockItemService;
         AppSetting = appSettingWrapper.Data;
-
-        DockItems = new(DockItemService.RegisteredDockItems);
-        DockItemService.DockItemRegistered += (s, e) => { DockItems.Add(e); };
-        DockItemService.DockItemUnregistered += (s, e) => { DockItems.Remove(e); };
-
+    
+        // DockItems = new(DockItemService.RegisteredDockItems);
+        // DockItemService.DockItemCreated += (s, e) => { DockItems.Add(e); };
+        // DockItemService.DockItemRemoved += (s, e) => { DockItems.Remove(e); };
+    
         DataContext = this;
-
+    
         InitializeComponent();
     }
 
@@ -73,8 +75,8 @@ public partial class ControlPanelDockItemsView : UserControl
             var menuWindow = Program.ServiceProvider.GetRequiredService<MenuWindow>();
             // menuWindow.PropertyChanged += OnMenuWindowPropertyChanged;
             // menuWindow.SelectedIndex = SelectedIndex;
-            menuWindow.SelectedDockItem = SelectedDockItem;
-            menuWindow.ShowMenu(x, y);
+            // menuWindow.SelectedDockItem = SelectedDockItem;
+            menuWindow.OpenMenu(x, y);
         }
         catch (Exception ex)
         {

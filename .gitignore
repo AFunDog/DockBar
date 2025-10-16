@@ -371,3 +371,6 @@ test
 # Rider
 .idea
 
+# 二进制数据文件
+.dockitems
+.settings

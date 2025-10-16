@@ -1,52 +1,58 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using Avalonia;
+using System.Threading;
+using System.Threading.Tasks;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Zeng.CoreLibrary.Toolkit.Contacts;
-using DockBar.AvaloniaApp;
+using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 using DockBar.AvaloniaApp.Contacts;
 using DockBar.AvaloniaApp.Structs;
-using DockBar.AvaloniaApp.ViewModels;
 using DockBar.Core.Contacts;
-using DockBar.Core.Helpers;
 using DockBar.Core.Structs;
-using DockBar.DockItem;
+using DockBar.DockItem.Contacts;
 using DockBar.DockItem.Items;
-using DockBar.SystemMonitor;
+using DockBar.DockItem.Structs;
+using ObservableCollections;
 using Serilog;
+using Zeng.CoreLibrary.Toolkit.Logging;
 
 namespace DockBar.AvaloniaApp.ViewModels;
 
 [Flags]
 internal enum PanelState { Hide = 0 }
 
+internal sealed record SelectMessage();
+
 internal sealed partial class MainWindowViewModel : ViewModelBase
 {
-    public IDockItemService DockItemService { get; }
-    public ILogger Logger { get; }
+    private IServiceProvider ServiceProvider { get; }
+    private ILogger Logger { get; }
+    private IDockItemService DockItemService { get; }
     public AppSetting AppSetting { get; set; }
-    public IPerformanceMonitor PerformanceMonitor { get; }
     public IGlobalHotKeyManager GlobalHotKeyManager { get; }
+    private IRepository<DockItemData> DockItemDataRepo { get; }
+    // private IRepository<DockItemPathData> DockItemPathDataRepo { get; }
+    private IRepository<IconData> IconDataRepo { get; }
+    public PerformanceMonitorViewModel PerformanceMonitorViewModel { get; set; }
 
-    // public ObservableCollection<DockItemBase> DockItems =>
-    // [
-    //     ..DockItemService.Root.Select(key => DockItemService.GetDockItem(key))
-    //         .OfType<DockItemBase>()
-    // ];
+    private ObservableDictionary<Guid, (DockItemData? itemData, IconData? iconData)> DockItemViewDataTable { get; }
+    private ObservableList<(Guid id, bool changeState)> DockItemViewDataList { get; }
+
+    // private ObservableList<(DockItemData? itemData, IconData? iconData)> DockItemViewDataList { get; }
+
+    public IEnumerable<DockItemViewData> DockItemViewDataView { get; }
 
     [ObservableProperty]
     public partial int SelectedIndex { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsSelectedDockItem))]
-    public partial DockItemBase? SelectedDockItem { get; set; } = null;
+    public partial Guid SelectedDockItemId { get; set; } = Guid.Empty;
 
     //[ObservableProperty]
     //private bool _isDockItemListPointerPressed;
@@ -54,7 +60,7 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
     /// <summary>
     /// 是否选中了 DockItem
     /// </summary>
-    public bool IsSelectedDockItem => SelectedDockItem is not null;
+    public bool IsSelectedDockItem => SelectedDockItemId != Guid.Empty;
 
     /// <summary>
     /// 是否处于文件拖入模式
@@ -88,11 +94,14 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(IsPanelShow))]
     public partial bool HasOwnedWindow { get; set; } = false;
 
+    // private ObservableHashSet<Window> OwnedWindowSet { get; set; } = []; 
+
     /// <summary>
     /// 面板是否显示
     /// </summary>
-    public bool IsPanelShow => IsMouseEntered || IsDragMode || IsHotKeyPressed || HasOwnedWindow
-    // || IsDockItemDraging
+    public bool IsPanelShow
+        => IsMouseEntered || IsDragMode || IsHotKeyPressed || HasOwnedWindow
+    // || IsDockItemDragging
     ;
 
     /// <summary>
@@ -102,144 +111,296 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
     public bool IsPanelShowDelay => IsPanelShow;
 
 
-    public MainWindowViewModel() : this(
-        Log.Logger,
-        IDockItemService.Empty,
-        IAppSettingWrapper.Empty,
-        IPerformanceMonitor.Empty,
-        IGlobalHotKeyManager.Empty
-    )
-    {
-    }
+    public MainWindowViewModel() { }
 
     public MainWindowViewModel(
+        IServiceProvider serviceProvider,
         ILogger logger,
         IDockItemService dockItemService,
         IAppSettingWrapper appSettingWrapper,
-        IPerformanceMonitor performanceMonitor,
-        IGlobalHotKeyManager globalHotKeyManager)
+        IGlobalHotKeyManager globalHotKeyManager,
+        IRepository<DockItemData> dockItemDataRepo,
+        // IRepository<DockItemPathData> dockItemPathDataRepo,
+        IRepository<IconData> iconDataRepo,
+        PerformanceMonitorViewModel performanceMonitorViewModel)
     {
+        ServiceProvider = serviceProvider;
         Logger = logger;
         DockItemService = dockItemService;
-
         // 读取应用设置，在读取前数据就应该要被加载
         AppSetting = appSettingWrapper.Data;
-
-        PerformanceMonitor = performanceMonitor;
-
         GlobalHotKeyManager = globalHotKeyManager;
+        DockItemDataRepo = dockItemDataRepo;
+        // DockItemPathDataRepo = dockItemPathDataRepo;
+        IconDataRepo = iconDataRepo;
+        PerformanceMonitorViewModel = performanceMonitorViewModel;
 
-        InitDockItemService(DockItemService);
-    }
+        // OwnedWindowSet.CollectionChanged += (in e) =>
+        // {
+        //     HasOwnedWindow = OwnedWindowSet.Count > 0;
+        // };
 
-    private void InitDockItemService(IDockItemService dockItemService)
-    {
-        // void OnDockItemAdded(IDockItemService service, DockItemBase dockItem)
-        // {
-        //     DockItems.Insert(dockItem.Index, dockItem);
-        //     dockItemService.SaveData(App.StorageFile);
-        //     //NotifyPanelSize();
-        // }
-        //
-        // void OnDockItemRemoved(IDockItemService service, DockItemBase dockItem)
-        // {
-        //     DockItems.Remove(dockItem);
-        //     dockItemService.SaveData(App.StorageFile);
-        //     //NotifyPanelSize();
-        // }
-        //
-        // void OnDockItemMoved(IDockItemService service, (int oldIndex, int newIndex) args)
-        // {
-        //     DockItems.Move(args.oldIndex, args.newIndex);
-        //     // 暂时用这个来解决问题
-        //     IsDockItemDraging = false;
-        //     dockItemService.SaveData(App.StorageFile);
-        // }
-
-        void OnDockItemStarted(IDockItemService service, DockItemBase dockItem)
+        DockItemViewDataTable = new();
+        DockItemViewDataList = new();
+        var view = DockItemViewDataList.CreateView(x
+            => DockItemViewDataTable.GetValueOrDefault(x.id) is { } ii
+                ? ToDockItemViewData(ii.itemData!, ii.iconData)
+                : null
+        );
+        DockItemViewDataTable.CollectionChanged += (in e) =>
         {
-            using var _ = LogHelper.Trace();
-            if (dockItem is KeyActionDockItem { ActionKey: not null } keyActionDockItem)
-            {
-                if (KeyActionDockItems.KeyActions.TryGetValue(keyActionDockItem.ActionKey, out var action))
-                    try
+            var ordered = DockItemViewDataTable
+                .OrderBy(x => x.Value.itemData?.Index == -1 ? int.MaxValue : x.Value.itemData?.Index)
+                .ToArray();
+            Dispatcher.UIThread.Post(() =>
+                {
+                    DockItemViewDataList.Clear();
+                    foreach (var (id, (itemData, iconData)) in ordered)
                     {
-                        action();
+                        DockItemViewDataList.Add((id, false));
                     }
-                    catch (Exception e)
-                    {
-                        Logger?.Error(e, "执行 KeyActionDockItem 的任务时发生错误");
-                    }
-                else
-                    Logger?.Warning("KeyActionDockItem 的任务未找到");
-            }
+                }
+            );
+        };
+
+        view.AttachFilter(x => DockItemViewDataTable.ContainsKey(x.id));
+        DockItemViewDataView = view.ToNotifyCollectionChanged();
+
+        if (SynchronizationContext.Current is null)
+        {
+            SynchronizationContext.SetSynchronizationContext(
+                new AvaloniaSynchronizationContext(Dispatcher.UIThread, DispatcherPriority.Default)
+            );
         }
-        // bool isLoaded = false;
 
-        dockItemService.LoadData(App.StorageFile);
-        // isLoaded = true;
-        // DockItems.Clear();
-        // foreach (var dockItem in dockItemService.Root)
-        // {
-        //     DockItems.Add(dockItem);
-        // }
+        Task.Run(async () =>
+            {
+                var dockItemViewDataList = (await DockItemDataRepo.SelectAll())
+                    .Where(x => x.ParentPath == "/")
+                    .Join((await IconDataRepo.SelectAll()), x => x.IconId, y => y.Id, (x, y) => (x, y))
+                    .ToArray();
+                foreach (var (itemData, iconData) in dockItemViewDataList)
+                {
+                    DockItemViewDataTable[itemData.Id] = (itemData, iconData);
+                }
+            }
+        );
 
-        //foreach (
-        //    var wrappedItem in dockItemService
-        //        .DockItems.Where(item => item is WrappedDockItem)
-        //        .Select(item => (WrappedDockItem)item)
-        //        .OrderBy(item => item.Index)
-        //)
-        //{
-        //    DockItems.Add(wrappedItem);
-        //}
-        //foreach (var dockItem in dockItemService.DockItems.Where(item => item is not WrappedDockItem))
-        //{
-        //    DockItems.Add(dockItem);
-        //}
-        // dockItemService.DockItemAdded += OnDockItemAdded;
-        // dockItemService.DockItemRemoved += OnDockItemRemoved;
-        // dockItemService.DockItemMoved += OnDockItemMoved;
-        dockItemService.DockItemExecuted += OnDockItemStarted;
+        DockItemDataRepo.ItemsChanged += (s, e) =>
+        {
+            if (e.Item.ParentPath != "/")
+                return;
+            switch (e.Type)
+            {
+                case RepositoryItemChangedTypeEnum.Insert:
+                case RepositoryItemChangedTypeEnum.Update:
+                {
+                    // if (DockItemViewDataTable.TryGetValue(e.Item.Id, out var item))
+                    // {
+                    //     // if (item.iconData?.Id != e.Item.IconId)
+                    //     // {
+                    //     //     DockItemViewDataTable[e.Item.Id] = item with { itemData = e.Item,iconData = await IconDataRepo.Select(e.Item.IconId)};
+                    //     // }
+                    //     // else
+                    //     // {
+                    //     // }
+                    //     Dispatcher.UIThread.InvokeAsync(async () =>
+                    //         {
+                    //             DockItemViewDataTable[e.Item.Id] = (itemData: e.Item,
+                    //                 iconData: await IconDataRepo.Select(e.Item.IconId));
+                    //         }
+                    //     );
+                    // }
+                    // else
+                    // {
+                    //     DockItemViewDataTable[e.Item.Id] = new(e.Item, null);
+                    // }
+                    Dispatcher.UIThread.InvokeAsync(async () =>
+                        {
+                            DockItemViewDataTable[e.Item.Id] = (itemData: e.Item,
+                                iconData: await IconDataRepo.Select(e.Item.IconId));
+                        }
+                    );
+
+                    break;
+                }
+                case RepositoryItemChangedTypeEnum.Delete:
+                {
+                    DockItemViewDataTable.Remove(e.Item.Id);
+
+                    break;
+                }
+            }
+        };
+        IconDataRepo.ItemsChanged += (s, e) =>
+        {
+            switch (e.Type)
+            {
+                case RepositoryItemChangedTypeEnum.Insert:
+                case RepositoryItemChangedTypeEnum.Update:
+                {
+                    foreach (var (id, item) in DockItemViewDataTable)
+                    {
+                        if (item.itemData is null)
+                            continue;
+                        if (item.itemData.IconId == e.Item.Id)
+                        {
+                            DockItemViewDataTable[id] = item with { iconData = e.Item };
+                        }
+                    }
+
+                    break;
+                }
+                case RepositoryItemChangedTypeEnum.Delete:
+                {
+                    foreach (var (id, item) in DockItemViewDataTable)
+                    {
+                        if (item.itemData is null)
+                            continue;
+                        if (item.itemData.IconId == e.Item.Id)
+                        {
+                            DockItemViewDataTable[id] = item with { iconData = null };
+                        }
+                    }
+
+                    break;
+                }
+            }
+        };
+
+        #region Messager注册
+
+        // 鼠标进入和退出消息
+        WeakReferenceMessenger.Default.Register<MainWindowViewModel, ValueChangedMessage<bool>, string>(
+            this,
+            "MainWindow.IsMouseEntered",
+            (s, e) => IsMouseEntered = e.Value
+        );
+        WeakReferenceMessenger.Default.Register<MainWindowViewModel, ValueChangedMessage<Guid>, string>(
+            this,
+            "MainWindow.SelectDockItem",
+            (s, e) => SelectedDockItemId = e.Value
+        );
+        WeakReferenceMessenger.Default.Register<MainWindowViewModel, ValueChangedMessage<int>, string>(
+            this,
+            "MainWindow.SelectIndex",
+            (s, e) => SelectedIndex = e.Value
+        );
+        WeakReferenceMessenger.Default.Register<MainWindowViewModel, ValueChangedMessage<bool>, string>(
+            this,
+            "MainWindow.IsDragMode",
+            (s, e) => IsDragMode = e.Value
+        );
+        WeakReferenceMessenger.Default.Register<MainWindowViewModel, ValueChangedMessage<bool>, string>(
+            this,
+            "MainWindow.HasOwnedWindow",
+            (s, e) => HasOwnedWindow = e.Value
+        );
+        WeakReferenceMessenger.Default.Register<MainWindowViewModel, AddDockItemMessage, string>(
+            this,
+            "AddDockItem",
+            (s, e) => { DockItemService.AddDockItem(e.Name, e.IconData, e.ParentPath, e.Index, e.Type, e.Metadata); }
+        );
+        WeakReferenceMessenger.Default.Register<MainWindowViewModel, MoveDockItemMessage, string>(
+            this,
+            "MoveDockItem",
+            (s, e) => { DockItemService.MoveDockItem(e.Id, "/", e.TargetIndex); }
+        );
+
+        WeakReferenceMessenger.Default.Register<MainWindowViewModel, OpenMenuWindowMessage, string>(
+            this,
+            "OpenMenuWindow",
+            (s, e) =>
+            {
+                Dispatcher.UIThread.InvokeAsync(async Task () =>
+                    {
+                        try
+                        {
+                            // var menuWindow = ServiceProvider.GetRequiredKeyedService<Window>(nameof(MenuWindow));
+                            // WeakReferenceMessenger.Default.Send(
+                            //     e with
+                            //     {
+                            //         SelectedDockItem = await DockItemDataRepo.Select(SelectedDockItemId),
+                            //         SelectedIndex = SelectedIndex
+                            //     },
+                            //     "MenuWindow.OpenMenu"
+                            // );
+                            Logger.Trace().Information("打开菜单 {Index}", SelectedIndex);
+                            WeakReferenceMessenger.Default.Send(
+                                e with
+                                {
+                                    SelectedDockItem = await DockItemDataRepo.Select(SelectedDockItemId),
+                                    SelectedIndex = SelectedIndex,
+                                },
+                                "WindowManager.OpenMenuWindow"
+                            );
+                        }
+                        catch (Exception exception)
+                        {
+                            Logger.Trace().Error(exception, "");
+                        }
+                        // menuWindow.SelectedDockItem = await DockItemDataRepo.Select(SelectedDockItemId);
+                        // menuWindow.SelectedIndex = SelectedIndex;
+                        // menuWindow.OpenMenu(e.X, e.Y);
+                    }
+                );
+            }
+        );
+
+        #endregion
+
+        // InitDockItemService(DockItemService);
     }
+
+
+    private static DockItemViewData ToDockItemViewData(DockItemData itemData, IconData? iconData)
+    {
+        return new DockItemViewData() { Id = itemData.Id, ShowName = itemData.Name, IconData = iconData?.Data ?? [] };
+    }
+
+    // private int PosXToIndex(double x)
+    // {
+    //     var curRight = AppSetting.DockItemSize / 2;
+    //     for (var i = 0; i < DockItemViewDataTable.Count; i++)
+    //     {
+    //         if (x <= curRight)
+    //             return i;
+    //         curRight += AppSetting.DockItemSize + AppSetting.DockItemSpacing;
+    //     }
+    //
+    //     return DockItemViewDataTable.Count;
+    // }
 
     /// <summary>
     /// 打开任务管理器
     /// </summary>
     [RelayCommand]
-    private void OpenTaskmgr()
+    private async Task OpenTaskmgr()
     {
-        try
-        {
-            Process.Start(new ProcessStartInfo { FileName = "taskmgr", UseShellExecute = true });
-        }
-        catch (Exception e)
-        {
-            Logger.Error(e, "打开 任务管理器 时发生错误");
-        }
+        // 防止启动时间过长卡住UI
+        await Task.Run(() =>
+            {
+                try
+                {
+                    Process.Start(new ProcessStartInfo { FileName = "taskmgr", UseShellExecute = true });
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(e, "打开 任务管理器 时发生错误");
+                }
+            }
+        );
     }
 
     /// <summary>
-    /// 执行 <paramref name="dockItemKey"/> 对应的 <see cref="DockItemBase.Execute"/> 函数
+    /// 执行 <paramref name="id"/> 对应的 <see cref="DockItemBase.Execute"/> 函数
     /// </summary>
     [RelayCommand]
-    private void ExecuteDockItem(int dockItemKey)
+    private void ExecuteDockItem(Guid id)
     {
-        DockItemService.ExecuteDockItem(dockItemKey);
+        DockItemService.ExecuteDockItem(id);
     }
 
-    // public void InsertDockLinkItem(int index, string fullPath)
-    // {
-    //     DockItemService.RegisterDockItem(new DockLinkItem { LinkPath = fullPath }, index);
-    //
-    //     //NotifyPanelSize();
-    // }
-    //
-    // public void RemoveDockItem(int key)
-    // {
-    //     DockItemService.UnregisterDockItem(key);
-    //     //NotifyPanelSize();
-    // }
 
     /// <summary>
     /// 用来延迟属性变化的 Timer
@@ -283,10 +444,4 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
             );
         }
     }
-
-    //private void NotifyPanelSize()
-    //{
-    //    OnPropertyChanged(nameof(DockItemListMargin));
-    //    OnPropertyChanged(nameof(DockPanelHeight));
-    //}
 }

@@ -2,18 +2,18 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
-using DockBar.Core.Helpers;
 using DockBar.SystemMonitor.Contacts;
 using DockBar.SystemMonitor.Internals;
 using Serilog;
 using Windows.Win32.System.SystemInformation;
+using Zeng.CoreLibrary.Toolkit.Logging;
 using static Windows.Win32.PInvoke;
 
 namespace DockBar.SystemMonitor.Internals;
 
-internal sealed partial class PerformanceMonitor : ObservableObject, IPerformanceMonitor, IDisposable
+internal sealed partial class PerformanceMonitor : IPerformanceMonitor, IDisposable
 {
-    private ILogger Logger { get; set; } = Log.Logger;
+    private ILogger Logger { get; set; }
     private Task? MonitorTask { get; set; }
 
     private CancellationTokenSource MonitorCancellationTokenSource { get; set; } = new();
@@ -26,24 +26,89 @@ internal sealed partial class PerformanceMonitor : ObservableObject, IPerformanc
 
     //private PerformanceNetworkMonitor? NetworkMonitor { get; set; }
 
-    [ObservableProperty]
-    public partial double CpuUsage { get; set; }
+    public event EventHandler<PerformanceChangedEventArgs>? PerformanceDataChanged;
 
-    [ObservableProperty]
-    public partial double MemoryUsage { get; set; }
+    public double CpuUsage
+    {
+        get => field;
+        private set
+        {
+            if (Math.Abs(field - value) < 1e-5)
+                return;
+            field = value;
+            PerformanceDataChanged?.Invoke(this, new PerformanceChangedEventArgs() { PropertyName = nameof(CpuUsage) });
+        }
+    }
 
-    [ObservableProperty]
-    public partial double TotalPhysicalMemoryMB { get; set; } = 1;
+    public double MemoryUsage
+    {
+        get => field;
+        private set
+        {
+            if (Math.Abs(field - value) < 1e-5)
+                return;
+            field = value;
+            PerformanceDataChanged?.Invoke(
+                this,
+                new PerformanceChangedEventArgs() { PropertyName = nameof(MemoryUsage) }
+            );
+        }
+    }
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(NetworkSentBytesString))]
-    public partial double NetworkSentBytes { get; set; }
+    public double TotalPhysicalMemoryMB
+    {
+        get => field;
+        private set
+        {
+            if (Math.Abs(field - value) < 1e-5)
+                return;
+            field = value;
+            PerformanceDataChanged?.Invoke(
+                this,
+                new PerformanceChangedEventArgs() { PropertyName = nameof(TotalPhysicalMemoryMB) }
+            );
+        }
+    } = 1;
+
+    public double NetworkSentBytes
+    {
+        get => field;
+        private set
+        {
+            if (Math.Abs(field - value) < 1e-5)
+                return;
+            field = value;
+            PerformanceDataChanged?.Invoke(
+                this,
+                new PerformanceChangedEventArgs() { PropertyName = nameof(NetworkSentBytes) }
+            );
+            PerformanceDataChanged?.Invoke(
+                this,
+                new PerformanceChangedEventArgs() { PropertyName = nameof(NetworkSentBytesString) }
+            );
+        }
+    }
 
     public string NetworkSentBytesString => NetworkBytesToString(NetworkSentBytes);
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(NetworkReceivedBytesString))]
-    public partial double NetworkReceivedBytes { get; set; }
+    public double NetworkReceivedBytes
+    {
+        get => field;
+        private set
+        {
+            if (Math.Abs(field - value) < 1e-5)
+                return;
+            field = value;
+            PerformanceDataChanged?.Invoke(
+                this,
+                new PerformanceChangedEventArgs() { PropertyName = nameof(NetworkReceivedBytes) }
+            );
+            PerformanceDataChanged?.Invoke(
+                this,
+                new PerformanceChangedEventArgs() { PropertyName = nameof(NetworkReceivedBytesString) }
+            );
+        }
+    }
 
     public string NetworkReceivedBytesString => NetworkBytesToString(NetworkReceivedBytes);
 
@@ -59,13 +124,11 @@ internal sealed partial class PerformanceMonitor : ObservableObject, IPerformanc
         };
     }
 
-    public PerformanceMonitor() : this(Log.Logger)
-    {
-    }
+    public PerformanceMonitor() : this(Log.Logger) { }
 
     public PerformanceMonitor(ILogger logger)
     {
-        Logger = logger;
+        Logger = logger.ForContext<PerformanceMonitor>();
 
         // 这样统计CPU好像更准确
         CpuUsageCounter = new PdhPerformanceCounter(@"\Processor(*)\% Processor Time", CountWay.Average);
@@ -85,7 +148,6 @@ internal sealed partial class PerformanceMonitor : ObservableObject, IPerformanc
 
     private async Task MonitorAsync(CancellationToken cancellationToken = default)
     {
-        using var _ = LogHelper.Trace();
         const int TraceTimeMs = 1000;
 
         const int LogTimeMs = 10000;
@@ -96,7 +158,7 @@ internal sealed partial class PerformanceMonitor : ObservableObject, IPerformanc
             try
             {
                 //TotalPhysicalMemoryMB = Vanara.PInvoke.Kernel32.GlobalMemoryStatusEx().TotalPhysicalMB;
-                TotalPhysicalMemoryMB = GetTotalPhysicalMemoryBytes() / (1024 * 1024);
+                TotalPhysicalMemoryMB = GetTotalPhysicalMemoryBytes() / (1024.0 * 1024);
                 var temp = CpuUsageCounter.NextValue();
                 CpuUsage = temp == 0 ? CpuUsage : temp;
                 MemoryUsage = (1 - MemoryUsageCounter.NextValue() / TotalPhysicalMemoryMB) * 100;
@@ -106,13 +168,13 @@ internal sealed partial class PerformanceMonitor : ObservableObject, IPerformanc
             }
             catch (Exception e)
             {
-                Logger.Error(e, "监视器出错");
+                Logger.Trace().Error(e, "监视器出错");
                 break;
             }
 
             if (logCount == LogTimeMs / TraceTimeMs)
             {
-                Logger.Verbose(
+                Logger.Trace().Verbose(
                     "记录一次性能数据 CPU:{CpuUsage,-5:F2} MEM:{MemoryUsage,-5:F2} UPLOAD:{NetworkSentBytes,-12} DOWNLOAD:{NetworkReceivedBytes,-12}",
                     CpuUsage,
                     MemoryUsage,
@@ -143,20 +205,20 @@ internal sealed partial class PerformanceMonitor : ObservableObject, IPerformanc
         return 1;
     }
 
-    public async void Dispose()
+    public void Dispose()
     {
-        using var _ = LogHelper.Trace();
         MonitorCancellationTokenSource.Cancel();
-        if (MonitorTask is not null)
-            await MonitorTask;
-        MonitorTask?.Dispose();
-        MonitorTask = null;
+        MonitorCancellationTokenSource.Dispose();
+        // if (MonitorTask is not null)
+        //     await MonitorTask;
+        // MonitorTask?.Dispose();
+        // MonitorTask = null;
         CpuUsageCounter?.Dispose();
         //CpuUsageCounter = null;
         MemoryUsageCounter?.Dispose();
         //MemoryUsageCounter = null;
         //NetworkMonitor?.Dispose();
         //NetworkMonitor = null;
-        Logger.Debug("性能监视器关闭并销毁");
+        Logger.Trace().Debug("性能监视器关闭并销毁");
     }
 }

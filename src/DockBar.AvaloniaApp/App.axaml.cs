@@ -1,45 +1,35 @@
-using System;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
-using Avalonia.Platform;
 using Avalonia.Styling;
-using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DockBar.AvaloniaApp.Views;
+using DockBar.AvaloniaApp.Windows;
 using DockBar.Core.Contacts;
-using DockBar.Core.Helpers;
 using DockBar.Core.Structs;
-using DockBar.SystemMonitor;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
-using Serilog.Context;
-using Serilog.Core;
-using Serilog.Events;
-using Serilog.Sinks.SystemConsole.Themes;
 
 namespace DockBar.AvaloniaApp;
 
 public partial class App : Application
 {
     public static App Instance => (App)Current!;
+    private ILogger Logger { get; }
 
-    public ILogger Logger { get; }
-
-    internal MainWindow MainWindow
-        => ((ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)!.MainWindow as MainWindow) !;
+    // private MainWindow? MainWindow
+    //     => ((ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)!.MainWindow as MainWindow);
 
     public const string SettingFile = ".settings";
     public const string StorageFile = ".dockItems";
 
-    public App() : this(Log.Logger, IAppSettingWrapper.Empty)
+    public App()
     {
+        Logger = null!;
     }
 
     public App(ILogger logger, IAppSettingWrapper appSettingWrapper)
@@ -91,7 +81,7 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             DisableAvaloniaDataAnnotationValidation();
-            desktop.MainWindow = Program.ServiceProvider.GetRequiredService<MainWindow>();
+            desktop.MainWindow = Program.ServiceProvider.GetRequiredKeyedService<Window>(nameof(MainWindow));
         }
 
         base.OnFrameworkInitializationCompleted();

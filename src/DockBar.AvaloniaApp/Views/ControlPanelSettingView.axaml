@@ -50,9 +50,10 @@
                 Spacing="16">
                 <Expander>
                     <Expander.Header>
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Classes="FontIcon HeaderIcon" Text="&#xE740;" />
-                            <TextBlock Text="停靠项目尺寸" />
+                        <StackPanel Orientation="Horizontal" Spacing="8" >
+                            <!-- <TextBlock Classes="FontIcon HeaderIcon" Text="&#xE740;" /> -->
+                            <LucideIcon Kind="Fullscreen"></LucideIcon>
+                            <TextBlock Text="停靠项目尺寸" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Expander.Header>
                     <StackPanel Orientation="Vertical">
@@ -85,8 +86,9 @@
                 <Expander>
                     <Expander.Header>
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Classes="FontIcon HeaderIcon" Text="&#xE771;" />
-                            <TextBlock Text="个性化" />
+                            <!-- <TextBlock Classes="FontIcon HeaderIcon" Text="&#xE771;" /> -->
+                            <LucideIcon Kind="Brush" />
+                            <TextBlock Text="个性化" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Expander.Header>
                     <StackPanel Orientation="Vertical">
@@ -108,8 +110,9 @@
                 <Expander>
                     <Expander.Header>
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Classes="FontIcon HeaderIcon" Text="&#xE765;" />
-                            <TextBlock Text="快捷键" />
+                            <!-- <TextBlock Classes="FontIcon HeaderIcon" Text="&#xE765;" /> -->
+                            <LucideIcon Kind="Keyboard"></LucideIcon>
+                            <TextBlock Text="快捷键" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Expander.Header>
                     <StackPanel Orientation="Vertical">

@@ -1,5 +1,5 @@
 <Window
-    x:Class="DockBar.AvaloniaApp.Views.ControlPanelWindow"
+    x:Class="DockBar.AvaloniaApp.Windows.ControlPanelWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cext="using:Zeng.CoreLibrary.Toolkit.Avalonia.Extensions"
@@ -33,6 +33,7 @@
             <Setter Property="ExtendClientAreaChromeHints" Value="NoChrome" />
             <!-- <Setter Property="TransparencyLevelHint" Value="AcrylicBlur" /> -->
             <Setter Property="WindowStartupLocation" Value="CenterOwner" />
+            <Setter Property="Padding" Value="{Binding $self.OffScreenMargin,Mode=OneWay}"></Setter>
             <!-- BorderOnly 属性会导致窗口没有最小化最大化动画 -->
             <!-- <Setter Property="SystemDecorations" Value="BorderOnly" /> -->
             <Style Selector="^[WindowState=Maximized]">
@@ -51,7 +52,11 @@
                 Command="{Binding NavigateCommand}"
                 Content="{Binding Content}"
                 MenuItemSource="{Binding MenuItems}"
-                SelectedMenuItem="{Binding SelectedMenuItem, Mode=TwoWay}" />
+                SelectedMenuItem="{Binding SelectedMenuItem, Mode=TwoWay}" >
+                <ctac:NavigationView.MenuTopIcon>
+                    <LucideIcon Kind="Menu"></LucideIcon>
+                </ctac:NavigationView.MenuTopIcon>
+            </ctac:NavigationView>
 
 
         </Grid>

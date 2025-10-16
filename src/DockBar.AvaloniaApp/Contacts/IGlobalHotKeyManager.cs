@@ -1,5 +1,4 @@
 ﻿using System;
-using Windows.Win32.UI.Input.KeyboardAndMouse;
 using Avalonia.Controls;
 
 namespace DockBar.AvaloniaApp.Contacts;

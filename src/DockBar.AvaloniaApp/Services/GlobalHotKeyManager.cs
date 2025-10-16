@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Security.Cryptography;
 using Windows.Win32.UI.Input.KeyboardAndMouse;
 using Avalonia.Controls;
 using DockBar.AvaloniaApp.Contacts;
-using DockBar.AvaloniaApp.Structs;
 using DockBar.Core.Contacts;
-using DockBar.Core.Helpers;
 using DockBar.Core.Structs;
 using Serilog;
+using Zeng.CoreLibrary.Toolkit.Logging;
 using static Windows.Win32.PInvoke;
 
 namespace DockBar.AvaloniaApp.Services;
@@ -118,10 +115,9 @@ public partial class GlobalHotKeyManager : IGlobalHotKeyManager
 
     private void AddHotKeyToTopLevel(TopLevel topLevel, HotKeyData hotKeyData)
     {
-        using var _ = LogHelper.Trace();
         if (!hotKeyData.HotKey.IsValid())
         {
-            Logger.Warning("跳过 {Key} 为 TopLevel {TopLevel} 注册全局热键 因为不可用", hotKeyData.Id, topLevel.GetType().Name);
+            Logger.Trace().Warning("跳过 {Key} 为 TopLevel {TopLevel} 注册全局热键 因为不可用", hotKeyData.Id, topLevel.GetType().Name);
             return;
         }
 
@@ -135,20 +131,19 @@ public partial class GlobalHotKeyManager : IGlobalHotKeyManager
                         (HOT_KEY_MODIFIERS)hotKeyData.HotKey.Modifiers,
                         hotKeyData.HotKey.Key
                     ))
-                    Logger.Verbose("为 TopLevel {TopLevel} 注册全局热键", topLevel.GetType().Name);
+                    Logger.Trace().Verbose("为 TopLevel {TopLevel} 注册全局热键", topLevel.GetType().Name);
                 else
                     throw new InvalidOperationException("注册热键失败，可能时按键冲突了");
             }
         }
         catch (Exception e)
         {
-            Logger.Error(e, "为 TopLevel {TopLevel} 注册全局热键失败", topLevel.GetType().Name);
+            Logger.Trace().Error(e, "为 TopLevel {TopLevel} 注册全局热键失败", topLevel.GetType().Name);
         }
     }
 
     private void RemoveHotKeyFromTopLevel(TopLevel topLevel, HotKeyData hotKeyData)
     {
-        using var _ = LogHelper.Trace();
         try
         {
             if (topLevel.TryGetPlatformHandle() is { Handle: { } handle })
@@ -159,7 +154,7 @@ public partial class GlobalHotKeyManager : IGlobalHotKeyManager
         }
         catch (Exception e)
         {
-            Logger.Error(e, "为 TopLevel {TopLevel} 注销全局热键失败", topLevel.GetType().Name);
+            Logger.Trace().Error(e, "为 TopLevel {TopLevel} 注销全局热键失败", topLevel.GetType().Name);
         }
     }
 
@@ -183,7 +178,7 @@ public partial class GlobalHotKeyManager : IGlobalHotKeyManager
                             }
                             catch (Exception e)
                             {
-                                Logger.Error(e, "执行 {Key} 全局热键时出错 {Name}", hotKeyInfo.Name, action.Method.Name);
+                                Logger.Trace().Error(e, "执行 {Key} 全局热键时出错 {Name}", hotKeyInfo.Name, action.Method.Name);
                             }
 
                         handled = true;
@@ -197,14 +192,13 @@ public partial class GlobalHotKeyManager : IGlobalHotKeyManager
 
     public void Register(string key, uint hotKeyModifiers, uint hotKey)
     {
-        using var _ = LogHelper.Trace();
         // if (HotKeyTable.TryGetValue(id, out var hotKeyInfo))
         // {
         //     hotKeyInfo.ClearBind();
         // }
         if (HotKeyNameTable.TryGetValue(key, out var hotKeyInfo))
         {
-            Logger.Verbose("注册全局热键 {Key} 已存在 HotKeyInfo 先清除再重新注册", key);
+            Logger.Trace().Verbose("注册全局热键 {Key} 已存在 HotKeyInfo 先清除再重新注册", key);
             Unregister(key);
         }
 
@@ -214,33 +208,31 @@ public partial class GlobalHotKeyManager : IGlobalHotKeyManager
         if (Host is not null)
             AddHotKeyToTopLevel(Host, HotKeyTable[id]);
 
-        Logger.Debug("注册全局热键完毕 {Key} {Id} {Mod} {HotKey}", key, id, hotKeyModifiers, hotKey);
+        Logger.Trace().Debug("注册全局热键完毕 {Key} {Id} {Mod} {HotKey}", key, id, hotKeyModifiers, hotKey);
     }
 
     public void Unregister(string key)
     {
-        using var _ = LogHelper.Trace();
         if (HotKeyNameTable.TryGetValue(key, out var hotKeyData))
         {
             if (Host is not null)
                 RemoveHotKeyFromTopLevel(Host, hotKeyData);
 
             HotKeyTable.Remove(hotKeyData.Id);
-            Logger.Debug("注销全局热键完毕 {Key}", key);
+            Logger.Trace().Debug("注销全局热键完毕 {Key}", key);
         }
         else
         {
-            Logger.Warning("注销全局热键 {Key} 不存在跳过", key);
+            Logger.Trace().Warning("注销全局热键 {Key} 不存在跳过", key);
         }
     }
 
     public void Bind(string key, Action action)
     {
-        using var _ = LogHelper.Trace();
         if (HotKeyActionTable.TryGetValue(key, out var actions))
         {
             actions.Add(action);
-            Logger.Debug("绑定热键 {Key}", key);
+            Logger.Trace().Debug("绑定热键 {Key}", key);
         }
         else
         {
@@ -250,23 +242,22 @@ public partial class GlobalHotKeyManager : IGlobalHotKeyManager
 
     public void Unbind(string key, Action? action)
     {
-        using var _ = LogHelper.Trace();
         if (HotKeyActionTable.TryGetValue(key, out var actions))
         {
             if (action is not null)
             {
                 actions.Remove(action);
-                Logger.Debug("取消一个热键绑定方法 {Key}", key);
+                Logger.Trace().Debug("取消一个热键绑定方法 {Key}", key);
             }
             else
             {
                 HotKeyActionTable.Remove(key);
-                Logger.Debug("清空热键绑定 {Key}", key);
+                Logger.Trace().Debug("清空热键绑定 {Key}", key);
             }
         }
         else
         {
-            Logger.Warning("取消绑定热键不存在，请先注册 {Key}", key);
+            Logger.Trace().Warning("取消绑定热键不存在，请先注册 {Key}", key);
         }
     }
 }

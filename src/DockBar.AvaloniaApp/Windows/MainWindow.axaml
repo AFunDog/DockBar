@@ -1,0 +1,281 @@
+<Window
+    x:Class="DockBar.AvaloniaApp.Windows.MainWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ac="using:DockBar.AvaloniaApp.Converters"
+    xmlns:controls="using:DockBar.AvaloniaApp.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:sys="using:System"
+    xmlns:vm="using:DockBar.AvaloniaApp.ViewModels"
+    xmlns:structs="using:DockBar.Core.Structs"
+    xmlns:converters="using:DockBar.AvaloniaApp.Converters"
+    xmlns:items="clr-namespace:DockBar.DockItem.Items;assembly=DockBar.DockItem"
+    xmlns:dac="clr-namespace:DockBar.AvaloniaApp.Structs"
+    Title="DockBar"
+    x:DataType="vm:MainWindowViewModel"
+    Classes.IsPanelShow="{Binding IsPanelShowDelay}"
+
+    Icon="avares://DockBar.AvaloniaApp/Assets/icon.ico"
+    SizeToContent="WidthAndHeight"
+    RenderOptions.TextRenderingMode="SubpixelAntialias"
+    Topmost="True"
+    mc:Ignorable="d">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel>
+            <vm:MainWindowViewModel.AppSetting>
+                <structs:AppSetting />
+            </vm:MainWindowViewModel.AppSetting>
+            <vm:MainWindowViewModel.PerformanceMonitorViewModel>
+                <vm:PerformanceMonitorViewModel CpuUsage="32" MemoryUsage="78" NetworkSentBytesString="13.20 KB/S"
+                                                NetworkReceivedBytesString="2.53 MB/S" />
+            </vm:MainWindowViewModel.PerformanceMonitorViewModel>
+            <vm:MainWindowViewModel.DockItemViewDataView>
+                <dac:DockItemViewData Id="{x:Static sys:Guid.Empty}" ShowName="Name" ></dac:DockItemViewData>
+            </vm:MainWindowViewModel.DockItemViewDataView>
+            <!-- <vm:MainWindowViewModel.DockItems> -->
+            <!--     <items:DockLinkItem LinkPath="" ShowName="停靠项目1" /> -->
+            <!--     <items:DockLinkItem LinkPath="" ShowName="停靠项目2" /> -->
+            <!--     <items:DockLinkItem LinkPath="" ShowName="停靠项目3" /> -->
+            <!-- </vm:MainWindowViewModel.DockItems> -->
+            </vm:MainWindowViewModel>
+        
+    </Design.DataContext>
+    <Design.DesignStyle>
+        <Style Selector="Window">
+            <!-- <Setter Property="Background" Value="Gray" /> -->
+            <Setter Property="RequestedThemeVariant" Value="Dark" />
+            <Style Selector="^ Grid#DockPanelGrid">
+                <Setter Property="ShowGridLines" Value="True" />
+            </Style>
+        </Style>
+    </Design.DesignStyle>
+    <Window.Styles>
+        <Style Selector="Window">
+            <Setter Property="Background" Value="{x:Null}" />
+            <Setter Property="SystemDecorations" Value="None" />
+            <Setter Property="ExtendClientAreaToDecorationsHint" Value="{Binding IsPanelShowDelay}" />
+            <Setter Property="ExtendClientAreaChromeHints" Value="NoChrome" />
+            <!-- <Setter Property="TransparencyLevelHint" Value="AcrylicBlur"></Setter> -->
+            <!--<Setter Property="ExtendClientAreaTitleBarHeightHint" Value="-1" />-->
+            <Setter Property="CanResize" Value="False" />
+            <Setter Property="ShowInTaskbar" Value="False" />
+            <Setter Property="Topmost" Value="True" />
+            <!--<Setter Property="Focusable" Value="True" />-->
+        </Style>
+        <Style Selector=":is(Control)#DockItemPanel">
+            <Setter Property="Transitions">
+                <Setter.Value>
+                    <Transitions>
+                        <DoubleTransition
+                            Easing="SineEaseOut"
+                            Property="Width"
+                            Duration="0:0:0.2" />
+                        <DoubleTransition
+                            Easing="SineEaseOut"
+                            Property="Height"
+                            Duration="0:0:0.2" />
+                    </Transitions>
+                </Setter.Value>
+            </Setter>
+
+        </Style>
+        <Style Selector=":is(Control)#FillControl">
+            <Setter Property="Height" Value="0" />
+            <Setter Property="Transitions">
+                <Setter.Value>
+                    <Transitions>
+                        <DoubleTransition
+                            Easing="ExponentialEaseOut"
+                            Property="Height"
+                            Duration="0:0:0.16" />
+                        <ThicknessTransition
+                            Easing="ExponentialEaseOut"
+                            Property="Margin"
+                            Duration="0:0:0.16" />
+                    </Transitions>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style Selector="Window.IsPanelShow :is(Control)#FillControl">
+            <Setter Property="Height" Value="{Binding #DockPanelGrid.Bounds.Height}" />
+            <Setter Property="Margin" Value="0,4,0,0" />
+        </Style>
+
+    </Window.Styles>
+
+    <Panel>
+        <Grid Name="RootGrid" RowDefinitions="*,auto,auto,auto">
+            <Control Name="FillControl" Grid.Row="0" />
+            <Grid
+                Name="DockPanelGrid"
+                Grid.Row="1"
+
+                VerticalAlignment="Bottom"
+                ColumnDefinitions="128,*,128">
+                <Grid.Styles>
+                    <Style Selector="Button.Flat">
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Background" Value="Transparent" />
+                    </Style>
+                    <Style Selector="Button.Flat:pressed">
+                        <Setter Property="RenderTransform" Value="" />
+                    </Style>
+                    <Style Selector="TextBlock.NetworkSign">
+                        <Setter Property="FontSize" Value="18" />
+                        <Setter Property="FontWeight" Value="Bold" />
+                        <Setter Property="FontFamily" Value="Segoe Fluent Icons" />
+                        <Setter Property="VerticalAlignment" Value="Center" />
+                        <Setter Property="HorizontalAlignment" Value="Right" />
+                    </Style>
+                </Grid.Styles>
+                <Grid
+                    Grid.Column="0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    RowDefinitions="*,*">
+
+                    <Grid
+                        Grid.Row="0"
+                        VerticalAlignment="Center"
+                        ColumnDefinitions="auto,*"
+                        RowDefinitions="*,*">
+                        <Button
+                            Grid.Row="0"
+                            Grid.RowSpan="2"
+                            Grid.Column="0"
+                            Margin="0,0,4,0"
+                            Classes="Flat"
+                            Command="{Binding OpenTaskmgrCommand}">
+                            <LucideIcon Kind="Cpu" Size="24"></LucideIcon>
+                        </Button>
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Bottom"
+
+                            Text="{Binding PerformanceMonitorViewModel.CpuUsage, StringFormat={}{0:F0}%}" />
+                        <ProgressBar
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            MinWidth="72"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Value="{Binding PerformanceMonitorViewModel.CpuUsage}" />
+                    </Grid>
+
+                    <Grid
+                        Grid.Row="1"
+                        Margin="0,4,0,0"
+                        VerticalAlignment="Center"
+                        ColumnDefinitions="auto,*"
+                        RowDefinitions="*,*">
+                        <Button
+                            Grid.Row="0"
+                            Grid.RowSpan="2"
+                            Grid.Column="0"
+                            Margin="0,0,4,0"
+                            Classes="Flat"
+                            Command="{Binding OpenTaskmgrCommand}">
+                            <LucideIcon Kind="MemoryStick" Size="24"></LucideIcon>
+                        </Button>
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Text="{Binding PerformanceMonitorViewModel.MemoryUsage, StringFormat={}{0:F0}%}" />
+                        <ProgressBar
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            MinWidth="72"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Value="{Binding PerformanceMonitorViewModel.MemoryUsage}" />
+                    </Grid>
+
+                </Grid>
+                <Grid
+                    Name="DockItemPanel"
+                    Grid.Column="1"
+                    Margin="0,0,0,2"
+                    MinWidth="16"
+                    Background="Transparent"
+                    DragDrop.AllowDrop="True">
+                    <ItemsControl
+                        Name="DockItemList"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Bottom"
+                        ItemsSource="{Binding DockItemViewDataView}"
+                        CornerRadius="8">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="{Binding AppSetting.DockItemSpacing}" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="dac:DockItemViewData">
+                                <controls:DockItemControl
+                                    CanDrag="True"
+                                    DockItemId="{Binding Id}"
+                                    ShowName="{Binding ShowName}"
+                                    DockIcon="{Binding IconData,Converter={x:Static ac:DockItemIconConverter.Instance}}"
+                                    FontSize="{Binding #DockItemList.((vm:MainWindowViewModel)DataContext).AppSetting.DockItemNameFontSize}"
+                                    Command="{Binding #DockItemList.((vm:MainWindowViewModel)DataContext).ExecuteDockItemCommand}"
+                                    CommandParameter="{Binding Id}"
+                                    PointerReleased="DockItem_PointerReleased"
+                                    Width="{Binding #DockItemList.((vm:MainWindowViewModel)DataContext).AppSetting.DockItemSize}"
+                                    Height="{Binding #DockItemList.((vm:MainWindowViewModel)DataContext).AppSetting.DockItemSize}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                </Grid>
+
+                <Grid
+                    Grid.Column="2"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Bottom"
+                    ColumnDefinitions="0.3*,2,*"
+                    RowDefinitions="*,8,*,4">
+                    <LucideIcon StrokeWidth="3.2" Kind="ChevronUp" Foreground="LightGreen" Size="24"></LucideIcon>
+                    <TextBlock
+                        Grid.Row="0" Grid.Column="2"
+                        VerticalAlignment="Center" Text="{Binding PerformanceMonitorViewModel.NetworkSentBytesString}" />
+                    <LucideIcon Grid.Column="0" Grid.Row="2" StrokeWidth="3.2" Kind="ChevronDown" Foreground="LightCoral" Size="24"></LucideIcon>
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="2"
+                        VerticalAlignment="Center"
+                        Text="{Binding PerformanceMonitorViewModel.NetworkReceivedBytesString}" />
+                </Grid>
+            </Grid>
+            <Border
+                Name="BottomBorder"
+                Grid.Row="2"
+                Height="2"
+                Background="Transparent"
+                DragDrop.AllowDrop="True" />
+            <!-- <StackPanel Grid.Row="3" Orientation="Horizontal"> -->
+            <!-- -->
+            <!--     <MenuItem> -->
+            <!--         ~1~ <MenuItem.i></MenuItem.i> @1@ -->
+            <!--         <MenuItem.Icon> -->
+            <!--             <LucideIcon Margin="0" Size="32" Width="32" Height="32" Kind="Plus"></LucideIcon> -->
+            <!--         </MenuItem.Icon> -->
+            <!--     </MenuItem> -->
+            <!--     <MenuItem> -->
+            <!--         <MenuItem.Icon> -->
+            <!--             <TextBlock -->
+            <!--                 Classes="FontIcon" -->
+            <!--                 Foreground="Orange" -->
+            <!--                 FontSize="32" -->
+            <!--                 Text="&#xE70F;" /> -->
+            <!--         </MenuItem.Icon> -->
+            <!--     </MenuItem> -->
+            <!-- </StackPanel> -->
+        </Grid>
+    </Panel>
+</Window>

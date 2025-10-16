@@ -26,7 +26,7 @@
                 <DataTemplate DataType="items:DockItemBase">
                     <controls:DockItemControl
                         x:DataType="items:DockItemBase"
-                        DockItemKey="{Binding Key}"
+                        DockItemId="{Binding Key}"
                         Margin="4"
                         PointerPressed="OnDockItemControlPointerPressed"
                         ShowName="{Binding ShowName}"

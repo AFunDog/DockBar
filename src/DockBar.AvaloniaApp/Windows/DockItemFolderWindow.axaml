@@ -4,9 +4,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         xmlns:views="using:DockBar.AvaloniaApp.Views"
-        x:Class="DockBar.AvaloniaApp.Views.DockItemFolderWindow"
+        xmlns:windows="clr-namespace:DockBar.AvaloniaApp.Windows"
+        x:Class="DockBar.AvaloniaApp.Windows.DockItemFolderWindow"
         RenderOptions.TextRenderingMode="Antialias"
-        x:DataType="views:DockItemFolderWindow"
+        x:DataType="windows:DockItemFolderWindow"
         Title="DockItemFolderWindow">
     <Window.Styles>
         <Style Selector="Window">

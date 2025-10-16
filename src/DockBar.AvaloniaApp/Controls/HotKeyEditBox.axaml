@@ -27,8 +27,8 @@
                         <TextPresenter HorizontalAlignment="Center"
                                        Text="{TemplateBinding HotKey,Converter={x:Static converters:HotKeyInfoStringConverter.Instance}}"
                                        VerticalAlignment="Center" />
-                        <Button Name="PART_ClearButton" Grid.Column="1" MaxWidth="32" MaxHeight="32">
-                            <TextBlock Classes="FontIcon" Text="&#xE711;" />
+                        <Button Name="PART_ClearButton" Grid.Column="1" MaxWidth="32" MaxHeight="32" Padding="4">
+                            <LucideIcon Kind="X" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Button>
                     </Grid>
                 </Border>
