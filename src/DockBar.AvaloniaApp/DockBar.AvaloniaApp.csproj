@@ -8,7 +8,7 @@
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <LangVersion>preview</LangVersion>
         <ApplicationIcon>Assets\app.ico</ApplicationIcon>
-        <VersionPrefix>1.1.0</VersionPrefix>
+        <VersionPrefix>1.1.1</VersionPrefix>
         <Configurations>Debug;Release</Configurations>
         <Platforms>AnyCPU;x64</Platforms>
     </PropertyGroup>

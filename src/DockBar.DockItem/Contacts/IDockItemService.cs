@@ -38,18 +38,17 @@ public interface IDockItemService
     Task<bool> MoveDockItem(Guid id, string parentPath, int index);
 
     /// <summary>
-    /// 执行 <see cref="DockItemBase"/>
+    /// 执行 <see cref="DockItemData.Type"/> 对应的注册回调
     /// </summary>
     /// <param name="key">
-    /// <see cref="DockItemBase"/> 的 <see cref="DockItemBase.Key"/> 属性
     /// </param>
     /// <remarks>
     /// 如果执行成功，则会触发 <see cref="DockItemExecuted"/> 事件
     /// </remarks>
     /// <returns>
-    /// 如果 <see cref="DockItemBase"/> 不存在，那么返回 <see cref="bool">false</see>
+    /// 如果 <see cref="DockItemData"/> 不存在，那么返回 <see cref="bool">false</see>
     /// <br/>
-    /// 如果 <see cref="DockItemBase"/>
+    /// 如果 <see cref="DockItemData"/>
     /// </returns>
     Task<bool> ExecuteDockItem(Guid key);
 

@@ -2,16 +2,16 @@ using System.Collections.Generic;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using Zeng.CoreLibrary.Toolkit.Avalonia.Structs;
-using Zeng.CoreLibrary.Toolkit.Services.Navigate;
 using DockBar.AvaloniaApp.Views;
 using DockBar.Core.Contacts;
 using Lucide.Avalonia;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using Zeng.CoreLibrary.Toolkit.Avalonia.Structs;
 using Zeng.CoreLibrary.Toolkit.Logging;
+using Zeng.CoreLibrary.Toolkit.Services.Navigate;
 
-namespace DockBar.AvaloniaApp.ViewModels;
+namespace DockBar.AvaloniaApp.ViewModels.ControlPanel;
 
 internal sealed partial class ControlPanelWindowViewModel : ViewModelBase
 {
@@ -46,10 +46,9 @@ internal sealed partial class ControlPanelWindowViewModel : ViewModelBase
     {
         Logger = logger;
         AppSettingWrapper = appSettingWrapper;
-        NavigateService = navigateService
-            .RegisterViewRoute("/", Program.ServiceProvider.GetRequiredService<ControlPanelMainView>)
-            .RegisterViewRoute("/DockItems", Program.ServiceProvider.GetRequiredService<ControlPanelDockItemsView>)
-            .RegisterViewRoute("/Settings", Program.ServiceProvider.GetRequiredService<ControlPanelSettingView>);
+        NavigateService = navigateService;
+        
+        
         NavigateService.OnNavigated += (s, e) =>
         {
             Content = e;

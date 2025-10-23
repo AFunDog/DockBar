@@ -7,6 +7,8 @@
              xmlns:items="using:DockBar.DockItem.Items"
              xmlns:views="using:DockBar.AvaloniaApp.Views"
              xmlns:ac="using:DockBar.AvaloniaApp.Converters"
+             xmlns:structs="clr-namespace:DockBar.DockItem.Structs;assembly=DockBar.DockItem"
+             xmlns:das="clr-namespace:DockBar.AvaloniaApp.Structs"
              x:DataType="views:ControlPanelDockItemsView"
              x:Class="DockBar.AvaloniaApp.Views.ControlPanelDockItemsView">
     <Grid RowDefinitions="*,auto">
@@ -23,17 +25,17 @@
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="items:DockItemBase">
-                    <controls:DockItemControl
-                        x:DataType="items:DockItemBase"
-                        DockItemId="{Binding Key}"
-                        Margin="4"
-                        PointerPressed="OnDockItemControlPointerPressed"
-                        ShowName="{Binding ShowName}"
-                        DockIcon="{Binding IconData,Converter={x:Static ac:DockItemIconConverter.Instance}}"
-                        FontSize="{Binding #DockItemList.((views:ControlPanelDockItemsView)DataContext).AppSetting.DockItemNameFontSize}"
-                        Width="{Binding #DockItemList.((views:ControlPanelDockItemsView)DataContext).AppSetting.DockItemSize}"
-                        Height="{Binding #DockItemList.((views:ControlPanelDockItemsView)DataContext).AppSetting.DockItemSize}" />
+                <DataTemplate DataType="das:DockItemViewData">
+                    <!-- <controls:DockItemControl -->
+                    <!--     x:DataType="items:DockItemBase" -->
+                    <!--     DockItemId="{Binding Key}" -->
+                    <!--     Margin="4" -->
+                    <!--     PointerPressed="OnDockItemControlPointerPressed" -->
+                    <!--     ShowName="{Binding ShowName}" -->
+                    <!--     DockIcon="{Binding IconData,Converter={x:Static ac:DockItemIconConverter.Instance}}" -->
+                    <!--     FontSize="{Binding #DockItemList.((views:ControlPanelDockItemsView)DataContext).AppSetting.DockItemNameFontSize}" -->
+                    <!--     Width="{Binding #DockItemList.((views:ControlPanelDockItemsView)DataContext).AppSetting.DockItemSize}" -->
+                    <!--     Height="{Binding #DockItemList.((views:ControlPanelDockItemsView)DataContext).AppSetting.DockItemSize}" /> -->
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>

@@ -66,57 +66,57 @@ public partial class DockItemFolderWindow : Window
         HideFolder();
     }
 
-    public void ShowFolder(DockItemFolder folder, int x, int y)
-    {
-        Logger.Trace().Verbose("打开停靠文件夹窗口 {FolderKey}", folder.Key);
-        TopPosition = new(x, y);
-
-        ItemGrid.Children.Clear();
-        int dockItemX = 0, dockItemY = 0;
-        // foreach (var dockItem in folder.Select(k => DockItemService.GetDockItem(k)).OfType<DockItemBase>())
-        //     if (DockItemIconConverter.Instance.Convert(
-        //             dockItem.IconData,
-        //             typeof(IImage),
-        //             null,
-        //             CultureInfo.CurrentCulture
-        //         ) is IImage icon)
-        //     {
-        //         var dockItemControl = new DockItemControl
-        //         {
-        //             DockItemId = dockItem.Key,
-        //             DockIcon = icon,
-        //             ShowName = dockItem.ShowName,
-        //             Command = new RelayCommand<int>(k => DockItemService.ExecuteDockItem(k)),
-        //             CommandParameter = dockItem.Key,
-        //             Width = Program.ServiceProvider.GetRequiredService<IAppSettingWrapper>().Data.DockItemSize,
-        //             Height = Program.ServiceProvider.GetRequiredService<IAppSettingWrapper>().Data.DockItemSize
-        //         };
-        //         Grid.SetColumn(dockItemControl, dockItemX);
-        //         Grid.SetRow(dockItemControl, dockItemY);
-        //         ItemGrid.Children.Add(dockItemControl);
-        //         dockItemX++;
-        //         if (dockItemX % ItemGrid.ColumnDefinitions.Count == 0)
-        //         {
-        //             dockItemX = 0;
-        //             dockItemY++;
-        //         }
-        //     }
-
-        Position = new((int)TopPosition.X, TopPosition.Y);
-
-        Show();
-        // IsShow = true;
-
-        Classes.Remove("ToHide");
-
-        if (Screens.ScreenFromWindow(this) is { } screen)
-            Position = new((int)(TopPosition.X - Bounds.Width * screen.Scaling * 0.5), TopPosition.Y);
-
-
-        Owner = Program.ServiceProvider.GetRequiredKeyedService<Window>(nameof(MainWindow));
-
-        Activate();
-    }
+    // public void ShowFolder(DockItemFolder folder, int x, int y)
+    // {
+    //     Logger.Trace().Verbose("打开停靠文件夹窗口 {FolderKey}", folder.Key);
+    //     TopPosition = new(x, y);
+    //
+    //     ItemGrid.Children.Clear();
+    //     int dockItemX = 0, dockItemY = 0;
+    //     // foreach (var dockItem in folder.Select(k => DockItemService.GetDockItem(k)).OfType<DockItemBase>())
+    //     //     if (DockItemIconConverter.Instance.Convert(
+    //     //             dockItem.IconData,
+    //     //             typeof(IImage),
+    //     //             null,
+    //     //             CultureInfo.CurrentCulture
+    //     //         ) is IImage icon)
+    //     //     {
+    //     //         var dockItemControl = new DockItemControl
+    //     //         {
+    //     //             DockItemId = dockItem.Key,
+    //     //             DockIcon = icon,
+    //     //             ShowName = dockItem.ShowName,
+    //     //             Command = new RelayCommand<int>(k => DockItemService.ExecuteDockItem(k)),
+    //     //             CommandParameter = dockItem.Key,
+    //     //             Width = Program.ServiceProvider.GetRequiredService<IAppSettingWrapper>().Data.DockItemSize,
+    //     //             Height = Program.ServiceProvider.GetRequiredService<IAppSettingWrapper>().Data.DockItemSize
+    //     //         };
+    //     //         Grid.SetColumn(dockItemControl, dockItemX);
+    //     //         Grid.SetRow(dockItemControl, dockItemY);
+    //     //         ItemGrid.Children.Add(dockItemControl);
+    //     //         dockItemX++;
+    //     //         if (dockItemX % ItemGrid.ColumnDefinitions.Count == 0)
+    //     //         {
+    //     //             dockItemX = 0;
+    //     //             dockItemY++;
+    //     //         }
+    //     //     }
+    //
+    //     Position = new((int)TopPosition.X, TopPosition.Y);
+    //
+    //     Show();
+    //     // IsShow = true;
+    //
+    //     Classes.Remove("ToHide");
+    //
+    //     if (Screens.ScreenFromWindow(this) is { } screen)
+    //         Position = new((int)(TopPosition.X - Bounds.Width * screen.Scaling * 0.5), TopPosition.Y);
+    //
+    //
+    //     Owner = Program.ServiceProvider.GetRequiredKeyedService<Window>(nameof(MainWindow));
+    //
+    //     Activate();
+    // }
 
     private IDisposable? HideTimer { get; set; }
 

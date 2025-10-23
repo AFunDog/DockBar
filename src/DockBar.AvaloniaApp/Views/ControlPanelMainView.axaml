@@ -5,13 +5,14 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:DockBar.AvaloniaApp.ViewModels"
+    xmlns:controlPanel="clr-namespace:DockBar.AvaloniaApp.ViewModels.ControlPanel"
     d:DesignHeight="450"
     d:DesignWidth="800"
-    
+    x:DataType="controlPanel:ControlPanelMainViewModel"
     mc:Ignorable="d">
-    <!-- <Design.DataContext> -->
-    <!--     ~1~ <vm:MainViewModel /> @1@ -->
-    <!-- </Design.DataContext> -->
+    <Design.DataContext>
+        <controlPanel:ControlPanelMainViewModel />
+    </Design.DataContext>
     <Grid RowDefinitions="auto,*">
         <StackPanel Margin="16,8,0,0" Orientation="Horizontal">
             <Image
@@ -37,7 +38,7 @@
                         BaselineAlignment="Center"
                         FontSize="20"
                         Text="🛠️当前版本" />
-                    <!-- <Run FontSize="16" Text="{Binding AppVersion, StringFormat={}V{0}}" /> -->
+                    <Run FontSize="16" Text="{Binding AppVersion, StringFormat={}V{0}}" />
                     <!--<Button Content="123" />-->
                     <LineBreak />
                     <Run

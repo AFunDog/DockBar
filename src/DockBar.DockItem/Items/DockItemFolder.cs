@@ -7,7 +7,7 @@ using MessagePack;
 
 namespace DockBar.DockItem.Items;
 
-[MessagePackObject(AllowPrivate = true)]
+// [MessagePackObject(AllowPrivate = true)]
 public sealed partial class DockItemFolder : DockItemBase, IDockItemGroup
 {
     [Key(nameof(DockItemKeys))]

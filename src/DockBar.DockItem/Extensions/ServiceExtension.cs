@@ -18,9 +18,9 @@ public static class ServiceExtension
             // .AddKeyedTransient<DockItemBase, DockLinkItem>(nameof(DockLinkItem))
             // .AddKeyedTransient<DockItemBase, DockItemFolder>(nameof(DockItemFolder))
             // .AddKeyedTransient<DockItemBase, KeyActionDockItem>(nameof(KeyActionDockItem))
-            .AddTransient<DockLinkItem>()
-            .AddTransient<DockItemFolder>()
-            .AddTransient<KeyActionDockItem>()
+            // .AddTransient<DockLinkItem>()
+            // .AddTransient<DockItemFolder>()
+            // .AddTransient<KeyActionDockItem>()
             .AddSingleton<IRepository<DockItemData>>(s
                 => new FileRepository<DockItemData>(s.GetRequiredService<ILogger>()) { FilePath = "data/dockItems.dat" }
             )

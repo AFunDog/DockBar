@@ -393,7 +393,7 @@ internal sealed partial class MainWindowViewModel : ViewModelBase
     }
 
     /// <summary>
-    /// 执行 <paramref name="id"/> 对应的 <see cref="DockItemBase.Execute"/> 函数
+    /// 执行 <paramref name="id"/> 对应的 <see cref="DockItemData.Type"/> 的对应的注册回调
     /// </summary>
     [RelayCommand]
     private void ExecuteDockItem(Guid id)

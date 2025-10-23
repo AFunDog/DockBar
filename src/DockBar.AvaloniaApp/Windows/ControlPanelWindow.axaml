@@ -7,14 +7,15 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:DockBar.AvaloniaApp.ViewModels"
+    xmlns:controlPanel="clr-namespace:DockBar.AvaloniaApp.ViewModels.ControlPanel"
     Title="{cext:Localize ControlPanelWindow.Title}"
     Width="1000"
     Height="600"
-    x:DataType="vm:ControlPanelWindowViewModel"
+    x:DataType="controlPanel:ControlPanelWindowViewModel"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
     <Design.DataContext>
-        <vm:ControlPanelWindowViewModel />
+        <controlPanel:ControlPanelWindowViewModel />
     </Design.DataContext>
     <Design.DesignStyle>
         <Style Selector="Window">

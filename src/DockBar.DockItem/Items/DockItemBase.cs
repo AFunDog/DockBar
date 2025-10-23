@@ -8,10 +8,10 @@ using Serilog;
 
 namespace DockBar.DockItem.Items;
 
-[MessagePackObject(AllowPrivate = true)]
-[Union(0, typeof(DockLinkItem))]
-[Union(1, typeof(KeyActionDockItem))]
-[Union(2, typeof(DockItemFolder))]
+// [MessagePackObject(AllowPrivate = true)]
+// [Union(0, typeof(DockLinkItem))]
+// [Union(1, typeof(KeyActionDockItem))]
+// [Union(2, typeof(DockItemFolder))]
 public abstract partial class DockItemBase : ObservableObject
 {
     /// <summary>
@@ -61,34 +61,7 @@ public abstract partial class DockItemBase : ObservableObject
     internal DockItemBase()
     {
     }
-
-    /// <summary>
-    /// 执行 <see cref="DockItemBase"/>
-    /// </summary>
-    /// <remarks>
-    /// 由 <see cref="IDockItemService"/> 执行
-    /// </remarks>
-    /// <returns></returns>
-    // internal bool Execute()
-    // {
-    //     using var _ = LogHelper.Trace();
-    //     Logger.Verbose("DockItem {Key} 尝试执行", Key);
-    //     if (CanExecute)
-    //         try
-    //         {
-    //             ExecuteCore();
-    //             Logger.Information("DockItem {Key} 执行完毕", Key);
-    //             return true;
-    //         }
-    //         catch (Exception e)
-    //         {
-    //             Logger.Error(e, "{Key} 尝试执行时出错", Key);
-    //         }
-    //
-    //     Logger.Warning("DockItem {Key} 不可执行", Key);
-    //     return false;
-    // }
-    //
+    
     protected internal abstract bool Execute();
     
     

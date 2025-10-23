@@ -15,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Events;
 using Avalonia.Controls;
+using DockBar.AvaloniaApp.ViewModels.ControlPanel;
 using DockBar.AvaloniaApp.Windows;
 using Serilog.Formatting.Compact;
 using Zeng.CoreLibrary.Toolkit.Avalonia.Extensions;
@@ -22,7 +23,9 @@ using Zeng.CoreLibrary.Toolkit.Contacts;
 using Zeng.CoreLibrary.Toolkit.Extensions;
 using Zeng.CoreLibrary.Toolkit.Logging;
 using Zeng.CoreLibrary.Toolkit.Services.Localization;
+using Zeng.CoreLibrary.Toolkit.Services.Navigate;
 using Zeng.CoreLibrary.Toolkit.Structs;
+using ControlPanelWindowViewModel = DockBar.AvaloniaApp.ViewModels.ControlPanel.ControlPanelWindowViewModel;
 
 namespace DockBar.AvaloniaApp;
 
@@ -86,7 +89,7 @@ internal sealed class Program
             .AddTransient<ControlPanelWindowViewModel>()
             .AddTransient<EditDockItemWindowViewModel>()
             // .AddTransient<SettingViewModel>()
-            .AddTransient<MainViewModel>()
+            .AddTransient<ControlPanelMainViewModel>()
             // 注册主窗口
             .AddKeyedSingleton<Window>(
                 nameof(MainWindow),
@@ -158,6 +161,17 @@ internal sealed class Program
 
     private static void AfterSetup(AppBuilder builder)
     {
+        var navigateService = ServiceProvider.GetRequiredService<INavigateService>();
+        navigateService
+            .RegisterViewRoute(
+                "/",
+                () => new ControlPanelMainView()
+                {
+                    DataContext = ServiceProvider.GetRequiredService<ControlPanelMainViewModel>()
+                }
+            )
+            .RegisterViewRoute("/DockItems", () => ServiceProvider.GetRequiredService<ControlPanelDockItemsView>())
+            .RegisterViewRoute("/Settings", () => ServiceProvider.GetRequiredService<ControlPanelSettingView>());
         // 通过预加载 MenuWindow 可以解决第一个打开的 MenuWindow 展示位置不对的问题
         // var menuWindow = ServiceProvider.GetRequiredService<MenuWindow>();
         // if (menuWindow.Screens.ScreenFromWindow(menuWindow) is { } screen)

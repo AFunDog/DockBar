@@ -11,17 +11,7 @@ namespace DockBar.DockItem.Items;
 
 // HACK DockLinkItem 在网络方面获取名称不会被覆盖的问题
 
-public enum LinkType
-{
-    Undefined,
-    Exe,
-    Lnk,
-    Web,
-    File,
-    Folder
-}
-
-[MessagePackObject(AllowPrivate = true)]
+// [MessagePackObject(AllowPrivate = true)]
 public partial class DockLinkItem : DockItemBase
 {
     /// <summary>

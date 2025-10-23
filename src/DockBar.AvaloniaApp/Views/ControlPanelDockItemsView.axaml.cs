@@ -10,6 +10,7 @@ using DockBar.Core.Contacts;
 using DockBar.Core.Structs;
 using DockBar.DockItem.Contacts;
 using DockBar.DockItem.Items;
+using DockBar.DockItem.Structs;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
@@ -22,9 +23,9 @@ public partial class ControlPanelDockItemsView : UserControl
 
     public AppSetting AppSetting { get; }
 
-    public ObservableCollection<DockItemBase> DockItems { get; }
+    public ObservableCollection<DockItemData> DockItems { get; }
 
-    public DockItemBase? SelectedDockItem { get; set; }
+    public DockItemData? SelectedDockItem { get; set; }
 
 
     public ControlPanelDockItemsView() 
@@ -87,7 +88,7 @@ public partial class ControlPanelDockItemsView : UserControl
 
     private void OnDockItemControlPointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        if (sender is Control { DataContext: DockItemBase item })
+        if (sender is Control { DataContext: DockItemData item })
             SelectedDockItem = item;
     }
 }
